@@ -1,4 +1,4 @@
-# 🤝 Contributor Covenant Code of Conduct
+﻿# ðŸ¤ Contributor Covenant Code of Conduct
 
 ## Our Pledge
 
@@ -6,7 +6,7 @@ In the interest of fostering an open and welcoming environment, we as contributo
 
 ## Our Standards
 
-### ✅ Positive Behavior
+### âœ… Positive Behavior
 
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints and experiences
@@ -14,7 +14,7 @@ In the interest of fostering an open and welcoming environment, we as contributo
 - Focusing on what is best for the community
 - Showing empathy towards other community members
 
-### ❌ Unacceptable Behavior
+### âŒ Unacceptable Behavior
 
 - The use of sexualized language or imagery and unwelcome sexual attention
 - Trolling, insulting/derogatory comments, and personal or political attacks
@@ -37,3 +37,4 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1.
+

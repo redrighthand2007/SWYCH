@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <!-- Banner Image -->
 <img src="assets/banner.jpg" alt="CacheDeal Banner" width="100%"/>
@@ -10,7 +10,7 @@
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![Firebase](https://img.shields.io/badge/Firebase-Backend-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-FFCA28?style=for-the-badge&logo=Supabase&logoColor=black)](https://Supabase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-00C853?style=for-the-badge)](LICENSE)
 
 <br/>
@@ -22,94 +22,94 @@
 
 ---
 
-### 🔒 The campus marketplace where deals get locked.
+### ðŸ”’ The campus marketplace where deals get locked.
 
 **Buy. Sell. Deal. On Campus.**
 
-A peer-to-peer marketplace built exclusively for **VIT Vellore** students to buy and sell items — cycles, calculators, lab coats, subscriptions, notes, game accounts — all within the campus.
+A peer-to-peer marketplace built exclusively for **VIT Vellore** students to buy and sell items â€” cycles, calculators, lab coats, subscriptions, notes, game accounts â€” all within the campus.
 
-[📱 Download APK](#-download) · [📖 Documentation](docs/) · [🐛 Report Bug](.github/ISSUE_TEMPLATE/bug_report.md) · [✨ Request Feature](.github/ISSUE_TEMPLATE/feature_request.md)
+[ðŸ“± Download APK](#-download) Â· [ðŸ“– Documentation](docs/) Â· [ðŸ› Report Bug](.github/ISSUE_TEMPLATE/bug_report.md) Â· [âœ¨ Request Feature](.github/ISSUE_TEMPLATE/feature_request.md)
 
 </div>
 
 ---
 
-## ⚡ How It Works
+## âš¡ How It Works
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────────┐
-│   📦 LIST   │────▶│  💰 OFFER    │────▶│  🔒 LOCK    │────▶│  🤝 DEAL     │
-│  Post your  │     │  Buyers make │     │  Seller     │     │  Meet up &   │
-│  item with  │     │  cash offers │     │  picks the  │     │  complete    │
-│  a price    │     │  with notes  │     │  best offer │     │  via WhatsApp│
-└─────────────┘     └──────────────┘     └─────────────┘     └──────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   ðŸ“¦ LIST   â”‚â”€â”€â”€â”€â–¶â”‚  ðŸ’° OFFER    â”‚â”€â”€â”€â”€â–¶â”‚  ðŸ”’ LOCK    â”‚â”€â”€â”€â”€â–¶â”‚  ðŸ¤ DEAL     â”‚
+â”‚  Post your  â”‚     â”‚  Buyers make â”‚     â”‚  Seller     â”‚     â”‚  Meet up &   â”‚
+â”‚  item with  â”‚     â”‚  cash offers â”‚     â”‚  picks the  â”‚     â”‚  complete    â”‚
+â”‚  a price    â”‚     â”‚  with notes  â”‚     â”‚  best offer â”‚     â”‚  via WhatsAppâ”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 <div align="center">
 
 | Step | What Happens |
 |:----:|:------------|
-| **1** | 📸 Seller posts an item with photo, price & category |
-| **2** | 🔍 Buyers browse by category or "Near Me" filter |
-| **3** | 💸 Interested buyers submit cash offers with optional notes |
-| **4** | ⚖️ Seller reviews offers sorted by amount, sees buyer reputation |
-| **5** | ✅ Seller accepts one offer → deal locks atomically |
-| **6** | 📱 Both get a WhatsApp deep link to arrange handoff |
-| **7** | 🟢 Both confirm within 3 days → green dots for reliability |
+| **1** | ðŸ“¸ Seller posts an item with photo, price & category |
+| **2** | ðŸ” Buyers browse by category or "Near Me" filter |
+| **3** | ðŸ’¸ Interested buyers submit cash offers with optional notes |
+| **4** | âš–ï¸ Seller reviews offers sorted by amount, sees buyer reputation |
+| **5** | âœ… Seller accepts one offer â†’ deal locks atomically |
+| **6** | ðŸ“± Both get a WhatsApp deep link to arrange handoff |
+| **7** | ðŸŸ¢ Both confirm within 3 days â†’ green dots for reliability |
 
 </div>
 
 ---
 
-## ✨ Features
+## âœ¨ Features
 
 <div align="center">
 
 |  | Feature | Description |
 |:---:|:--------|:------------|
-| 📱 | **Phone OTP Auth** | Quick signup with phone verification — no complex forms |
-| 📦 | **Smart Listings** | Post items with photo, price, description & category |
-| 🏷️ | **8 Categories** | Eatables · Wearables · Cycles · Calculators · Lab Coats · Subscriptions · Study Notes · Game Accounts |
-| 📍 | **Near Me Filter** | Find items from your hostel block or nearby |
-| 💰 | **Cash Offers** | Submit offers with optional notes for negotiation context |
-| 🔒 | **Atomic Deal Lock** | One-tap accept — atomically locks deal, rejects others |
-| 💬 | **WhatsApp Connect** | Pre-filled WhatsApp message to arrange the meetup |
-| 🟢🔴 | **Reputation Dots** | Green dots for completed deals, red dots for no-shows |
-| ⏰ | **3-Day Window** | Completion deadline keeps deals moving |
-| 🔄 | **Auto Re-list** | Missed deals auto-expire, item goes back to market |
+| ðŸ“± | **Phone OTP Auth** | Quick signup with phone verification â€” no complex forms |
+| ðŸ“¦ | **Smart Listings** | Post items with photo, price, description & category |
+| ðŸ·ï¸ | **8 Categories** | Eatables Â· Wearables Â· Cycles Â· Calculators Â· Lab Coats Â· Subscriptions Â· Study Notes Â· Game Accounts |
+| ðŸ“ | **Near Me Filter** | Find items from your hostel block or nearby |
+| ðŸ’° | **Cash Offers** | Submit offers with optional notes for negotiation context |
+| ðŸ”’ | **Atomic Deal Lock** | One-tap accept â€” atomically locks deal, rejects others |
+| ðŸ’¬ | **WhatsApp Connect** | Pre-filled WhatsApp message to arrange the meetup |
+| ðŸŸ¢ðŸ”´ | **Reputation Dots** | Green dots for completed deals, red dots for no-shows |
+| â° | **3-Day Window** | Completion deadline keeps deals moving |
+| ðŸ”„ | **Auto Re-list** | Missed deals auto-expire, item goes back to market |
 
 </div>
 
 ---
 
-## 🛡️ Reputation System
+## ðŸ›¡ï¸ Reputation System
 
-The trust system is **automatic and abuse-resistant** — no manual reporting needed.
+The trust system is **automatic and abuse-resistant** â€” no manual reporting needed.
 
 ```
-  ┌─────────────────────────────────────────────────────┐
-  │                 Deal Locked ⏱️ 3 Days                │
-  │                                                     │
-  │    ┌──────────────┐          ┌──────────────────┐   │
-  │    │ Both confirm │          │ Buyer doesn't    │   │
-  │    │ completion   │          │ confirm in time  │   │
-  │    └──────┬───────┘          └────────┬─────────┘   │
-  │           │                           │             │
-  │     🟢 +1 Green Dot            Seller re-lists     │
-  │     to BOTH users              the item             │
-  │                                       │             │
-  │                                 🔴 +1 Red Dot       │
-  │                                 to BUYER only       │
-  └─────────────────────────────────────────────────────┘
+  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+  â”‚                 Deal Locked â±ï¸ 3 Days                â”‚
+  â”‚                                                     â”‚
+  â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+  â”‚    â”‚ Both confirm â”‚          â”‚ Buyer doesn't    â”‚   â”‚
+  â”‚    â”‚ completion   â”‚          â”‚ confirm in time  â”‚   â”‚
+  â”‚    â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜          â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+  â”‚           â”‚                           â”‚             â”‚
+  â”‚     ðŸŸ¢ +1 Green Dot            Seller re-lists     â”‚
+  â”‚     to BOTH users              the item             â”‚
+  â”‚                                       â”‚             â”‚
+  â”‚                                 ðŸ”´ +1 Red Dot       â”‚
+  â”‚                                 to BUYER only       â”‚
+  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-- **Green Dot 🟢** — Both sides completed the deal. Shows reliability.
-- **Red Dot 🔴** — Buyer failed to show up. Only triggered by seller's re-list action.
+- **Green Dot ðŸŸ¢** â€” Both sides completed the deal. Shows reliability.
+- **Red Dot ðŸ”´** â€” Buyer failed to show up. Only triggered by seller's re-list action.
 - Dots are visible on profiles and next to each offer, so sellers can weigh a lower offer from a reliable buyer against a higher offer from a flaky one.
 
 ---
 
-## 🏗️ Tech Stack
+## ðŸ—ï¸ Tech Stack
 
 <div align="center">
 
@@ -120,9 +120,9 @@ The trust system is **automatic and abuse-resistant** — no manual reporting ne
 | **Architecture** | MVVM + Clean Architecture | Separation of concerns |
 | **DI** | ![Hilt](https://img.shields.io/badge/Hilt-Dagger-FF6F00?style=flat-square) | Dependency injection |
 | **Navigation** | Compose Navigation 2.8+ | Type-safe `@Serializable` routes |
-| **Auth** | ![Firebase](https://img.shields.io/badge/Firebase-Phone%20Auth-FFCA28?style=flat-square&logo=firebase&logoColor=black) | Phone OTP verification |
-| **Database** | ![Firestore](https://img.shields.io/badge/Cloud-Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black) | Real-time NoSQL database |
-| **Storage** | ![Storage](https://img.shields.io/badge/Firebase-Storage-FFCA28?style=flat-square&logo=firebase&logoColor=black) | Photo uploads |
+| **Auth** | ![Supabase](https://img.shields.io/badge/Supabase-Phone%20Auth-FFCA28?style=flat-square&logo=Supabase&logoColor=black) | Phone OTP verification |
+| **Database** | ![Postgres](https://img.shields.io/badge/Cloud-Postgres-FFCA28?style=flat-square&logo=Supabase&logoColor=black) | Real-time NoSQL database |
+| **Cloudinary** | ![Cloudinary](https://img.shields.io/badge/Supabase-Cloudinary-FFCA28?style=flat-square&logo=Supabase&logoColor=black) | Photo uploads |
 | **Images** | ![Coil](https://img.shields.io/badge/Coil%203-Image%20Loading-00BCD4?style=flat-square) | Fast async image loading |
 | **Async** | Coroutines + Flow | Reactive data streams |
 | **CI/CD** | ![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white) | Automated build & test |
@@ -131,87 +131,87 @@ The trust system is **automatic and abuse-resistant** — no manual reporting ne
 
 ---
 
-## 🏛️ Architecture
+## ðŸ›ï¸ Architecture
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                       UI LAYER                           │
-│                                                          │
-│  ┌──────────┐   ┌───────────┐   ┌────────────────────┐  │
-│  │ Screens  │◄──┤ ViewModels│───┤ UiState / UiEvents │  │
-│  │(Compose) │   │(StateFlow)│   │ (Sealed Classes)   │  │
-│  └──────────┘   └─────┬─────┘   └────────────────────┘  │
-├────────────────────────┼─────────────────────────────────┤
-│                  DOMAIN LAYER                            │
-│                        │                                 │
-│  ┌─────────────────────┴─────────────────────────────┐   │
-│  │                  Use Cases                        │   │
-│  │  PostItemUseCase │ AcceptOfferUseCase │ SendOtp   │   │
-│  └─────────────────────┬─────────────────────────────┘   │
-│  ┌─────────────────────┴─────────────────────────────┐   │
-│  │            Repository Interfaces                  │   │
-│  └─────────────────────┬─────────────────────────────┘   │
-├────────────────────────┼─────────────────────────────────┤
-│                   DATA LAYER                             │
-│  ┌─────────────────────┴─────────────────────────────┐   │
-│  │          Repository Implementations               │   │
-│  └───┬──────────────┬──────────────┬─────────────────┘   │
-│  ┌───┴────┐   ┌─────┴──────┐  ┌───┴──────────┐          │
-│  │Firebase│   │ Firestore  │  │   Firebase   │          │
-│  │  Auth  │   │  Database  │  │   Storage    │          │
-│  └────────┘   └────────────┘  └──────────────┘          │
-└──────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                       UI LAYER                           â”‚
+â”‚                                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ Screens  â”‚â—„â”€â”€â”¤ ViewModelsâ”‚â”€â”€â”€â”¤ UiState / UiEvents â”‚  â”‚
+â”‚  â”‚(Compose) â”‚   â”‚(StateFlow)â”‚   â”‚ (Sealed Classes)   â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                  DOMAIN LAYER                            â”‚
+â”‚                        â”‚                                 â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚                  Use Cases                        â”‚   â”‚
+â”‚  â”‚  PostItemUseCase â”‚ AcceptOfferUseCase â”‚ SendOtp   â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚            Repository Interfaces                  â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                   DATA LAYER                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚          Repository Implementations               â”‚   â”‚
+â”‚  â””â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚  â”Œâ”€â”€â”€â”´â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”‚
+â”‚  â”‚Supabaseâ”‚   â”‚ Postgres  â”‚  â”‚   Supabase   â”‚          â”‚
+â”‚  â”‚  Auth  â”‚   â”‚  Database  â”‚  â”‚   Cloudinary    â”‚          â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 > For detailed architecture documentation, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ---
 
-## 📂 Project Structure
+## ðŸ“‚ Project Structure
 
 ```
 com.vit.cachedeal/
-├── 📱 App.kt & MainActivity.kt
-│
-├── 🎨 core/
-│   ├── designsystem/          # Theme, colors, typography, components
-│   │   ├── theme/             # Material 3 theme tokens
-│   │   └── component/         # ItemCard, DotBadge, CategoryChip...
-│   ├── di/                    # Hilt modules (Firebase, Repos)
-│   ├── model/                 # User, Item, Offer, Deal, Category
-│   └── util/                  # Resource, Constants, WhatsAppHelper
-│
-├── 💾 data/
-│   ├── repository/            # Firebase implementations
-│   └── source/                # Firebase data sources
-│
-├── 🧠 domain/
-│   ├── repository/            # Repository interfaces
-│   └── usecase/               # Business logic (PostItem, AcceptOffer...)
-│
-└── 🖥️ ui/
-    ├── navigation/            # Routes & NavHost
-    ├── auth/                  # Phone OTP login
-    ├── onboarding/            # Name + block setup
-    ├── home/                  # Category browse feed
-    ├── postitem/              # List an item
-    ├── itemdetail/            # View item + make offer
-    ├── mylistings/            # Seller's items
-    ├── offers/                # Offer review screen
-    ├── deals/                 # Active deals management
-    └── profile/               # User profile + reputation
+â”œâ”€â”€ ðŸ“± App.kt & MainActivity.kt
+â”‚
+â”œâ”€â”€ ðŸŽ¨ core/
+â”‚   â”œâ”€â”€ designsystem/          # Theme, colors, typography, components
+â”‚   â”‚   â”œâ”€â”€ theme/             # Material 3 theme tokens
+â”‚   â”‚   â””â”€â”€ component/         # ItemCard, DotBadge, CategoryChip...
+â”‚   â”œâ”€â”€ di/                    # Hilt modules (Supabase, Repos)
+â”‚   â”œâ”€â”€ model/                 # User, Item, Offer, Deal, Category
+â”‚   â””â”€â”€ util/                  # Resource, Constants, WhatsAppHelper
+â”‚
+â”œâ”€â”€ ðŸ’¾ data/
+â”‚   â”œâ”€â”€ repository/            # Supabase implementations
+â”‚   â””â”€â”€ source/                # Supabase data sources
+â”‚
+â”œâ”€â”€ ðŸ§  domain/
+â”‚   â”œâ”€â”€ repository/            # Repository interfaces
+â”‚   â””â”€â”€ usecase/               # Business logic (PostItem, AcceptOffer...)
+â”‚
+â””â”€â”€ ðŸ–¥ï¸ ui/
+    â”œâ”€â”€ navigation/            # Routes & NavHost
+    â”œâ”€â”€ auth/                  # Phone OTP login
+    â”œâ”€â”€ onboarding/            # Name + block setup
+    â”œâ”€â”€ home/                  # Category browse feed
+    â”œâ”€â”€ postitem/              # List an item
+    â”œâ”€â”€ itemdetail/            # View item + make offer
+    â”œâ”€â”€ mylistings/            # Seller's items
+    â”œâ”€â”€ offers/                # Offer review screen
+    â”œâ”€â”€ deals/                 # Active deals management
+    â””â”€â”€ profile/               # User profile + reputation
 ```
 
 ---
 
-## 🚀 Getting Started
+## ðŸš€ Getting Started
 
 ### Prerequisites
 
 - **Android Studio** Ladybug (2024.2.1) or newer
 - **JDK 17+**
 - **Android SDK 35**
-- A **Firebase project** with Phone Auth, Firestore, and Storage enabled
+- A **Supabase project** with Phone Auth, Postgres, and Cloudinary enabled
 
 ### Quick Start
 
@@ -220,21 +220,21 @@ com.vit.cachedeal/
 git clone https://github.com/redrighthand2007/CacheDeal-App.git
 cd CacheDeal-App
 
-# 2. Add your Firebase config
-# Download google-services.json from Firebase Console
+# 2. Add your Supabase config
+# Download google-services.json from Supabase Console
 # Place it in the app/ directory
 
 # 3. Open in Android Studio & run!
 ```
 
-> 📖 For detailed setup instructions, see [docs/SETUP.md](docs/SETUP.md)
+> ðŸ“– For detailed setup instructions, see [docs/SETUP.md](docs/SETUP.md)
 
 ---
 
-## 🗄️ Database Schema
+## ðŸ—„ï¸ Database Schema
 
 <details>
-<summary><b>Click to expand Firestore schema</b></summary>
+<summary><b>Click to expand Postgres schema</b></summary>
 
 ### Users (`users/{uid}`)
 | Field | Type | Description |
@@ -254,7 +254,7 @@ cd CacheDeal-App
 | `title` | string | Item title |
 | `description` | string | Description |
 | `price` | number | Asking price |
-| `photoUrl` | string | Storage URL |
+| `photoUrl` | string | Cloudinary URL |
 | `status` | string | `open` / `locked` / `sold` |
 
 ### Offers (`items/{id}/offers/{offerId}`)
@@ -277,26 +277,26 @@ cd CacheDeal-App
 
 </details>
 
-> 📖 For full schema documentation, see [docs/FIRESTORE_SCHEMA.md](docs/FIRESTORE_SCHEMA.md)
+> ðŸ“– For full schema documentation, see [docs/Postgres_SCHEMA.md](docs/Postgres_SCHEMA.md)
 
 ---
 
-## 🗺️ What We've Built (So Far)
+## ðŸ—ºï¸ What We've Built (So Far)
 
 We're moving fast. Here's where CacheDeal currently stands:
 
-- [x] 🎨 **Sleek UI Architecture:** Beautiful Jetpack Compose components.
-- [x] 📱 **Full App Screens:** Auth, Home, Profile, Sell, and Deals grids are fully designed.
-- [x] 🌙 **Dynamic Themes:** Smooth 3-way toggle between Light, Dark, and System modes.
-- [x] 🚀 **Lightning Fast Launch:** Zero-delay native Android 12 splash screen.
-- [x] 📦 **Data Models & Repos:** Full MVVM + Clean Architecture scaffolding.
-- [ ] 🔌 **Backend Hookup:** Wiring up Firebase (or Supabase!) for real-time auth and data.
-- [ ] 💬 **WhatsApp Deep Links:** Seamless handoffs for meetups.
-- [ ] 🧪 **Campus Beta Test:** Launching to our first batch of students.
+- [x] ðŸŽ¨ **Sleek UI Architecture:** Beautiful Jetpack Compose components.
+- [x] ðŸ“± **Full App Screens:** Auth, Home, Profile, Sell, and Deals grids are fully designed.
+- [x] ðŸŒ™ **Dynamic Themes:** Smooth 3-way toggle between Light, Dark, and System modes.
+- [x] ðŸš€ **Lightning Fast Launch:** Zero-delay native Android 12 splash screen.
+- [x] ðŸ“¦ **Data Models & Repos:** Full MVVM + Clean Architecture scaffolding.
+- [ ] ðŸ”Œ **Backend Hookup:** Wiring up Supabase (or Supabase!) for real-time auth and data.
+- [ ] ðŸ’¬ **WhatsApp Deep Links:** Seamless handoffs for meetups.
+- [ ] ðŸ§ª **Campus Beta Test:** Launching to our first batch of students.
 
 ---
 
-## 🤝 Contributing
+## ðŸ¤ Contributing
 
 Contributions are what make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -306,35 +306,37 @@ Contributions are what make the open-source community an amazing place to learn,
 4. Push to the Branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-> 📖 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+> ðŸ“– See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-## 📄 License
+## ðŸ“„ License
 
 Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
 
 ---
 
-## 🙏 Acknowledgements
+## ðŸ™ Acknowledgements
 
-- [Jetpack Compose](https://developer.android.com/jetpack/compose) — Modern declarative UI
-- [Firebase](https://firebase.google.com/) — Backend infrastructure
-- [Material 3](https://m3.material.io/) — Design system
-- [Coil](https://coil-kt.github.io/coil/) — Image loading
-- [Hilt](https://dagger.dev/hilt/) — Dependency injection
-- The **VIT Vellore** student community 💛
+- [Jetpack Compose](https://developer.android.com/jetpack/compose) â€” Modern declarative UI
+- [Supabase](https://Supabase.google.com/) â€” Backend infrastructure
+- [Material 3](https://m3.material.io/) â€” Design system
+- [Coil](https://coil-kt.github.io/coil/) â€” Image loading
+- [Hilt](https://dagger.dev/hilt/) â€” Dependency injection
+- The **VIT Vellore** student community ðŸ’›
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for VIT Vellore Campus**
+**Built with â¤ï¸ for VIT Vellore Campus**
 
 <img src="assets/logo.jpg" alt="CacheDeal Logo" width="80"/>
 
 <br/>
 
-⭐ **Star this repo if you find it useful!** ⭐
+â­ **Star this repo if you find it useful!** â­
 
 </div>
+
+

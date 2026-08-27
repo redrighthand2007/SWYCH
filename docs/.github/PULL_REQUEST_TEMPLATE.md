@@ -1,28 +1,28 @@
-## 📋 Description
+﻿## ðŸ“‹ Description
 
 Brief description of what this PR does.
 
-## 🔗 Related Issue
+## ðŸ”— Related Issue
 
 Closes #(issue number)
 
-## 🏷️ Type of Change
+## ðŸ·ï¸ Type of Change
 
-- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
-- [ ] ✨ New feature (non-breaking change that adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] 📝 Documentation update
-- [ ] 🎨 UI/UX improvement
-- [ ] ♻️ Code refactor (no functional changes)
-- [ ] ⚡ Performance improvement
+- [ ] ðŸ› Bug fix (non-breaking change that fixes an issue)
+- [ ] âœ¨ New feature (non-breaking change that adds functionality)
+- [ ] ðŸ’¥ Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] ðŸ“ Documentation update
+- [ ] ðŸŽ¨ UI/UX improvement
+- [ ] â™»ï¸ Code refactor (no functional changes)
+- [ ] âš¡ Performance improvement
 
-## 📸 Screenshots / Demo
+## ðŸ“¸ Screenshots / Demo
 
 | Before | After |
 |--------|-------|
 | (screenshot) | (screenshot) |
 
-## ✅ Checklist
+## âœ… Checklist
 
 - [ ] My code follows the project's style guidelines
 - [ ] I have performed a self-review of my own code
@@ -32,6 +32,7 @@ Closes #(issue number)
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] I have updated the documentation accordingly
 
-## 📝 Notes for Reviewers
+## ðŸ“ Notes for Reviewers
 
 Any additional notes or context for the reviewers.
+

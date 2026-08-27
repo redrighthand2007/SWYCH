@@ -1,4 +1,4 @@
-# 📋 Changelog
+﻿# ðŸ“‹ Changelog
 
 All notable changes to CacheDeal will be documented in this file.
 
@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### 🚀 Added
+### ðŸš€ Added
 - Initial project setup with Jetpack Compose + Material 3
-- Firebase integration (Auth, Firestore, Storage)
+- Supabase integration (Auth, Postgres, Storage)
 - Phone OTP authentication flow
 - User profile with hostel/block selection
 - Item listing with photo upload
@@ -24,17 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto re-list on missed completion
 - Dark mode Material 3 theme
 
-### 🏗️ Infrastructure
+### ðŸ—ï¸ Infrastructure
 - MVVM + Clean Architecture
 - Hilt dependency injection
 - Type-safe Compose Navigation
 - GitHub Actions CI/CD pipeline
-- Firestore security rules
+- Postgres security rules
 
 ---
 
 ## [1.0.0] - TBD
 
-### 🎉 Initial Release
+### ðŸŽ‰ Initial Release
 - First public release for VIT Vellore campus
 - All v1 features as described in PRD
+

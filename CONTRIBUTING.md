@@ -1,8 +1,8 @@
-# 🤝 Contributing to CacheDeal
+﻿# ðŸ¤ Contributing to CacheDeal
 
 First off, thank you for considering contributing to CacheDeal! It's people like you that make this app a great tool for the VIT campus community.
 
-## 📋 Table of Contents
+## ðŸ“‹ Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
@@ -12,11 +12,11 @@ First off, thank you for considering contributing to CacheDeal! It's people like
 - [Commit Convention](#commit-convention)
 - [Pull Request Process](#pull-request-process)
 
-## 📜 Code of Conduct
+## ðŸ“œ Code of Conduct
 
 This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
-## 🚀 Getting Started
+## ðŸš€ Getting Started
 
 1. Fork the repository
 2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/cachedeal.git`
@@ -26,14 +26,14 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 6. Push to the branch: `git push origin feature/amazing-feature`
 7. Open a Pull Request
 
-## 🛠️ Development Setup
+## ðŸ› ï¸ Development Setup
 
 ### Prerequisites
 
 - Android Studio Ladybug (2024.2.1) or newer
 - JDK 17+
 - Android SDK 35
-- A Firebase project with Phone Auth, Firestore, and Storage enabled
+- A Supabase project with Phone Auth, Postgres, and Storage enabled
 
 ### Setup Steps
 
@@ -43,22 +43,22 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 4. Sync Gradle and build the project
 5. Run on an emulator or physical device
 
-## 💡 How to Contribute
+## ðŸ’¡ How to Contribute
 
-### 🐛 Reporting Bugs
+### ðŸ› Reporting Bugs
 
 - Use the [Bug Report](https://github.com/YOUR_USERNAME/cachedeal/issues/new?template=bug_report.md) issue template
 - Include detailed steps to reproduce
 - Add screenshots if applicable
 - Specify your device and Android version
 
-### ✨ Suggesting Features
+### âœ¨ Suggesting Features
 
 - Use the [Feature Request](https://github.com/YOUR_USERNAME/cachedeal/issues/new?template=feature_request.md) issue template
 - Explain the problem your feature solves
 - Provide mockups if possible
 
-### 🔧 Submitting Code
+### ðŸ”§ Submitting Code
 
 1. Check existing issues and PRs to avoid duplicates
 2. For major changes, open an issue first to discuss
@@ -66,7 +66,7 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 4. Add tests for new features
 5. Update documentation as needed
 
-## 📏 Coding Standards
+## ðŸ“ Coding Standards
 
 ### Kotlin Style
 
@@ -91,7 +91,7 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 - Follow the slot API pattern for flexible components
 - Use Material 3 components and theme tokens
 
-## 📝 Commit Convention
+## ðŸ“ Commit Convention
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
@@ -126,7 +126,7 @@ docs(readme): update setup instructions
 style(theme): adjust color palette for dark mode
 ```
 
-## 🔄 Pull Request Process
+## ðŸ”„ Pull Request Process
 
 1. Update the README.md with details of changes if applicable
 2. Update the CHANGELOG.md with a note about your change
@@ -135,7 +135,7 @@ style(theme): adjust color palette for dark mode
 5. PRs require approval before merging
 6. Squash and merge is preferred for feature branches
 
-## 🏷️ Branch Naming
+## ðŸ·ï¸ Branch Naming
 
 ```
 feature/short-description    # New features
@@ -146,8 +146,9 @@ refactor/short-description   # Code refactoring
 
 ---
 
-## ❓ Questions?
+## â“ Questions?
 
 Feel free to open an issue with the `question` label or reach out to the maintainers.
 
-Thank you for contributing! 🎉
+Thank you for contributing! ðŸŽ‰
+
