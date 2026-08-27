@@ -1,0 +1,92 @@
+# ============================================
+# Campus Deal Locker — .gitignore
+# ============================================
+
+# ——— Gradle ———
+.gradle/
+build/
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# ——— Android Studio / IntelliJ IDEA ———
+*.iml
+.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+.idea/assetWizardSettings.xml
+.idea/misc.xml
+.idea/vcs.xml
+.idea/runConfigurations.xml
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/navEditor.xml
+
+# ——— Build Outputs ———
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+release/
+
+# ——— Local Configuration ———
+local.properties
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# ——— Firebase ———
+# IMPORTANT: google-services.json contains API keys
+# Store it as a GitHub secret for CI, never commit it
+app/google-services.json
+
+# ——— Signing Keys ———
+*.jks
+*.keystore
+keystore.properties
+
+# ——— Testing ———
+.coverage
+*.exec
+jacoco.exec
+
+# ——— OS Generated ———
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ——— Kotlin ———
+*.kotlin_module
+
+# ——— Captures (Android Studio profiling) ———
+captures/
+
+# ——— NDK ———
+.externalNativeBuild/
+.cxx/
+obj/
+
+# ——— Google Services (Crashlytics) ———
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# Firebase
+google-services.json
