@@ -11,6 +11,6 @@ import androidx.navigation.NavController
 @Composable
 fun GlobalOffersScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Global Offers (WIP)")
+        Text("Global Offers (Coming Soon)")
     }
 }

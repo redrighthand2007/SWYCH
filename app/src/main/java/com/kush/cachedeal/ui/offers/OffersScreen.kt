@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
 @Composable
-fun OffersScreen(itemId: String, navController: NavController) {
+fun OffersScreen(navController: NavController, itemId: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Offers migrated to 1-Tap Deals")
+        Text("Offers (Coming Soon)")
     }
 }

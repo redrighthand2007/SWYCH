@@ -11,6 +11,6 @@ import androidx.navigation.NavController
 @Composable
 fun MyListingsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("My Listings (WIP)")
+        Text("My Listings Screen (WIP)")
     }
 }

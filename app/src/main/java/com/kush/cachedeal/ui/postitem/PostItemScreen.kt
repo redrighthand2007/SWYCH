@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
 @Composable
-fun PostItemScreen(navController: NavController) {
+fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Post Item Screen")
+        Text("Post Item Screen (WIP)")
     }
 }

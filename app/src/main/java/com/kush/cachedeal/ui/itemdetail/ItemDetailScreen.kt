@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
 @Composable
-fun ItemDetailScreen(itemId: String, navController: NavController) {
+fun ItemDetailScreen(navController: NavController, itemId: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Item Detail: $itemId")
+        Text("Item Detail Screen (WIP)")
     }
 }

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
 @Composable
-fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit = {}) {
+fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("Deals Screen (WIP)")
     }

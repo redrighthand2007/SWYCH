@@ -47,6 +47,24 @@ class AuthRepository(private val context: Context) {
         }
     }
 
+        suspend fun loginUser(email: String, password: String): Result<Unit> {
+        return try {
+            val user = SupabaseManager.client.postgrest["users"]
+                .select { filter { eq("email", email) } }
+                .decodeSingleOrNull<User>()
+            
+            if (user != null) {
+                val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+                prefs.edit().putString("current_uid", user.uid).apply()
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("User not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     val currentUserUid: String?
         get() {
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
@@ -58,4 +76,5 @@ class AuthRepository(private val context: Context) {
         prefs.edit().clear().apply()
     }
 }
+
 

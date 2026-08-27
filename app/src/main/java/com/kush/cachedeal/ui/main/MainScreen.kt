@@ -1,4 +1,4 @@
-package com.kush.cachedeal.ui.main
+﻿package com.kush.cachedeal.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -123,10 +123,7 @@ fun MainScreen(
                     navController = navController,
                     initialCategory = browseCategory
                 )
-                2 -> com.kush.cachedeal.ui.postitem.PostItemScreen(
-                    navController = navController,
-                    
-                )
+                2 -> com.kush.cachedeal.ui.postitem.PostItemScreen(navController = navController, onNavigateHome = { selectedTabIndex = 0 })
                 3 -> Text("Deals")
                 4 -> ProfileScreen(
                     navController = navController,
@@ -288,6 +285,7 @@ private fun CacheDealBottomBar(
         }
     }
 }
+
 
 
 
