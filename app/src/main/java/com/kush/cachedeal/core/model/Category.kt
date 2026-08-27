@@ -1,5 +1,7 @@
-package com.kush.cachedeal.core.model
+﻿package com.kush.cachedeal.core.model
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 enum class Category(val displayName: String) {
     EATABLES("Eatables"),
     WEARABLES("Wearables"),
@@ -10,3 +12,4 @@ enum class Category(val displayName: String) {
     STUDY_NOTES("Study Notes"),
     GAME_ACCOUNTS("Game Accounts")
 }
+

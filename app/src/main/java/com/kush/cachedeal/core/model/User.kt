@@ -1,19 +1,19 @@
 package com.kush.cachedeal.core.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Entity(tableName = "users")
 @Serializable
 data class User(
-    @PrimaryKey
     val uid: String = "",
     val phone: String = "",
     val email: String = "",
     val name: String = "",
     val block: String = "",
+    @SerialName("green_dots")
     val greenDots: Int = 0,
+    @SerialName("red_dots")
     val redDots: Int = 0,
+    @SerialName("created_at")
     val createdAt: Long = System.currentTimeMillis()
 )

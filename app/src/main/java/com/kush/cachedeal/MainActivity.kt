@@ -1,4 +1,4 @@
-package com.kush.cachedeal
+﻿package com.kush.cachedeal
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         SettingsManager.init(applicationContext)
-        com.kush.cachedeal.core.database.DatabaseSeeder.seedDatabase(applicationContext)
+        
 
         enableEdgeToEdge()
         setContent {
@@ -36,3 +36,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
+
+

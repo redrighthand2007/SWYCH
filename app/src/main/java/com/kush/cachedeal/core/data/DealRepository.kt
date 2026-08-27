@@ -1,43 +1,70 @@
 package com.kush.cachedeal.core.data
 
 import android.content.Context
-import com.kush.cachedeal.core.database.CacheDealDatabase
 import com.kush.cachedeal.core.model.Deal
-import kotlinx.coroutines.flow.Flow
+import com.kush.cachedeal.core.network.SupabaseManager
+import io.github.jan.supabase.postgrest.postgrest
 import java.util.UUID
 
 class DealRepository(private val context: Context) {
-    private val dealDao = CacheDealDatabase.getDatabase(context).dealDao()
 
-    fun getMyDealsFlow(userId: String): Flow<List<Deal>> {
-        return dealDao.getMyDealsFlow(userId)
-    }
-
-    suspend fun getMyDeals(userId: String): List<Deal> {
-        return dealDao.getMyDeals(userId)
-    }
-
-    suspend fun createDeal(deal: Deal): Result<Unit> {
+    suspend fun createDeal(
+        itemId: String,
+        itemTitle: String,
+        itemPhotoUrl: String,
+        sellerId: String,
+        agreedPrice: Double
+    ): Result<Unit> {
         return try {
-            val newDeal = if (deal.id.isEmpty()) {
-                deal.copy(id = UUID.randomUUID().toString())
-            } else deal
-            dealDao.insertDeal(newDeal)
-            // TODO: In Phase 2, insert into Supabase
+            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+            val buyerId = prefs.getString("current_uid", null) ?: return Result.failure(Exception("Not logged in"))
+            
+            val deal = Deal(
+                id = "deal_${UUID.randomUUID().toString().take(8)}",
+                itemId = itemId,
+                buyerId = buyerId,
+                sellerId = sellerId,
+                itemTitle = itemTitle,
+                itemPhotoUrl = itemPhotoUrl,
+                finalPrice = agreedPrice
+            )
+            
+            SupabaseManager.client.postgrest["deals"].insert(deal)
+            
+            // Also update item status
+            SupabaseManager.client.postgrest["items"].update({
+                set("status", "LOCKED")
+            }) {
+                filter { eq("id", itemId) }
+            }
+            
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun updateDealStatus(dealId: String, newStatus: String): Result<Unit> {
+    suspend fun getMyDeals(): Result<List<Deal>> {
         return try {
-            dealDao.updateStatus(dealId, newStatus)
-            // TODO: In Phase 2, update Supabase
-            Result.success(Unit)
+            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+            val uid = prefs.getString("current_uid", null) ?: return Result.failure(Exception("Not logged in"))
+            
+            val deals = SupabaseManager.client.postgrest["deals"]
+                .select {
+                    filter { 
+                        // Simplified filter: buyer or seller. 
+                        // In PostgREST, we'd use 'or' filter, but doing simple fetch for MVP
+                        or {
+                            eq("buyer_id", uid)
+                            eq("seller_id", uid)
+                        }
+                    }
+                }
+                .decodeList<Deal>()
+                
+            Result.success(deals)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 }
-

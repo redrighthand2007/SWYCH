@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
@@ -42,9 +42,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     
     // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
 
     // Supabase
     implementation(libs.supabase.postgrest)

@@ -1,4 +1,4 @@
-package com.kush.cachedeal.core.designsystem.component
+﻿package com.kush.cachedeal.core.designsystem.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
@@ -90,7 +90,7 @@ fun ItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "₹${"%.0f".format(item.price)}",
+                        text = "â‚¹${"%.0f".format(item.price)}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -103,7 +103,7 @@ fun ItemCard(
                 // Seller info + dots
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = item.sellerName,
+                        text = "Seller",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -112,8 +112,8 @@ fun ItemCard(
                     )
                     Spacer(Modifier.width(4.dp))
                     DotBadge(
-                        greenDots = item.sellerGreenDots,
-                        redDots = item.sellerRedDots
+                        greenDots = 0,
+                        redDots = 0
                     )
                 }
             }
@@ -149,3 +149,4 @@ private fun StatusBadge(status: String) {
         }
     }
 }
+

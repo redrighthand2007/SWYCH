@@ -1,26 +1,23 @@
 package com.kush.cachedeal.core.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Entity(tableName = "deals")
 @Serializable
 data class Deal(
-    @PrimaryKey
     val id: String = "",
+    @SerialName("item_id")
     val itemId: String = "",
-    val itemTitle: String = "",
-    val itemPhotoUrl: String = "",
-    val sellerId: String = "",
-    val sellerName: String = "",
-    val sellerPhone: String = "",
+    @SerialName("buyer_id")
     val buyerId: String = "",
-    val buyerName: String = "",
-    val buyerPhone: String = "",
+    @SerialName("seller_id")
+    val sellerId: String = "",
+    @SerialName("item_title")
+    val itemTitle: String = "",
+    @SerialName("item_photo_url")
+    val itemPhotoUrl: String = "",
+    @SerialName("final_price")
     val finalPrice: Double = 0.0,
-    val lockedAt: Long = System.currentTimeMillis(),
-    val completionDeadline: Long = System.currentTimeMillis() + 86400000,
-    val status: String = "locked", // locked / completed / expired
-    val completedAt: Long? = null
+    val status: String = "LOCKED",
+    val timestamp: Long = System.currentTimeMillis()
 )

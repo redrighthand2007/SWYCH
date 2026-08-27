@@ -1,20 +1,19 @@
-package com.kush.cachedeal.core.data
+﻿package com.kush.cachedeal.core.data
 
 import android.content.Context
-import com.kush.cachedeal.core.database.CacheDealDatabase
 import com.kush.cachedeal.core.model.User
-import kotlinx.coroutines.flow.Flow
+import com.kush.cachedeal.core.network.SupabaseManager
+import io.github.jan.supabase.postgrest.postgrest
 import java.util.UUID
 
 class AuthRepository(private val context: Context) {
-    private val userDao = CacheDealDatabase.getDatabase(context).userDao()
 
     suspend fun registerUser(
         name: String,
         block: String,
         phone: String,
         email: String,
-        password: String // We hash this locally or let Supabase handle it in Phase 2
+        password: String 
     ): Result<Unit> {
         return try {
             val user = User(
@@ -22,12 +21,11 @@ class AuthRepository(private val context: Context) {
                 name = name,
                 block = block,
                 phone = phone,
-                email = email,
-                greenDots = 0,
-                redDots = 0
+                email = email
             )
-            userDao.insertUser(user)
-            // Save mock current user to shared prefs
+            
+            SupabaseManager.client.postgrest["users"].insert(user)
+            
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
             prefs.edit().putString("current_uid", user.uid).apply()
             
@@ -37,28 +35,27 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun loginUser(email: String, pass: String): Result<Unit> {
-        // Mock login
-        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-        prefs.edit().putString("current_uid", "user_kush").apply() // Fallback to seeded user
-        return Result.success(Unit)
+        suspend fun getCurrentUserProfile(): Result<User> {
+        return try {
+            val uid = currentUserUid ?: return Result.failure(Exception("Not logged in"))
+            val user = SupabaseManager.client.postgrest["users"]
+                .select { filter { eq("uid", uid) } }
+                .decodeSingle<User>()
+            Result.success(user)
+        } catch(e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    suspend fun getCurrentUserProfile(): User? {
-        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-        val uid = prefs.getString("current_uid", "user_kush") ?: "user_kush"
-        return userDao.getUser(uid)
-    }
+    val currentUserUid: String?
+        get() {
+            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+            return prefs.getString("current_uid", null)
+        }
 
-    fun getCurrentUserProfileFlow(): Flow<User?> {
+    fun logout() {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-        val uid = prefs.getString("current_uid", "user_kush") ?: "user_kush"
-        return userDao.getUserFlow(uid)
-    }
-
-    suspend fun signOut() {
-        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-        prefs.edit().remove("current_uid").apply()
+        prefs.edit().clear().apply()
     }
 }
 
