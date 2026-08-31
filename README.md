@@ -1,342 +1,277 @@
-﻿<div align="center">
+<div align="center">
 
-<!-- Banner Image -->
-<img src="assets/banner.jpg" alt="Swych Banner" width="100%"/>
+<img src="app/src/main/res/drawable/logo.jpg" alt="Swych Logo" width="120" style="border-radius: 28px;" />
 
-<br/>
-<br/>
+# Swych
 
-<!-- Badges -->
-[![Android](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![Supabase](https://img.shields.io/badge/Supabase-Backend-FFCA28?style=for-the-badge&logo=Supabase&logoColor=black)](https://Supabase.google.com/)
-[![License](https://img.shields.io/badge/License-MIT-00C853?style=for-the-badge)](LICENSE)
-
-<br/>
-
-[![Build Status](https://img.shields.io/github/actions/workflow/status/redrighthand2007/Swych-App/android-ci.yml?branch=main&style=flat-square&label=CI&logo=githubactions)](https://github.com/redrighthand2007/Swych-App/actions)
-[![Issues](https://img.shields.io/github/issues/redrighthand2007/Swych-App?style=flat-square&color=FF6B6B)](https://github.com/redrighthand2007/Swych-App/issues)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
-[![Stars](https://img.shields.io/github/stars/redrighthand2007/Swych-App?style=flat-square&color=FFD700)](https://github.com/redrighthand2007/Swych-App/stargazers)
-
----
-
-### ðŸ”’ The campus marketplace where deals get locked.
+### The campus marketplace that actually works.
 
 **Buy. Sell. Deal. On Campus.**
 
-A peer-to-peer marketplace built exclusively for **VIT Vellore** students to buy and sell items â€” cycles, calculators, lab coats, subscriptions, notes, game accounts â€” all within the campus.
-
-[ðŸ“± Download APK](#-download) Â· [ðŸ“– Documentation](docs/) Â· [ðŸ› Report Bug](.github/ISSUE_TEMPLATE/bug_report.md) Â· [âœ¨ Request Feature](.github/ISSUE_TEMPLATE/feature_request.md)
-
-</div>
-
----
-
-## âš¡ How It Works
-
-```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   ðŸ“¦ LIST   â”‚â”€â”€â”€â”€â–¶â”‚  ðŸ’° OFFER    â”‚â”€â”€â”€â”€â–¶â”‚  ðŸ”’ LOCK    â”‚â”€â”€â”€â”€â–¶â”‚  ðŸ¤ DEAL     â”‚
-â”‚  Post your  â”‚     â”‚  Buyers make â”‚     â”‚  Seller     â”‚     â”‚  Meet up &   â”‚
-â”‚  item with  â”‚     â”‚  cash offers â”‚     â”‚  picks the  â”‚     â”‚  complete    â”‚
-â”‚  a price    â”‚     â”‚  with notes  â”‚     â”‚  best offer â”‚     â”‚  via WhatsAppâ”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-```
-
-<div align="center">
-
-| Step | What Happens |
-|:----:|:------------|
-| **1** | ðŸ“¸ Seller posts an item with photo, price & category |
-| **2** | ðŸ” Buyers browse by category or "Near Me" filter |
-| **3** | ðŸ’¸ Interested buyers submit cash offers with optional notes |
-| **4** | âš–ï¸ Seller reviews offers sorted by amount, sees buyer reputation |
-| **5** | âœ… Seller accepts one offer â†’ deal locks atomically |
-| **6** | ðŸ“± Both get a WhatsApp deep link to arrange handoff |
-| **7** | ðŸŸ¢ Both confirm within 3 days â†’ green dots for reliability |
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![API Level](https://img.shields.io/badge/Min_SDK-26%20(Android_8.0)-brightgreen)](https://developer.android.com/studio/releases/platforms)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 </div>
 
 ---
 
-## âœ¨ Features
+## What is Swych?
 
-<div align="center">
+Swych is a **peer-to-peer campus trading app** built for college students. It lets you list items you no longer need, discover what others are selling nearby, make offers, and lock in deals — all from your phone, all within your campus community.
 
-|  | Feature | Description |
-|:---:|:--------|:------------|
-| ðŸ“± | **Phone OTP Auth** | Quick signup with phone verification â€” no complex forms |
-| ðŸ“¦ | **Smart Listings** | Post items with photo, price, description & category |
-| ðŸ·ï¸ | **8 Categories** | Eatables Â· Wearables Â· Cycles Â· Calculators Â· Lab Coats Â· Subscriptions Â· Study Notes Â· Game Accounts |
-| ðŸ“ | **Near Me Filter** | Find items from your hostel block or nearby |
-| ðŸ’° | **Cash Offers** | Submit offers with optional notes for negotiation context |
-| ðŸ”’ | **Atomic Deal Lock** | One-tap accept â€” atomically locks deal, rejects others |
-| ðŸ’¬ | **WhatsApp Connect** | Pre-filled WhatsApp message to arrange the meetup |
-| ðŸŸ¢ðŸ”´ | **Reputation Dots** | Green dots for completed deals, red dots for no-shows |
-| â° | **3-Day Window** | Completion deadline keeps deals moving |
-| ðŸ”„ | **Auto Re-list** | Missed deals auto-expire, item goes back to market |
-
-</div>
+No middlemen. No shipping fees. Just students helping students.
 
 ---
 
-## ðŸ›¡ï¸ Reputation System
+## Screenshots
 
-The trust system is **automatic and abuse-resistant** â€” no manual reporting needed.
-
-```
-  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â”‚                 Deal Locked â±ï¸ 3 Days                â”‚
-  â”‚                                                     â”‚
-  â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-  â”‚    â”‚ Both confirm â”‚          â”‚ Buyer doesn't    â”‚   â”‚
-  â”‚    â”‚ completion   â”‚          â”‚ confirm in time  â”‚   â”‚
-  â”‚    â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜          â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-  â”‚           â”‚                           â”‚             â”‚
-  â”‚     ðŸŸ¢ +1 Green Dot            Seller re-lists     â”‚
-  â”‚     to BOTH users              the item             â”‚
-  â”‚                                       â”‚             â”‚
-  â”‚                                 ðŸ”´ +1 Red Dot       â”‚
-  â”‚                                 to BUYER only       â”‚
-  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-```
-
-- **Green Dot ðŸŸ¢** â€” Both sides completed the deal. Shows reliability.
-- **Red Dot ðŸ”´** â€” Buyer failed to show up. Only triggered by seller's re-list action.
-- Dots are visible on profiles and next to each offer, so sellers can weigh a lower offer from a reliable buyer against a higher offer from a flaky one.
+> *Coming soon — run the app to see it in action!*
 
 ---
 
-## ðŸ—ï¸ Tech Stack
+## Features
 
-<div align="center">
-
-| Layer | Technology | Purpose |
-|:------|:-----------|:--------|
-| **Language** | ![Kotlin](https://img.shields.io/badge/Kotlin-2.1+-7F52FF?style=flat-square&logo=kotlin&logoColor=white) | Modern, concise, null-safe |
-| **UI** | ![Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white) | Declarative UI with Material You |
-| **Architecture** | MVVM + Clean Architecture | Separation of concerns |
-| **DI** | ![Hilt](https://img.shields.io/badge/Hilt-Dagger-FF6F00?style=flat-square) | Dependency injection |
-| **Navigation** | Compose Navigation 2.8+ | Type-safe `@Serializable` routes |
-| **Auth** | ![Supabase](https://img.shields.io/badge/Supabase-Phone%20Auth-FFCA28?style=flat-square&logo=Supabase&logoColor=black) | Phone OTP verification |
-| **Database** | ![Postgres](https://img.shields.io/badge/Cloud-Postgres-FFCA28?style=flat-square&logo=Supabase&logoColor=black) | Real-time NoSQL database |
-| **Cloudinary** | ![Cloudinary](https://img.shields.io/badge/Supabase-Cloudinary-FFCA28?style=flat-square&logo=Supabase&logoColor=black) | Photo uploads |
-| **Images** | ![Coil](https://img.shields.io/badge/Coil%203-Image%20Loading-00BCD4?style=flat-square) | Fast async image loading |
-| **Async** | Coroutines + Flow | Reactive data streams |
-| **CI/CD** | ![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white) | Automated build & test |
-
-</div>
+| Feature | Status |
+|---------|--------|
+| Browse campus listings by category | ✅ Live |
+| List an item with photo | ✅ Live |
+| Make offers on items | ✅ Live |
+| Lock a deal & track status | ✅ Live |
+| My Listings dashboard | ✅ Live |
+| My Deals tracker | ✅ Live |
+| Shimmer skeleton loading | ✅ Live |
+| User profile with reputation dots | ✅ Live |
+| Register & Login | ✅ Live |
+| Cloudinary image uploads | 🔧 In Progress |
+| Push notifications | 📋 Planned |
+| Campus Beta Launch | 📋 Planned |
 
 ---
 
-## ðŸ›ï¸ Architecture
+## Tech Stack
 
-```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                       UI LAYER                           â”‚
-â”‚                                                          â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚ Screens  â”‚â—„â”€â”€â”¤ ViewModelsâ”‚â”€â”€â”€â”¤ UiState / UiEvents â”‚  â”‚
-â”‚  â”‚(Compose) â”‚   â”‚(StateFlow)â”‚   â”‚ (Sealed Classes)   â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                  DOMAIN LAYER                            â”‚
-â”‚                        â”‚                                 â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚                  Use Cases                        â”‚   â”‚
-â”‚  â”‚  PostItemUseCase â”‚ AcceptOfferUseCase â”‚ SendOtp   â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚            Repository Interfaces                  â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                   DATA LAYER                             â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚          Repository Implementations               â”‚   â”‚
-â”‚  â””â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â”‚  â”Œâ”€â”€â”€â”´â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”‚
-â”‚  â”‚Supabaseâ”‚   â”‚ Postgres  â”‚  â”‚   Supabase   â”‚          â”‚
-â”‚  â”‚  Auth  â”‚   â”‚  Database  â”‚  â”‚   Cloudinary    â”‚          â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-```
-
-> For detailed architecture documentation, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+| Layer | Technology |
+|-------|------------|
+| **Language** | Kotlin 2.0 |
+| **UI** | Jetpack Compose + Material 3 |
+| **Navigation** | Compose Navigation (Type-safe Routes) |
+| **Database** | Supabase (PostgreSQL) |
+| **Auth** | Supabase Auth (via SharedPreferences session) |
+| **Image Loading** | Coil 3 + OkHttp |
+| **Image Storage** | Cloudinary |
+| **Serialization** | Kotlinx Serialization |
+| **Architecture** | Cloud-First, MVVM-inspired |
 
 ---
 
-## ðŸ“‚ Project Structure
+## Architecture
+
+Swych uses a **Cloud-First** approach — no local database. All data lives in Supabase PostgreSQL and is fetched on demand. Screens show shimmer skeleton loaders while data loads, giving a fast, modern feel.
 
 ```
-com.vit.swych/
-â”œâ”€â”€ ðŸ“± App.kt & MainActivity.kt
-â”‚
-â”œâ”€â”€ ðŸŽ¨ core/
-â”‚   â”œâ”€â”€ designsystem/          # Theme, colors, typography, components
-â”‚   â”‚   â”œâ”€â”€ theme/             # Material 3 theme tokens
-â”‚   â”‚   â””â”€â”€ component/         # ItemCard, DotBadge, CategoryChip...
-â”‚   â”œâ”€â”€ di/                    # Hilt modules (Supabase, Repos)
-â”‚   â”œâ”€â”€ model/                 # User, Item, Offer, Deal, Category
-â”‚   â””â”€â”€ util/                  # Resource, Constants, WhatsAppHelper
-â”‚
-â”œâ”€â”€ ðŸ’¾ data/
-â”‚   â”œâ”€â”€ repository/            # Supabase implementations
-â”‚   â””â”€â”€ source/                # Supabase data sources
-â”‚
-â”œâ”€â”€ ðŸ§  domain/
-â”‚   â”œâ”€â”€ repository/            # Repository interfaces
-â”‚   â””â”€â”€ usecase/               # Business logic (PostItem, AcceptOffer...)
-â”‚
-â””â”€â”€ ðŸ–¥ï¸ ui/
-    â”œâ”€â”€ navigation/            # Routes & NavHost
-    â”œâ”€â”€ auth/                  # Phone OTP login
-    â”œâ”€â”€ onboarding/            # Name + block setup
-    â”œâ”€â”€ home/                  # Category browse feed
-    â”œâ”€â”€ postitem/              # List an item
-    â”œâ”€â”€ itemdetail/            # View item + make offer
-    â”œâ”€â”€ mylistings/            # Seller's items
-    â”œâ”€â”€ offers/                # Offer review screen
-    â”œâ”€â”€ deals/                 # Active deals management
-    â””â”€â”€ profile/               # User profile + reputation
+UI Layer (Compose Screens)
+        ↓
+Repository Layer (Suspend functions → Result<T>)
+        ↓
+Supabase Client (PostgREST API)
+        ↓
+PostgreSQL Database (Supabase Cloud)
+```
+
+**Key design decisions:**
+- No Room DB — keeps the app simple and data always fresh
+- `Result<T>` return types for clean error handling
+- `LaunchedEffect` data fetching with `mutableStateOf<T?>(null)` shimmer pattern
+- Type-safe navigation routes using `@Serializable` data classes
+
+---
+
+## Database Schema
+
+<details>
+<summary><b>PostgreSQL Tables (click to expand)</b></summary>
+
+### `users`
+| Column | Type | Description |
+|--------|------|-------------|
+| `uid` | TEXT (PK) | Unique user ID |
+| `name` | TEXT | Display name |
+| `block` | TEXT | Hostel block |
+| `phone` | TEXT | Phone number |
+| `email` | TEXT | Email address |
+| `green_dots` | INTEGER | Completed deals (reputation) |
+| `red_dots` | INTEGER | Missed deals (reputation) |
+
+### `items`
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | TEXT (PK) | Unique item ID |
+| `seller_id` | TEXT (FK) | References `users.uid` |
+| `category` | TEXT | Item category |
+| `title` | TEXT | Item title |
+| `description` | TEXT | Item description |
+| `price` | REAL | Asking price (₹) |
+| `photo_url` | TEXT | Cloudinary image URL |
+| `status` | TEXT | `OPEN` / `LOCKED` / `SOLD` |
+
+### `deals`
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | TEXT (PK) | Unique deal ID |
+| `item_id` | TEXT (FK) | References `items.id` |
+| `buyer_id` | TEXT (FK) | References `users.uid` |
+| `seller_id` | TEXT (FK) | References `users.uid` |
+| `item_title` | TEXT | Snapshot of item name |
+| `item_photo_url` | TEXT | Snapshot of item photo |
+| `final_price` | REAL | Agreed deal price |
+| `status` | TEXT | `LOCKED` / `COMPLETED` / `EXPIRED` |
+| `timestamp` | BIGINT | Deal creation time |
+
+</details>
+
+---
+
+## Project Structure
+
+```
+app/src/main/java/com/kush/swych/
+├── MainActivity.kt
+├── core/
+│   ├── data/              # Repositories (AuthRepository, ItemRepository, DealRepository)
+│   ├── designsystem/
+│   │   ├── component/     # ItemCard, DotBadge, CategoryChip, ShimmerEffect, DealButton
+│   │   └── theme/         # Colors, Typography, Shapes, Material 3 Theme
+│   ├── model/             # User, Item, Deal, Category (all @Serializable)
+│   ├── network/           # SupabaseManager, CloudinaryManager
+│   └── util/              # Constants, Resource, SettingsManager
+└── ui/
+    ├── auth/              # AuthScreen, LoginScreen, SignUpScreen
+    ├── browse/            # BrowseScreen (shimmer grid of items)
+    ├── deals/             # DealsScreen (live deal tracker)
+    ├── home/              # HomeScreen (bottom nav host)
+    ├── itemdetail/        # ItemDetailScreen (parallax + offer form)
+    ├── main/              # MainScreen (tab switcher)
+    ├── mylistings/        # MyListingsScreen (seller dashboard)
+    ├── navigation/        # AppNavHost, Routes
+    ├── offers/            # OffersScreen
+    ├── postitem/          # PostItemScreen (image + form)
+    └── profile/           # ProfileScreen (user + reputation dots)
 ```
 
 ---
 
-## ðŸš€ Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- **Android Studio** Ladybug (2024.2.1) or newer
-- **JDK 17+**
-- **Android SDK 35**
-- A **Supabase project** with Phone Auth, Postgres, and Cloudinary enabled
+- Android Studio **Hedgehog** (2023.1.1) or newer
+- JDK 17+
+- Android device or emulator running **Android 8.0 (API 26)+**
+- A [Supabase](https://supabase.com) project
 
-### Quick Start
+### Setup
 
 ```bash
 # 1. Clone the repo
 git clone https://github.com/redrighthand2007/Swych-App.git
 cd Swych-App
-
-# 2. Add your Supabase config
-# Download google-services.json from Supabase Console
-# Place it in the app/ directory
-
-# 3. Open in Android Studio & run!
 ```
 
-> ðŸ“– For detailed setup instructions, see [docs/SETUP.md](docs/SETUP.md)
+**2. Set up Supabase:**
+- Go to your [Supabase dashboard](https://supabase.com/dashboard)
+- Open the **SQL Editor** and run the schema from `docs/SUPABASE_SCHEMA.md`
+- Copy your **Project URL** and **Anon Key**
+
+**3. Add your credentials:**
+
+Open `app/src/main/java/com/kush/swych/core/network/SupabaseManager.kt` and update:
+
+```kotlin
+private const val SUPABASE_URL = "your-project-url"
+private const val SUPABASE_ANON_KEY = "your-anon-key"
+```
+
+**4. Run the app:**
+- Open the project in Android Studio
+- Click **Run ▶️**
 
 ---
 
-## ðŸ—„ï¸ Database Schema
+## Categories
 
-<details>
-<summary><b>Click to expand Postgres schema</b></summary>
+Swych is tuned for campus life. Current supported categories:
 
-### Users (`users/{uid}`)
-| Field | Type | Description |
-|-------|------|-------------|
-| `phone` | string | Verified phone number |
-| `name` | string | Display name |
-| `block` | string | Hostel/block |
-| `greenDots` | int | Completed deals count |
-| `redDots` | int | Missed completions count |
-| `createdAt` | timestamp | Account creation |
-
-### Items (`items/{id}`)
-| Field | Type | Description |
-|-------|------|-------------|
-| `sellerId` | string | Seller's UID |
-| `category` | string | Fixed category |
-| `title` | string | Item title |
-| `description` | string | Description |
-| `price` | number | Asking price |
-| `photoUrl` | string | Cloudinary URL |
-| `status` | string | `open` / `locked` / `sold` |
-
-### Offers (`items/{id}/offers/{offerId}`)
-| Field | Type | Description |
-|-------|------|-------------|
-| `buyerId` | string | Buyer's UID |
-| `amount` | number | Cash offer |
-| `note` | string? | Optional message |
-| `status` | string | `pending` / `accepted` / `rejected` |
-
-### Deals (`deals/{id}`)
-| Field | Type | Description |
-|-------|------|-------------|
-| `itemId` | string | Item reference |
-| `sellerId` | string | Seller's UID |
-| `buyerId` | string | Buyer's UID |
-| `finalPrice` | number | Accepted amount |
-| `completionDeadline` | timestamp | `lockedAt + 3 days` |
-| `status` | string | `locked` / `completed` / `expired` |
-
-</details>
-
-> ðŸ“– For full schema documentation, see [docs/Postgres_SCHEMA.md](docs/Postgres_SCHEMA.md)
+- 🍱 **Eatables** — food, snacks, mess coupons
+- 👕 **Wearables** — clothes, shoes, accessories
+- 🚲 **Cycles** — bicycles, MTBs
+- 🧮 **Calculators** — scientific, graphing
+- 🥼 **Lab Coats** — lab essentials
+- 📱 **Subscription Plans** — Netflix, Spotify splits
+- 📚 **Study Notes** — handwritten, printed
+- 🎮 **Game Accounts** — BGMI, VALORANT, etc.
 
 ---
 
-## ðŸ—ºï¸ What We've Built (So Far)
+## How Deals Work
 
-We're moving fast. Here's where Swych currently stands:
-
-- [x] ðŸŽ¨ **Sleek UI Architecture:** Beautiful Jetpack Compose components.
-- [x] ðŸ“± **Full App Screens:** Auth, Home, Profile, Sell, and Deals grids are fully designed.
-- [x] ðŸŒ™ **Dynamic Themes:** Smooth 3-way toggle between Light, Dark, and System modes.
-- [x] ðŸš€ **Lightning Fast Launch:** Zero-delay native Android 12 splash screen.
-- [x] ðŸ“¦ **Data Models & Repos:** Full MVVM + Clean Architecture scaffolding.
-- [ ] ðŸ”Œ **Backend Hookup:** Wiring up Supabase (or Supabase!) for real-time auth and data.
-- [ ] ðŸ’¬ **WhatsApp Deep Links:** Seamless handoffs for meetups.
-- [ ] ðŸ§ª **Campus Beta Test:** Launching to our first batch of students.
+1. **Seller lists an item** → fills category, title, description, price, photo
+2. **Buyer browses** → taps item, sees full detail screen
+3. **Buyer makes an offer** → enters their price
+4. **Deal is created** → item status flips to `LOCKED`
+5. **Both parties meet on campus** → seller marks deal complete
+6. **Reputation updates** → green dot for success, red dot for a no-show
 
 ---
 
-## ðŸ¤ Contributing
+## Reputation System
 
-Contributions are what make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Every user has two counters visible on their profile:
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/amazing-feature`)
-3. Commit your Changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the Branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- 🟢 **Green Dots** — number of successfully completed deals
+- 🔴 **Red Dots** — number of deals they backed out of
 
-> ðŸ“– See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+This gives every buyer and seller an instant trust signal before committing to a deal.
 
 ---
 
-## ðŸ“„ License
+## Contributing
 
-Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
+Contributions are welcome! Here's how to get involved:
+
+1. Fork the repo
+2. Create a feature branch — `git checkout -b add-push-notifications`
+3. Make your changes
+4. Open a Pull Request with a short description
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
 ---
 
-## ðŸ™ Acknowledgements
+## Roadmap
 
-- [Jetpack Compose](https://developer.android.com/jetpack/compose) â€” Modern declarative UI
-- [Supabase](https://Supabase.google.com/) â€” Backend infrastructure
-- [Material 3](https://m3.material.io/) â€” Design system
-- [Coil](https://coil-kt.github.io/coil/) â€” Image loading
-- [Hilt](https://dagger.dev/hilt/) â€” Dependency injection
-- The **VIT Vellore** student community ðŸ’›
+- [ ] Cloudinary image uploads (in progress)
+- [ ] Real OTP-based phone authentication
+- [ ] Push notifications for new offers
+- [ ] Chat between buyer and seller
+- [ ] Campus-specific filtering (block-based proximity)
+- [ ] Admin panel for moderation
+- [ ] Android 15 edge-to-edge support
+
+---
+
+## License
+
+Distributed under the **MIT License** — see [LICENSE](LICENSE) for more information.
 
 ---
 
 <div align="center">
 
-**Built with â¤ï¸ for VIT Vellore Campus**
+Built with ❤️ for campus students everywhere.
 
-<img src="assets/logo.jpg" alt="Swych Logo" width="80"/>
-
-<br/>
-
-â­ **Star this repo if you find it useful!** â­
+⭐ **Star this repo if Swych helped you!** ⭐
 
 </div>
-
-
