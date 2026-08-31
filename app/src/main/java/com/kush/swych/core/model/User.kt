@@ -13,7 +13,5 @@ data class User(
     @SerialName("green_dots")
     val greenDots: Int = 0,
     @SerialName("red_dots")
-    val redDots: Int = 0,
-    @SerialName("created_at")
-    val createdAt: Long = System.currentTimeMillis()
+    val redDots: Int = 0
 )
