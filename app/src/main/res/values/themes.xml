@@ -4,4 +4,13 @@
     <style name="Theme.Swych" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_bg</item>
     </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background -->
+        <item name="windowSplashScreenBackground">#191C1D</item>
+        <!-- Use windowSplashScreenAnimatedIcon to add a drawable -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <!-- Set the theme of the Activity that directly follows your splash screen -->
+        <item name="postSplashScreenTheme">@style/Theme.Swych</item>
+    </style>
 </resources>
