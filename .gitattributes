@@ -1,0 +1,12 @@
+# Tell GitHub Linguist to ignore these files for language statistics
+# They are build tools, not application code
+
+gradlew          linguist-vendored
+gradlew.bat      linguist-vendored
+gradle/**        linguist-vendored
+*.gradle.kts     linguist-vendored
+*.properties     linguist-vendored
+*.xml            linguist-vendored
+*.pro            linguist-vendored
+docs/**          linguist-documentation
+*.md             linguist-documentation

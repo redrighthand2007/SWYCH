@@ -79,9 +79,9 @@ private fun CategoryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Category image (placeholder snacks for all)
+            // Category placeholder using logo
             Image(
-                painter = painterResource(id = R.drawable.snacks),
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = category.displayName,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
