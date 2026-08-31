@@ -1,154 +1,104 @@
-﻿# ðŸ¤ Contributing to Swych
+# Contributing to Swych
 
-First off, thank you for considering contributing to Swych! It's people like you that make this app a great tool for the VIT campus community.
+Thanks for your interest in contributing! Swych is a campus-first project and every contribution helps make it better for students.
 
-## ðŸ“‹ Table of Contents
+---
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [How to Contribute](#how-to-contribute)
-- [Coding Standards](#coding-standards)
-- [Commit Convention](#commit-convention)
-- [Pull Request Process](#pull-request-process)
+## Quick Start
 
-## ðŸ“œ Code of Conduct
+1. **Fork** the repository
+2. **Clone** your fork — `git clone https://github.com/YOUR_USERNAME/Swych-App.git`
+3. **Create a branch** — `git checkout -b add-push-notifications`
+4. **Make your changes**
+5. **Push** — `git push origin add-push-notifications`
+6. **Open a Pull Request**
 
-This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+---
 
-## ðŸš€ Getting Started
+## Development Setup
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/swych.git`
-3. Create a feature branch: `git checkout -b feature/amazing-feature`
-4. Make your changes
-5. Commit your changes (see [Commit Convention](#commit-convention))
-6. Push to the branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
-## ðŸ› ï¸ Development Setup
-
-### Prerequisites
-
-- Android Studio Ladybug (2024.2.1) or newer
+**You'll need:**
+- Android Studio Hedgehog (2023.1.1) or newer
 - JDK 17+
-- Android SDK 35
-- A Supabase project with Phone Auth, Postgres, and Storage enabled
+- Android device or emulator running Android 8.0+ (API 26)
+- A [Supabase](https://supabase.com) project
 
-### Setup Steps
+**Steps:**
+1. Clone the repo and open in Android Studio
+2. Go to `core/network/SupabaseManager.kt` and add your Supabase URL and Anon Key
+3. Run the SQL from `docs/SUPABASE_SCHEMA.md` in your Supabase SQL editor
+4. Hit **Run ▶️** in Android Studio
 
-1. Clone the repository
-2. Open the project in Android Studio
-3. Copy your `google-services.json` to the `app/` directory
-4. Sync Gradle and build the project
-5. Run on an emulator or physical device
+---
 
-## ðŸ’¡ How to Contribute
+## What You Can Help With
 
-### ðŸ› Reporting Bugs
+- **Bug fixes** — spotted something broken? Open an issue or fix it directly
+- **New features** — check the Roadmap in the README for ideas
+- **UI improvements** — better layouts, animations, or dark mode tweaks
+- **Documentation** — typos, better explanations, missing steps
+- **Performance** — faster loading, better error handling
 
-- Use the [Bug Report](https://github.com/YOUR_USERNAME/swych/issues/new?template=bug_report.md) issue template
-- Include detailed steps to reproduce
-- Add screenshots if applicable
-- Specify your device and Android version
+---
 
-### âœ¨ Suggesting Features
+## Coding Standards
 
-- Use the [Feature Request](https://github.com/YOUR_USERNAME/swych/issues/new?template=feature_request.md) issue template
-- Explain the problem your feature solves
-- Provide mockups if possible
-
-### ðŸ”§ Submitting Code
-
-1. Check existing issues and PRs to avoid duplicates
-2. For major changes, open an issue first to discuss
-3. Write clean, well-documented code
-4. Add tests for new features
-5. Update documentation as needed
-
-## ðŸ“ Coding Standards
-
-### Kotlin Style
-
+### Kotlin
 - Follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html)
-- Use meaningful variable and function names
-- Keep functions small and focused
-- Use `sealed interface` for UI states
-- Use `data class` for models
+- Use clear, descriptive names for functions and variables
+- Keep composables small and focused — one job each
+- Use `data class` for all models
+- Use `Result<T>` for async operations that can fail
 
-### Architecture
+### Architecture (Cloud-First)
+- **No local database** — all data fetches directly from Supabase
+- Screens use `LaunchedEffect` to fetch + `mutableStateOf<T?>(null)` for shimmer loading
+- Repositories return `Result<T>` — never throw exceptions to the UI
+- Keep business logic out of Composables
 
-- Follow MVVM + Clean Architecture
-- Keep UI logic in ViewModels
-- Business logic goes in Use Cases
-- Data access through Repositories
-- Use Hilt for dependency injection
+### Compose
+- Use Material 3 components and theme tokens everywhere
+- Shimmer loading for any screen that fetches remote data
+- Use `remember {}` for expensive computations
+- Avoid deeply nested Composables
 
-### Compose Guidelines
+---
 
-- Keep composables small and reusable
-- Use `remember` and `derivedStateOf` appropriately
-- Follow the slot API pattern for flexible components
-- Use Material 3 components and theme tokens
+## Commit Style
 
-## ðŸ“ Commit Convention
-
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-### Types
-
-| Type | Description |
-|------|-------------|
-| `feat` | A new feature |
-| `fix` | A bug fix |
-| `docs` | Documentation changes |
-| `style` | Code style changes (formatting, no logic change) |
-| `refactor` | Code refactoring |
-| `test` | Adding or updating tests |
-| `chore` | Maintenance tasks |
-| `perf` | Performance improvements |
-| `ci` | CI/CD changes |
-
-### Examples
+Keep it short and human. Max 4 words. No AI-style verbose messages.
 
 ```
-feat(auth): add phone OTP verification flow
-fix(offers): resolve batch write race condition on accept
-docs(readme): update setup instructions
-style(theme): adjust color palette for dark mode
-```
-
-## ðŸ”„ Pull Request Process
-
-1. Update the README.md with details of changes if applicable
-2. Update the CHANGELOG.md with a note about your change
-3. Ensure all tests pass
-4. Request review from at least one maintainer
-5. PRs require approval before merging
-6. Squash and merge is preferred for feature branches
-
-## ðŸ·ï¸ Branch Naming
-
-```
-feature/short-description    # New features
-fix/short-description        # Bug fixes
-docs/short-description       # Documentation
-refactor/short-description   # Code refactoring
+add push notifications
+fix login crash
+update profile screen
+tweak item card
 ```
 
 ---
 
-## â“ Questions?
+## Pull Request Guidelines
 
-Feel free to open an issue with the `question` label or reach out to the maintainers.
+- Keep PRs focused — one feature or fix per PR
+- Add a short description of what you changed and why
+- Test on a real device if possible
+- Screenshots are appreciated for UI changes
+- Don't open a PR for a major feature without creating an issue first
 
-Thank you for contributing! ðŸŽ‰
+---
 
+## Reporting Bugs
+
+Open an issue and include:
+- What you were doing
+- What you expected to happen
+- What actually happened
+- Your Android version and device model
+
+---
+
+## Questions?
+
+Open an issue with the `question` label — happy to help!
+
+Thanks for contributing. 🙌
