@@ -1,4 +1,4 @@
-﻿package com.kush.cachedeal.core.data
+package com.kush.cachedeal.core.data
 
 import android.content.Context
 import com.kush.cachedeal.core.model.Item
@@ -47,6 +47,27 @@ class ItemRepository(private val context: Context) {
                 .select()
                 .decodeList<Item>()
             Result.success(items)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getItemById(itemId: String): Result<Item> {
+        return try {
+            val item = SupabaseManager.client.postgrest["items"]
+                .select { filter { eq("id", itemId) } }
+                .decodeSingle<Item>()
+            Result.success(item)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateItemStatus(itemId: String, status: String): Result<Unit> {
+        return try {
+            SupabaseManager.client.postgrest["items"]
+                .update({ set("status", status) }) { filter { eq("id", itemId) } }
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
