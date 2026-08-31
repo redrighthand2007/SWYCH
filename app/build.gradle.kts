@@ -1,4 +1,4 @@
-﻿plugins {
+plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
@@ -36,6 +36,18 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // Exclude unaligned Fresco native libs pulled in by Cloudinary SDK.
+    // We use Coil for images, so Fresco is not needed.
+    packaging {
+        jniLibs {
+            excludes += listOf(
+                "**/libimagepipeline.so",
+                "**/libnative-filters.so",
+                "**/libnative-imagetranscoder.so"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -49,8 +61,10 @@ dependencies {
     implementation(libs.supabase.realtime)
     implementation(libs.ktor.client.cio)
 
-    // Cloudinary
-    implementation(libs.cloudinary.android)
+    // Cloudinary (exclude Fresco — we use Coil for images)
+    implementation(libs.cloudinary.android) {
+        exclude(group = "com.facebook.fresco")
+    }
 
     // Core & Compose UI
     implementation(libs.androidx.activity.compose)
