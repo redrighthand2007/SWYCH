@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CacheDeal"
+rootProject.name = "Swych"
 include(":app")
 include(":app")
  

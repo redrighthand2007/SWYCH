@@ -9,12 +9,12 @@
 
 ## Reporting a Vulnerability
 
-We take the security of CacheDeal seriously. If you discover a security vulnerability, please report it responsibly.
+We take the security of Swych seriously. If you discover a security vulnerability, please report it responsibly.
 
 ### ðŸ“§ How to Report
 
 1. **DO NOT** create a public GitHub issue for security vulnerabilities
-2. Email us at: **security@cachedeal.com** (or open a private security advisory on GitHub)
+2. Email us at: **security@swych.com** (or open a private security advisory on GitHub)
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce

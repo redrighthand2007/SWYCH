@@ -2,7 +2,7 @@
 
 ## High-Level Architecture
 
-CacheDeal follows **MVVM + Clean Architecture** principles, ensuring separation of concerns, testability, and scalability.
+Swych follows **MVVM + Clean Architecture** principles, ensuring separation of concerns, testability, and scalability.
 
 ```
 â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”

@@ -1,6 +1,6 @@
 ﻿---
 name: "âœ¨ Feature Request"
-about: Suggest a new feature for CacheDeal
+about: Suggest a new feature for Swych
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''

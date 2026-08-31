@@ -1,6 +1,6 @@
 ﻿# ðŸ—„ï¸ Postgres Database Schema
 
-This document describes the Cloud Postgres data model for CacheDeal.
+This document describes the Cloud Postgres data model for Swych.
 
 ## Collections Overview
 

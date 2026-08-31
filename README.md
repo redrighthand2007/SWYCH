@@ -1,7 +1,7 @@
 ﻿<div align="center">
 
 <!-- Banner Image -->
-<img src="assets/banner.jpg" alt="CacheDeal Banner" width="100%"/>
+<img src="assets/banner.jpg" alt="Swych Banner" width="100%"/>
 
 <br/>
 <br/>
@@ -15,10 +15,10 @@
 
 <br/>
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/redrighthand2007/CacheDeal-App/android-ci.yml?branch=main&style=flat-square&label=CI&logo=githubactions)](https://github.com/redrighthand2007/CacheDeal-App/actions)
-[![Issues](https://img.shields.io/github/issues/redrighthand2007/CacheDeal-App?style=flat-square&color=FF6B6B)](https://github.com/redrighthand2007/CacheDeal-App/issues)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/redrighthand2007/Swych-App/android-ci.yml?branch=main&style=flat-square&label=CI&logo=githubactions)](https://github.com/redrighthand2007/Swych-App/actions)
+[![Issues](https://img.shields.io/github/issues/redrighthand2007/Swych-App?style=flat-square&color=FF6B6B)](https://github.com/redrighthand2007/Swych-App/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
-[![Stars](https://img.shields.io/github/stars/redrighthand2007/CacheDeal-App?style=flat-square&color=FFD700)](https://github.com/redrighthand2007/CacheDeal-App/stargazers)
+[![Stars](https://img.shields.io/github/stars/redrighthand2007/Swych-App?style=flat-square&color=FFD700)](https://github.com/redrighthand2007/Swych-App/stargazers)
 
 ---
 
@@ -170,7 +170,7 @@ The trust system is **automatic and abuse-resistant** â€” no manual reporti
 ## ðŸ“‚ Project Structure
 
 ```
-com.vit.cachedeal/
+com.vit.swych/
 â”œâ”€â”€ ðŸ“± App.kt & MainActivity.kt
 â”‚
 â”œâ”€â”€ ðŸŽ¨ core/
@@ -217,8 +217,8 @@ com.vit.cachedeal/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/redrighthand2007/CacheDeal-App.git
-cd CacheDeal-App
+git clone https://github.com/redrighthand2007/Swych-App.git
+cd Swych-App
 
 # 2. Add your Supabase config
 # Download google-services.json from Supabase Console
@@ -283,7 +283,7 @@ cd CacheDeal-App
 
 ## ðŸ—ºï¸ What We've Built (So Far)
 
-We're moving fast. Here's where CacheDeal currently stands:
+We're moving fast. Here's where Swych currently stands:
 
 - [x] ðŸŽ¨ **Sleek UI Architecture:** Beautiful Jetpack Compose components.
 - [x] ðŸ“± **Full App Screens:** Auth, Home, Profile, Sell, and Deals grids are fully designed.
@@ -331,7 +331,7 @@ Distributed under the **MIT License**. See [LICENSE](LICENSE) for more informati
 
 **Built with â¤ï¸ for VIT Vellore Campus**
 
-<img src="assets/logo.jpg" alt="CacheDeal Logo" width="80"/>
+<img src="assets/logo.jpg" alt="Swych Logo" width="80"/>
 
 <br/>
 

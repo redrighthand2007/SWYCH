@@ -1,6 +1,6 @@
 ﻿---
 name: "ðŸ› Bug Report"
-about: Report a bug to help us improve CacheDeal
+about: Report a bug to help us improve Swych
 title: "[BUG] "
 labels: bug, triage
 assignees: ''

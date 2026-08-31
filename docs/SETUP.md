@@ -1,6 +1,6 @@
 ﻿# ðŸ› ï¸ Development Setup Guide
 
-Follow this guide to set up the CacheDeal project for local development.
+Follow this guide to set up the Swych project for local development.
 
 ## Prerequisites
 
@@ -16,8 +16,8 @@ Follow this guide to set up the CacheDeal project for local development.
 ## ðŸ“± Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cachedeal.git
-cd cachedeal
+git clone https://github.com/YOUR_USERNAME/swych.git
+cd swych
 ```
 
 ## ðŸ”¥ Step 2: Supabase Setup
@@ -25,15 +25,15 @@ cd cachedeal
 ### 2.1 Create Supabase Project
 
 1. Go to [Supabase Console](https://console.Supabase.google.com/)
-2. Click **"Add project"** â†’ Name it `cachedeal`
+2. Click **"Add project"** â†’ Name it `swych`
 3. Disable Google Analytics (optional for v1)
 4. Click **Create project**
 
 ### 2.2 Register Android App
 
 1. In Supabase Console â†’ **Add app** â†’ **Android**
-2. Package name: `com.vit.cachedeal`
-3. App nickname: `CacheDeal`
+2. Package name: `com.vit.swych`
+3. App nickname: `Swych`
 4. Debug signing certificate SHA-1:
    ```bash
    # From Android Studio terminal:
@@ -113,7 +113,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
 ### "google-services.json not found"
 - Ensure the file is in the `app/` directory (not the project root)
-- Check that the package name in the JSON matches `com.vit.cachedeal`
+- Check that the package name in the JSON matches `com.vit.swych`
 
 ### "Phone Auth not working on emulator"
 - Add test phone numbers in Supabase Console

@@ -6,11 +6,11 @@
 }
 
 android {
-    namespace = "com.kush.cachedeal"
+    namespace = "com.kush.swych"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.kush.CacheDeal"
+        applicationId = "com.kush.swych"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -75,3 +75,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+

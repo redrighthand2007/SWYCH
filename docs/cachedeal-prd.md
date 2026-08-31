@@ -1,4 +1,4 @@
-﻿# CacheDeal â€” Product Requirements Document
+﻿# Swych â€” Product Requirements Document
 
 **Platform:** Android (Kotlin, Jetpack Compose)
 **Backend:** Supabase (Auth + Postgres + Storage)
