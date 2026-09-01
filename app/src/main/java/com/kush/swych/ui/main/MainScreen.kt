@@ -1,6 +1,7 @@
 package com.kush.swych.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -84,6 +85,10 @@ fun MainScreen(
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(initialTab) }
     var browseCategory by remember { mutableStateOf(initialBrowseCategory) }
+
+    BackHandler(enabled = selectedTabIndex != 0) {
+        selectedTabIndex = 0
+    }
 
     Scaffold(
         bottomBar = {
@@ -196,3 +201,4 @@ private fun SwychBottomBar(
         }
     }
 }
+
