@@ -4,11 +4,13 @@ import android.content.Context
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.network.SupabaseManager
 import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import java.util.UUID
 
 class ItemRepository(private val context: Context) {
+
+    companion object {
+        var cachedItems: List<Item>? = null
+    }
 
     suspend fun postItem(
         title: String,
@@ -21,11 +23,10 @@ class ItemRepository(private val context: Context) {
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
             val sellerId = prefs.getString("current_uid", null) ?: return Result.failure(Exception("Not logged in"))
             
-            // Upload to Cloudinary (will implement later if needed, passing blank for now or just using uri string)
-            val photoUrl = photoUri // com.kush.swych.core.network.CloudinaryManager.uploadImage(context, photoUri)
+            val photoUrl = photoUri
 
             val item = Item(
-                id = "item_${UUID.randomUUID().toString().take(8)}",
+                id = "item_",
                 sellerId = sellerId,
                 title = title,
                 description = description,
@@ -35,17 +36,22 @@ class ItemRepository(private val context: Context) {
             )
             
             SupabaseManager.client.postgrest["items"].insert(item)
+            cachedItems = null // Invalidate cache
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun getAllItems(): Result<List<Item>> {
+    suspend fun getAllItems(forceRefresh: Boolean = false): Result<List<Item>> {
+        if (!forceRefresh && cachedItems != null) {
+            return Result.success(cachedItems!!)
+        }
         return try {
             val items = SupabaseManager.client.postgrest["items"]
                 .select()
                 .decodeList<Item>()
+            cachedItems = items
             Result.success(items)
         } catch (e: Exception) {
             Result.failure(e)
@@ -54,6 +60,9 @@ class ItemRepository(private val context: Context) {
 
     suspend fun getItemById(itemId: String): Result<Item> {
         return try {
+            val cached = cachedItems?.find { it.id == itemId }
+            if (cached != null) return Result.success(cached)
+
             val item = SupabaseManager.client.postgrest["items"]
                 .select { filter { eq("id", itemId) } }
                 .decodeSingle<Item>()
@@ -67,6 +76,7 @@ class ItemRepository(private val context: Context) {
         return try {
             SupabaseManager.client.postgrest["items"]
                 .update({ set("status", status) }) { filter { eq("id", itemId) } }
+            cachedItems = null // Invalidate cache
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -89,4 +99,3 @@ class ItemRepository(private val context: Context) {
         }
     }
 }
-

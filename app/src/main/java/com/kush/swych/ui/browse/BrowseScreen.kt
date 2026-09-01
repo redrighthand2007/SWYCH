@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -48,14 +49,21 @@ fun BrowseContent(
     val itemRepo = remember { ItemRepository(context) }
     val authRepo = remember { AuthRepository(context) }
     
-    var items by remember { mutableStateOf<List<Item>?>(null) }
-    var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
-    var currentUser by remember { mutableStateOf<User?>(null) }
+    // Initialize with cached items to avoid null state when popping back stack, which would reset scroll state
+    var items by remember { mutableStateOf<List<Item>?>(ItemRepository.cachedItems) }
+    var users by remember { mutableStateOf<Map<String, User>>(AuthRepository.cachedUsers?.associateBy { it.uid } ?: emptyMap()) }
     
-    var selectedCategory by remember { mutableStateOf(if (initialCategory.isBlank()) "All" else initialCategory) }
-    var selectedSort by remember { mutableStateOf(SortOption.RECENT) }
-    var locationFilter by remember { mutableStateOf(LocationFilter.CAMPUS) }
+    val initialUid = authRepo.currentUserUid
+    var currentUser by remember { mutableStateOf<User?>(if (initialUid != null) users[initialUid] else null) }
     
+    // Saveable state for filters
+    var selectedCategory by rememberSaveable { mutableStateOf(if (initialCategory.isBlank()) "All" else initialCategory) }
+    var selectedSortName by rememberSaveable { mutableStateOf(SortOption.RECENT.name) }
+    var locationFilterName by rememberSaveable { mutableStateOf(LocationFilter.CAMPUS.name) }
+    
+    val selectedSort = SortOption.valueOf(selectedSortName)
+    val locationFilter = LocationFilter.valueOf(locationFilterName)
+
     // We store "applied" items in memory for prototype
     var appliedItemIds by remember { mutableStateOf(setOf<String>()) }
     val scope = rememberCoroutineScope()
@@ -132,7 +140,7 @@ fun BrowseContent(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable { locationFilter = filter }
+                            .clickable { locationFilterName = filter.name }
                             .padding(horizontal = 16.dp, vertical = 6.dp)
                     ) {
                         Text(
@@ -157,7 +165,7 @@ fun BrowseContent(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable { selectedSort = filter }
+                            .clickable { selectedSortName = filter.name }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
@@ -213,7 +221,10 @@ fun BrowseContent(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(filteredItems) { item ->
+                    items(
+                        items = filteredItems,
+                        key = { it.id } // Use item ID as key to help Compose preserve scroll position across recompositions!
+                    ) { item ->
                         val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
                         ItemCard(
                             item = item,

@@ -8,6 +8,10 @@ import java.util.UUID
 
 class AuthRepository(private val context: Context) {
 
+    companion object {
+        var cachedUsers: List<User>? = null
+    }
+
     suspend fun registerUser(
         name: String,
         block: String,
@@ -17,7 +21,7 @@ class AuthRepository(private val context: Context) {
     ): Result<Unit> {
         return try {
             val user = User(
-                uid = "user_${UUID.randomUUID().toString().take(8)}",
+                uid = "user_",
                 name = name,
                 block = block,
                 phone = phone,
@@ -29,15 +33,19 @@ class AuthRepository(private val context: Context) {
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
             prefs.edit().putString("current_uid", user.uid).apply()
             
+            cachedUsers = null
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-        suspend fun getCurrentUserProfile(): Result<User> {
+    suspend fun getCurrentUserProfile(): Result<User> {
         return try {
             val uid = currentUserUid ?: return Result.failure(Exception("Not logged in"))
+            val cached = cachedUsers?.find { it.uid == uid }
+            if (cached != null) return Result.success(cached)
+
             val user = SupabaseManager.client.postgrest["users"]
                 .select { filter { eq("uid", uid) } }
                 .decodeSingle<User>()
@@ -47,7 +55,7 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-        suspend fun loginUser(email: String, password: String): Result<Unit> {
+    suspend fun loginUser(email: String, password: String): Result<Unit> {
         return try {
             val user = SupabaseManager.client.postgrest["users"]
                 .select { filter { eq("email", email) } }
@@ -71,11 +79,15 @@ class AuthRepository(private val context: Context) {
             return prefs.getString("current_uid", null)
         }
 
-    suspend fun getAllUsers(): Result<List<User>> {
+    suspend fun getAllUsers(forceRefresh: Boolean = false): Result<List<User>> {
+        if (!forceRefresh && cachedUsers != null) {
+            return Result.success(cachedUsers!!)
+        }
         return try {
             val users = SupabaseManager.client.postgrest["users"]
                 .select()
                 .decodeList<User>()
+            cachedUsers = users
             Result.success(users)
         } catch (e: Exception) {
             Result.failure(e)
@@ -85,7 +97,6 @@ class AuthRepository(private val context: Context) {
     fun logout() {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
+        cachedUsers = null
     }
 }
-
-
