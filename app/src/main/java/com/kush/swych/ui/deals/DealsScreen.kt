@@ -1,12 +1,15 @@
-package com.kush.swych.ui.deals
+﻿package com.kush.swych.ui.deals
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +39,8 @@ fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit
     val dealRepo = remember { DealRepository(context) }
     val authRepo = remember { AuthRepository(context) }
     val currentUid = authRepo.currentUserUid
+    val itemRepo = remember { com.kush.swych.core.data.ItemRepository(context) }
+    val coroutineScope = rememberCoroutineScope()
 
     var deals by remember { mutableStateOf<List<Deal>?>(null) }
     var selectedFilter by remember { mutableStateOf(DealFilter.BUYING) }
@@ -129,7 +134,18 @@ fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit
                         contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 0.dp)
                     ) {
                         items(filteredDeals) { deal ->
-                            DealCard(deal = deal, isSeller = selectedFilter == DealFilter.SELLING)
+                            DealCard(
+                                deal = deal, 
+                                isSeller = selectedFilter == DealFilter.SELLING,
+                                onRemoveClick = {
+                                    coroutineScope.launch {
+                                        val res = itemRepo.deleteItem(deal.itemId)
+                                        if (res.isSuccess) {
+                                            deals = deals?.filter { it.itemId != deal.itemId }
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -139,7 +155,7 @@ fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit
 }
 
 @Composable
-fun DealCard(deal: Deal, isSeller: Boolean) {
+fun DealCard(deal: Deal, isSeller: Boolean, onRemoveClick: () -> Unit = {}) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -166,7 +182,7 @@ fun DealCard(deal: Deal, isSeller: Boolean) {
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    Text("??", fontSize = 32.sp)
+                    Text("📦", fontSize = 32.sp)
                 }
             }
             
@@ -208,7 +224,24 @@ fun DealCard(deal: Deal, isSeller: Boolean) {
                     )
                 }
             }
+            
+            if (isSeller) {
+                androidx.compose.material3.IconButton(
+                    onClick = onRemoveClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Remove Item",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
     }
 }
+
+
+
+
 

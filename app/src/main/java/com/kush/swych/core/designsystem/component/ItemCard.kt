@@ -1,10 +1,12 @@
-package com.kush.swych.core.designsystem.component
+﻿package com.kush.swych.core.designsystem.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,6 +30,7 @@ fun ItemCard(
     onClick: () -> Unit,
     onDealClick: () -> Unit,
     isApplied: Boolean = false,
+    onRemoveClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
@@ -89,7 +92,7 @@ fun ItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "?" + "%.0f".format(item.price),
+                        text = "₹" + "%.0f".format(item.price),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
@@ -115,9 +118,26 @@ fun ItemCard(
                                 fontSize = 12.sp
                             )
                         }
+                    } else {
+                        androidx.compose.material3.IconButton(
+                            onClick = onRemoveClick,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Remove Item",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
+
+
+
+
+

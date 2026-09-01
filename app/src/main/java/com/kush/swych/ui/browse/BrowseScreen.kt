@@ -226,6 +226,7 @@ fun BrowseContent(
                         key = { it.id } // Use item ID as key to help Compose preserve scroll position across recompositions!
                     ) { item ->
                         val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
+                        val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
                         ItemCard(
                             item = item,
                             sellerBlock = sellerBlock,
@@ -234,6 +235,14 @@ fun BrowseContent(
                             onClick = { navController.navigate(ItemDetailRoute(item.id)) },
                             onDealClick = {
                                 appliedItemIds = appliedItemIds + item.id
+                            },
+                            onRemoveClick = {
+                                coroutineScope.launch {
+                                    val res = itemRepo.deleteItem(item.id)
+                                    if (res.isSuccess) {
+                                        items = items?.filter { it.id != item.id }
+                                    }
+                                }
                             }
                         )
                     }
@@ -242,3 +251,4 @@ fun BrowseContent(
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package com.kush.swych.core.data
+﻿package com.kush.swych.core.data
 
 import android.content.Context
 import com.kush.swych.core.model.Item
@@ -94,6 +94,16 @@ class ItemRepository(private val context: Context) {
                 }
                 .decodeList<Item>()
             Result.success(items)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    suspend fun deleteItem(itemId: String): Result<Unit> {
+        return try {
+            SupabaseManager.client.postgrest["items"]
+                .delete { filter { eq("id", itemId) } }
+            cachedItems = null
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
