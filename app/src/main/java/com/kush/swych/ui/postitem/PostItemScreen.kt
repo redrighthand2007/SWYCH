@@ -1,5 +1,6 @@
 package com.kush.swych.ui.postitem
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -7,6 +8,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,25 +18,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil3.compose.AsyncImage
 import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.DealButton
 import com.kush.swych.core.model.Category
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +52,8 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
     var description by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var savedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isSubmitting by remember { mutableStateOf(false) }
     var categoryExpanded by remember { mutableStateOf(false) }
 
@@ -59,12 +63,21 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
     var categoryError by remember { mutableStateOf(false) }
     var imageError by remember { mutableStateOf(false) }
 
-    // Image picker
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        selectedImageUri = uri
-        if (uri != null) imageError = false
+    // Camera picker
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap: Bitmap? ->
+        if (bitmap != null) {
+            selectedImageBitmap = bitmap
+            imageError = false
+            // Save bitmap to cache dir to get a URI for later upload
+            val file = File(context.cacheDir, "item_photo_{System.currentTimeMillis()}.jpg")
+            val out = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            out.flush()
+            out.close()
+            savedImageUri = Uri.fromFile(file)
+        }
     }
 
     var visible by remember { mutableStateOf(false) }
@@ -72,194 +85,186 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("List an Item", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 4 }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // — Photo Picker —
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            if (imageError) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
-                            else MaterialTheme.colorScheme.surfaceVariant
-                        )
-                        .border(
-                            width = 2.dp,
-                            color = if (imageError) MaterialTheme.colorScheme.error
-                            else if (selectedImageUri != null) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .clickable { imagePicker.launch("image/*") },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (selectedImageUri != null) {
-                        AsyncImage(
-                            model = selectedImageUri,
-                            contentDescription = "Selected image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
-                        )
-                    } else {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.AddPhotoAlternate,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp),
-                                tint = if (imageError) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                "Tap to add a photo",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (imageError) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            if (imageError) {
-                                Text(
-                                    "Photo is required",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-                }
+            Text(
+                text = "Sell an Item",
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-                // — Category Dropdown —
-                ExposedDropdownMenuBox(
-                    expanded = categoryExpanded,
-                    onExpandedChange = { categoryExpanded = !categoryExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCategory?.displayName ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Category") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+            AnimatedVisibility(
+                visible = visible,
+                enter = slideInVertically(initialOffsetY = { 50 }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400))
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    
+                    // Photo Placeholder
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor(),
-                        isError = categoryError,
-                        supportingText = if (categoryError) {{ Text("Select a category") }} else null
-                    )
-                    ExposedDropdownMenu(
-                        expanded = categoryExpanded,
-                        onDismissRequest = { categoryExpanded = false }
-                    ) {
-                        Category.entries.forEach { cat ->
-                            DropdownMenuItem(
-                                text = { Text(cat.displayName) },
-                                onClick = {
-                                    selectedCategory = cat
-                                    categoryExpanded = false
-                                    categoryError = false
-                                }
+                            .height(220.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (imageError) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
+                                else MaterialTheme.colorScheme.surfaceVariant
                             )
-                        }
-                    }
-                }
-
-                // — Title —
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it; titleError = false },
-                    label = { Text("Item Title") },
-                    placeholder = { Text("e.g. Barely used MTB cycle") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = titleError,
-                    supportingText = if (titleError) {{ Text("Title is required") }} else null
-                )
-
-                // — Description —
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Description") },
-                    placeholder = { Text("Condition, reason for selling, etc.") },
-                    minLines = 3,
-                    maxLines = 5,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // — Price —
-                OutlinedTextField(
-                    value = price,
-                    onValueChange = { price = it.filter { c -> c.isDigit() || c == '.' }; priceError = false },
-                    label = { Text("Price (₹)") },
-                    placeholder = { Text("0") },
-                    prefix = { Text("₹ ", fontWeight = FontWeight.Bold) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = priceError,
-                    supportingText = if (priceError) {{ Text("Enter a valid price") }} else null
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                // — Submit Button —
-                DealButton(
-                    text = if (isSubmitting) "Listing..." else "List Item 🚀",
-                    isLoading = isSubmitting,
-                    onClick = {
-                        // Validate
-                        titleError = title.isBlank()
-                        priceError = price.isBlank() || price.toDoubleOrNull() == null
-                        categoryError = selectedCategory == null
-                        imageError = selectedImageUri == null
-
-                        if (!titleError && !priceError && !categoryError && !imageError) {
-                            isSubmitting = true
-                            scope.launch {
-                                val result = itemRepo.postItem(
-                                    title = title.trim(),
-                                    description = description.trim(),
-                                    price = price.toDouble(),
-                                    category = selectedCategory!!.displayName,
-                                    photoUri = selectedImageUri.toString()
+                            .border(
+                                2.dp,
+                                if (imageError) MaterialTheme.colorScheme.error else Color.Transparent,
+                                RoundedCornerShape(16.dp)
+                            )
+                            .clickable { cameraLauncher.launch(null) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (selectedImageBitmap != null) {
+                            Image(
+                                bitmap = selectedImageBitmap!!.asImageBitmap(),
+                                contentDescription = "Item Photo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.3f))
+                            )
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt,
+                                contentDescription = "Retake Photo",
+                                tint = Color.White,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.CameraAlt,
+                                    contentDescription = "Take Photo",
+                                    tint = if (imageError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(48.dp)
                                 )
-                                isSubmitting = false
-                                if (result.isSuccess) {
-                                    snackbarHostState.showSnackbar("✅ Item listed successfully!")
-                                    kotlinx.coroutines.delay(800)
-                                    onNavigateHome()
-                                } else {
-                                    snackbarHostState.showSnackbar(
-                                        result.exceptionOrNull()?.message ?: "Failed to list item"
-                                    )
-                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = if (imageError) "Photo is compulsory" else "Take a photo of your item",
+                                    color = if (imageError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    }
 
-                Spacer(Modifier.height(16.dp))
+                    // Item Name
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it; titleError = false },
+                        label = { Text("Item Name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        isError = titleError,
+                        singleLine = true
+                    )
+
+                    // Category
+                    ExposedDropdownMenuBox(
+                        expanded = categoryExpanded,
+                        onExpandedChange = { categoryExpanded = !categoryExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedCategory?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Category") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            isError = categoryError
+                        )
+                        ExposedDropdownMenu(
+                            expanded = categoryExpanded,
+                            onDismissRequest = { categoryExpanded = false }
+                        ) {
+                            Category.values().forEach { cat ->
+                                DropdownMenuItem(
+                                    text = { Text(cat.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                    onClick = {
+                                        selectedCategory = cat
+                                        categoryError = false
+                                        categoryExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Price
+                    OutlinedTextField(
+                        value = price,
+                        onValueChange = { price = it; priceError = false },
+                        label = { Text("Price (?)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = priceError,
+                        singleLine = true
+                    )
+
+                    // Description
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Little Description (Optional)") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        maxLines = 4
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    DealButton(
+                        text = "List Item",
+                        onClick = {
+                            if (title.isBlank()) titleError = true
+                            if (price.isBlank() || price.toDoubleOrNull() == null) priceError = true
+                            if (selectedCategory == null) categoryError = true
+                            if (savedImageUri == null) imageError = true
+
+                            if (!titleError && !priceError && !categoryError && !imageError) {
+                                isSubmitting = true
+                                scope.launch {
+                                    val result = itemRepo.postItem(
+                                        title = title,
+                                        description = description,
+                                        price = price.toDouble(),
+                                        category = selectedCategory!!,
+                                        photoUrl = savedImageUri.toString()
+                                    )
+                                    isSubmitting = false
+                                    result.onSuccess {
+                                        onNavigateHome()
+                                    }.onFailure { e ->
+                                        snackbarHostState.showSnackbar("Failed: \")
+                                    }
+                                }
+                            }
+                        },
+                        isLoading = isSubmitting,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
             }
         }
     }

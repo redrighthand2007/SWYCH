@@ -1,21 +1,10 @@
-﻿package com.kush.swych.core.designsystem.component
+package com.kush.swych.core.designsystem.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,6 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.kush.swych.core.model.Item
 
@@ -34,6 +24,8 @@ import com.kush.swych.core.model.Item
 fun ItemCard(
     item: Item,
     onClick: () -> Unit,
+    onDealClick: () -> Unit,
+    isApplied: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
@@ -47,9 +39,9 @@ fun ItemCard(
             .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column {
             // Item Image
@@ -64,90 +56,63 @@ fun ItemCard(
             )
 
             Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                modifier = Modifier.padding(12.dp)
             ) {
-                // Category Chip
-                CategoryChip(label = item.category, selected = false)
-
-                Spacer(Modifier.height(4.dp))
-
                 // Title
                 Text(
                     text = item.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(4.dp))
 
-                // Price + Status row
+                // Hostel Block (mocked for now if not in item)
+                Text(
+                    text = "Block",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                // Price + Deal Button row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "â‚¹${"%.0f".format(item.price)}",
+                        text = "?",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    StatusBadge(status = item.status)
-                }
-
-                Spacer(Modifier.height(6.dp))
-
-                // Seller info + dots
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Seller",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    DotBadge(
-                        greenDots = 0,
-                        redDots = 0
-                    )
+                    
+                    Button(
+                        onClick = onDealClick,
+                        enabled = !isApplied,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isApplied) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
+                            contentColor = if (isApplied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Text(
+                            text = if (isApplied) "Applied" else "Deal",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         }
     }
 }
-
-@Composable
-private fun StatusBadge(status: String) {
-    val (color, label) = when (status) {
-        "locked" -> Pair(Color(0xFFFFA000), "Locked")
-        "sold" -> Pair(Color(0xFF388E3C), "Sold")
-        else -> Pair(Color.Transparent, "")
-    }
-    if (label.isNotEmpty()) {
-        Box(
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.small)
-                .then(
-                    if (status != "open") Modifier
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                    else Modifier
-                )
-        ) {
-            if (status != "open") {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = color,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                )
-            }
-        }
-    }
-}
-
-
