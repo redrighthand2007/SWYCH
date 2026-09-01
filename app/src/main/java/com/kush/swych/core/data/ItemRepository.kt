@@ -1,9 +1,10 @@
-﻿package com.kush.swych.core.data
+package com.kush.swych.core.data
 
 import android.content.Context
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.network.SupabaseManager
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.storage.storage
 import java.util.UUID
 
 class ItemRepository(private val context: Context) {
@@ -23,17 +24,16 @@ class ItemRepository(private val context: Context) {
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
             val sellerId = prefs.getString("current_uid", null) ?: return Result.failure(Exception("Not logged in"))
             
-            // Upload to Cloudinary
+            // Upload to Supabase Storage
             var photoUrl = photoUri
             if (photoUri.startsWith("file://")) {
                 val path = android.net.Uri.parse(photoUri).path
                 if (path != null) {
-                    val uploadResult = com.kush.swych.core.network.CloudinaryManager.uploadImage(context, path)
-                    if (uploadResult.isSuccess) {
-                        photoUrl = uploadResult.getOrNull() ?: photoUri
-                    } else {
-                        return Result.failure(uploadResult.exceptionOrNull() ?: Exception("Cloudinary upload failed"))
-                    }
+                    val file = java.io.File(path)
+                    val fileName = file.name
+                    val bucket = SupabaseManager.client.storage["items"]
+                    bucket.upload(fileName, file.readBytes()) { upsert = true }
+                    photoUrl = bucket.publicUrl(fileName)
                 }
             }
 
@@ -121,4 +121,8 @@ class ItemRepository(private val context: Context) {
         }
     }
 }
+
+
+
+
 
