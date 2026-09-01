@@ -7,7 +7,7 @@
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <!-- Set the splash screen background -->
-        <item name="windowSplashScreenBackground">#191C1D</item>
+        <item name="windowSplashScreenBackground">#171311</item>
         <!-- Use windowSplashScreenAnimatedIcon to add a drawable -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
         <!-- Set the theme of the Activity that directly follows your splash screen -->
