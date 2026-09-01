@@ -26,89 +26,87 @@ fun HomeContent(
     navController: NavController,
     onCategoryClick: (String) -> Unit
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Upper Half: Trendy branding
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.4f)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialTheme.colorScheme.background
+        // Header Item (Trendy branding)
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp) // Fixed height so it scrolls away
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                MaterialTheme.colorScheme.background
+                            )
                         )
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Swych",
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-1.5).sp,
-                        fontSize = 64.sp
                     ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    shape = RoundedCornerShape(100),
-                    color = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Swap n' Switch",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                        text = "Swych",
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = (-1.5).sp,
+                            fontSize = 64.sp
                         ),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        color = MaterialTheme.colorScheme.primary
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(100),
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) {
+                        Text(
+                            text = "Swap n' Switch",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
                 }
             }
         }
 
-        // Lower Half: Categories
-        Column(
-            modifier = Modifier
-                .weight(0.6f)
-                .fillMaxWidth()
-        ) {
+        // Title for categories
+        item {
             Text(
                 text = "Explore Categories",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
                 color = MaterialTheme.colorScheme.onBackground
             )
+        }
 
-            LazyColumn(
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                val categories = Category.values().filter { it != Category.OTHER }
-                items(categories) { category ->
-                    CategoryRow(
-                        category = category,
-                        onClick = { onCategoryClick(category.name) }
-                    )
-                }
-                item {
-                    CategoryRow(
-                        category = Category.OTHER,
-                        onClick = { onCategoryClick(Category.OTHER.name) }
-                    )
-                }
-                item { Spacer(modifier = Modifier.height(32.dp)) }
+        // Category Items
+        val categories = Category.values().filter { it != Category.OTHER }
+        items(categories) { category ->
+            Box(modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)) {
+                CategoryRow(
+                    category = category,
+                    onClick = { onCategoryClick(category.name) }
+                )
             }
+        }
+        item {
+            Box(modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)) {
+                CategoryRow(
+                    category = Category.OTHER,
+                    onClick = { onCategoryClick(Category.OTHER.name) }
+                )
+            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
