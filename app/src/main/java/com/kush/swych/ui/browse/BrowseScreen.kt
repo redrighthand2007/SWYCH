@@ -49,7 +49,7 @@ fun BrowseContent(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        val result = itemRepo.getItems()
+        val result = itemRepo.getAllItems()
         items = result.getOrNull() ?: emptyList()
     }
 

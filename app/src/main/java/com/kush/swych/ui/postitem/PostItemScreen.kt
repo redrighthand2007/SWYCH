@@ -248,14 +248,14 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                                         title = title,
                                         description = description,
                                         price = price.toDouble(),
-                                        category = selectedCategory!!,
-                                        photoUrl = savedImageUri.toString()
+                                        category = selectedCategory!!.name,
+                                        photoUri = savedImageUri.toString()
                                     )
                                     isSubmitting = false
                                     result.onSuccess {
                                         onNavigateHome()
                                     }.onFailure { e ->
-                                        snackbarHostState.showSnackbar("Failed: \")
+                                        snackbarHostState.showSnackbar("Failed: " + e.message)
                                     }
                                 }
                             }

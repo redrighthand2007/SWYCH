@@ -50,7 +50,7 @@ fun ProfileScreen(
     var isCardExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        val result = authRepo.getCurrentUser()
+        val result = authRepo.getCurrentUserProfile()
         user = result.getOrNull()
     }
 
@@ -112,7 +112,7 @@ fun ProfileScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Block: \",
+                            text = "Block: " + user!!.block,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -224,7 +224,7 @@ fun ProfileScreen(
                         onClick = {
                             showLogoutDialog = false
                             scope.launch {
-                                authRepo.signOut()
+                                authRepo.logout()
                                 navController.navigate(AuthRoute) {
                                     popUpTo(0) { inclusive = true }
                                 }

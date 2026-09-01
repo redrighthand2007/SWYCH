@@ -90,7 +90,7 @@ fun HomeContent(
         }
 
         // Category Items
-        val categories = Category.values().filter { it != Category.OTHER }
+        val categories = Category.values()
         items(categories) { category ->
             Box(modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)) {
                 CategoryRow(
@@ -100,12 +100,6 @@ fun HomeContent(
             }
         }
         item {
-            Box(modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)) {
-                CategoryRow(
-                    category = Category.OTHER,
-                    onClick = { onCategoryClick(Category.OTHER.name) }
-                )
-            }
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
