@@ -250,8 +250,14 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                                     )
                                     isSubmitting = false
                                     result.onSuccess {
-                                        onNavigateHome()
-                                    }.onFailure { e ->
+                                          title = ""
+                                          description = ""
+                                          price = ""
+                                          selectedCategory = null
+                                          selectedImageBitmap = null
+                                          savedImageUri = null
+                                          snackbarHostState.showSnackbar("Item listed successfully!")
+                                      }.onFailure { e ->
                                         snackbarHostState.showSnackbar("Failed: " + e.message)
                                     }
                                 }
@@ -270,6 +276,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         )
     }
 }
+
 
 
 

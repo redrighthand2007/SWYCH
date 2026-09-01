@@ -32,7 +32,7 @@ class ItemRepository(private val context: Context) {
                     val file = java.io.File(path)
                     val fileName = file.name
                     val bucket = SupabaseManager.client.storage["items"]
-                    bucket.upload(fileName, file.readBytes()) { upsert = true }
+                    bucket.upload(fileName, file.readBytes())
                     photoUrl = bucket.publicUrl(fileName)
                 }
             }
@@ -121,6 +121,7 @@ class ItemRepository(private val context: Context) {
         }
     }
 }
+
 
 
 
