@@ -40,25 +40,20 @@ fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
     ) {
-        Spacer(Modifier.height(16.dp))
         Text(
-            "My Deals",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            text = "My Deals",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            color = MaterialTheme.colorScheme.onBackground
         )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Deals you are buying or selling",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(12.dp))
 
         when {
             deals == null -> {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp)
+                ) {
                     items(4) {
                         Box(
                             Modifier
@@ -86,7 +81,10 @@ fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit
                 }
             }
             else -> {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp)
+                ) {
                     items(deals!!) { deal ->
                         DealCard(deal = deal, isSeller = deal.sellerId == currentUid)
                     }

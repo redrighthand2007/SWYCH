@@ -92,21 +92,22 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
                 text = "Sell an Item",
-                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 8.dp)
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             AnimatedVisibility(
                 visible = visible,
                 enter = slideInVertically(initialOffsetY = { 50 }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400))
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
                     
                     // Photo Placeholder
                     Box(
