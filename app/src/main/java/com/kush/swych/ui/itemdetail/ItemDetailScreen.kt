@@ -208,31 +208,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         }
 
                         // — Make an Offer / Own listing —
-                        if (currentUid != null && it.sellerId == currentUid) {
-                            // Own listing card
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                                tonalElevation = 2.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Text("📦", fontSize = 32.sp)
-                                    Column {
-                                        Text("This is your listing", fontWeight = FontWeight.Bold)
-                                        Text(
-                                            "Others can see and make deals on this.",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                        } else if (it.status.uppercase() == "OPEN") {
+                        if (it.status.uppercase() == "OPEN" && it.sellerId != currentUid) {
                             // Make an offer section
                             Text(
                                 text = "Make an Offer 🤝",
@@ -331,3 +307,4 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
         }
     }
 }
+
