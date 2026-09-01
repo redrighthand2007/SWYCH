@@ -242,10 +242,18 @@ fun ProfileScreen(
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
 
-                ProfileOptionRow(icon = Icons.Default.Code, text = "Contact Developer")
-                ProfileOptionRow(icon = Icons.Default.Feedback, text = "Feedback")
-                ProfileOptionRow(icon = Icons.Default.HelpOutline, text = "FAQs")
-                ProfileOptionRow(icon = Icons.Default.Gavel, text = "Legal Info")
+                ExpandableProfileOption(icon = Icons.Default.Code, text = "Contact Developer") {
+                    Text("Email: support@swych.app", style = MaterialTheme.typography.bodyMedium)
+                }
+                ExpandableProfileOption(icon = Icons.Default.Feedback, text = "Feedback") {
+                    Text("We'd love to hear your thoughts! Drop us a review.", style = MaterialTheme.typography.bodyMedium)
+                }
+                ExpandableProfileOption(icon = Icons.Default.HelpOutline, text = "FAQs") {
+                    Text("Q: How do I accept a deal?\nA: Just tap the deal and hit Accept!", style = MaterialTheme.typography.bodyMedium)
+                }
+                ExpandableProfileOption(icon = Icons.Default.Gavel, text = "Legal Info") {
+                    Text("Terms of Service and Privacy Policy apply.", style = MaterialTheme.typography.bodyMedium)
+                }
                 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -296,21 +304,47 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileOptionRow(icon: ImageVector, text: String, onClick: () -> Unit = {}) {
-    Row(
+fun ExpandableProfileOption(
+    icon: ImageVector,
+    text: String,
+    content: @Composable () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 14.dp, horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .background(if (expanded) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.Transparent)
+            .clickable { expanded = !expanded }
+            .padding(vertical = 14.dp, horizontal = 16.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.width(16.dp))
-            Text(text, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(16.dp))
+                Text(text, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+            }
+            Icon(
+                imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                contentDescription = null, 
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        
+        androidx.compose.animation.AnimatedVisibility(visible = expanded) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, start = 40.dp)
+            ) {
+                content()
+            }
+        }
     }
 }
+
