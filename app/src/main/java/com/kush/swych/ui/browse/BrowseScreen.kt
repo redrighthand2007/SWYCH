@@ -66,6 +66,7 @@ fun BrowseContent(
 
     // We store "applied" items in memory for prototype
     var appliedItemIds by remember { mutableStateOf(setOf<String>()) }
+    var fetchError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -78,6 +79,9 @@ fun BrowseContent(
         }
         
         val result = itemRepo.getAllItems()
+        if (result.isFailure) {
+            fetchError = result.exceptionOrNull()?.message ?: "Unknown error"
+        }
         items = result.getOrNull() ?: emptyList()
     }
 
@@ -212,7 +216,7 @@ fun BrowseContent(
 
             if (filteredItems.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    Text("No items found", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(fetchError ?: "No items found", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 LazyVerticalGrid(
@@ -251,4 +255,6 @@ fun BrowseContent(
         }
     }
 }
+
+
 
