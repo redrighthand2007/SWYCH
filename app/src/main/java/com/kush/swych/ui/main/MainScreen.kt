@@ -121,7 +121,7 @@ fun MainScreen(
                     initialCategory = browseCategory
                 )
                 2 -> com.kush.swych.ui.postitem.PostItemScreen(navController = navController, onNavigateHome = { selectedTabIndex = 0 })
-                3 -> Text("Deals Screen Coming Soon")
+                3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController, onNavigateToMainTab = { selectedTabIndex = it })
                 4 -> ProfileScreen(
                     navController = navController,
                     onNavigateToMainTab = { tabIndex -> selectedTabIndex = tabIndex }
@@ -201,4 +201,5 @@ private fun SwychBottomBar(
         }
     }
 }
+
 
