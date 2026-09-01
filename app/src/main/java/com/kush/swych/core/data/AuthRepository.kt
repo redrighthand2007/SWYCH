@@ -1,4 +1,4 @@
-﻿package com.kush.swych.core.data
+package com.kush.swych.core.data
 
 import android.content.Context
 import com.kush.swych.core.model.User
@@ -70,6 +70,17 @@ class AuthRepository(private val context: Context) {
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
             return prefs.getString("current_uid", null)
         }
+
+    suspend fun getAllUsers(): Result<List<User>> {
+        return try {
+            val users = SupabaseManager.client.postgrest["users"]
+                .select()
+                .decodeList<User>()
+            Result.success(users)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     fun logout() {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)

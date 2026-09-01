@@ -23,6 +23,8 @@ import com.kush.swych.core.model.Item
 @Composable
 fun ItemCard(
     item: Item,
+    sellerBlock: String,
+    isOwnItem: Boolean,
     onClick: () -> Unit,
     onDealClick: () -> Unit,
     isApplied: Boolean = false,
@@ -36,21 +38,22 @@ fun ItemCard(
     Card(
         modifier = modifier
             .scale(scale)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .aspectRatio(0.85f), // Boxy look without completely squishing text
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxSize()) {
             // Item Image
             AsyncImage(
                 model = item.photoUrl.ifBlank { null },
                 contentDescription = item.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .weight(1f)
                     .clip(MaterialTheme.shapes.large),
                 contentScale = ContentScale.Crop
             )
@@ -70,9 +73,9 @@ fun ItemCard(
 
                 Spacer(Modifier.height(4.dp))
 
-                // Hostel Block (mocked for now if not in item)
+                // Hostel Block
                 Text(
-                    text = "Block",
+                    text = sellerBlock,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -86,30 +89,32 @@ fun ItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "?",
+                        text = "?" + "%.0f".format(item.price),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
                     )
                     
-                    Button(
-                        onClick = onDealClick,
-                        enabled = !isApplied,
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        modifier = Modifier.height(32.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isApplied) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
-                            contentColor = if (isApplied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    ) {
-                        Text(
-                            text = if (isApplied) "Applied" else "Deal",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        )
+                    if (!isOwnItem) {
+                        Button(
+                            onClick = onDealClick,
+                            enabled = !isApplied,
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isApplied) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
+                                contentColor = if (isApplied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
+                            Text(
+                                text = if (isApplied) "Applied" else "Deal",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }

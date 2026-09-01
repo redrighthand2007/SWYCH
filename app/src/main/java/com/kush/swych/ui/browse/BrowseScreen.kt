@@ -14,22 +14,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.ItemCard
 import com.kush.swych.core.designsystem.component.shimmerEffect
 import com.kush.swych.core.model.Category
 import com.kush.swych.core.model.Item
+import com.kush.swych.core.model.User
 import com.kush.swych.ui.navigation.ItemDetailRoute
 import kotlinx.coroutines.launch
 
 private enum class SortOption(val label: String) {
-    RECENT("Recently Added"),
-    LOW_TO_HIGH("Low to High"),
-    HIGH_TO_LOW("High to Low")
+    RECENT("Recents"),
+    LOW_TO_HIGH("Low -> High")
+}
+
+private enum class LocationFilter(val label: String) {
+    CAMPUS("Campus"),
+    HOSTEL("Hostel")
 }
 
 @Composable
@@ -39,16 +46,29 @@ fun BrowseContent(
 ) {
     val context = LocalContext.current
     val itemRepo = remember { ItemRepository(context) }
+    val authRepo = remember { AuthRepository(context) }
+    
     var items by remember { mutableStateOf<List<Item>?>(null) }
+    var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
+    var currentUser by remember { mutableStateOf<User?>(null) }
     
     var selectedCategory by remember { mutableStateOf(if (initialCategory.isBlank()) "All" else initialCategory) }
     var selectedSort by remember { mutableStateOf(SortOption.RECENT) }
+    var locationFilter by remember { mutableStateOf(LocationFilter.CAMPUS) }
     
     // We store "applied" items in memory for prototype
     var appliedItemIds by remember { mutableStateOf(setOf<String>()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
+        val currentUid = authRepo.currentUserUid
+        if (currentUid != null) {
+            val userResult = authRepo.getAllUsers()
+            val userList = userResult.getOrNull() ?: emptyList()
+            users = userList.associateBy { it.uid }
+            currentUser = users[currentUid]
+        }
+        
         val result = itemRepo.getAllItems()
         items = result.getOrNull() ?: emptyList()
     }
@@ -93,6 +113,66 @@ fun BrowseContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Filters (Campus/Hostel and Sort)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Location Filter
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                LocationFilter.values().forEach { filter ->
+                    val isSelected = locationFilter == filter
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                            .clickable { locationFilter = filter }
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = filter.label,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            // Sort Filter
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                SortOption.values().forEach { filter ->
+                    val isSelected = selectedSort == filter
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                            .clickable { selectedSort = filter }
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = filter.label,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Grid
         if (items == null) {
             LazyVerticalGrid(
@@ -102,15 +182,24 @@ fun BrowseContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(6) {
-                    Box(modifier = Modifier.fillMaxWidth().aspectRatio(0.7f).clip(RoundedCornerShape(16.dp)).shimmerEffect())
+                    Box(modifier = Modifier.fillMaxWidth().aspectRatio(0.85f).clip(RoundedCornerShape(16.dp)).shimmerEffect())
                 }
             }
         } else {
             var filteredItems = if (selectedCategory == "All") items!! else items!!.filter { it.category == selectedCategory }
+            
+            // Location filtering
+            if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {
+                filteredItems = filteredItems.filter { item ->
+                    val itemSellerBlock = users[item.sellerId]?.block ?: ""
+                    itemSellerBlock == currentUser!!.block
+                }
+            }
+
+            // Sorting
             filteredItems = when (selectedSort) {
-                SortOption.RECENT -> filteredItems // Assume fetched by recent
+                SortOption.RECENT -> filteredItems // Assume order fetched is recent
                 SortOption.LOW_TO_HIGH -> filteredItems.sortedBy { it.price }
-                SortOption.HIGH_TO_LOW -> filteredItems.sortedByDescending { it.price }
             }
 
             if (filteredItems.isEmpty()) {
@@ -125,13 +214,15 @@ fun BrowseContent(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(filteredItems) { item ->
+                        val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
                         ItemCard(
                             item = item,
+                            sellerBlock = sellerBlock,
+                            isOwnItem = item.sellerId == currentUser?.uid,
                             isApplied = appliedItemIds.contains(item.id),
                             onClick = { navController.navigate(ItemDetailRoute(item.id)) },
                             onDealClick = {
                                 appliedItemIds = appliedItemIds + item.id
-                                // In real app: create deal row in Supabase
                             }
                         )
                     }
