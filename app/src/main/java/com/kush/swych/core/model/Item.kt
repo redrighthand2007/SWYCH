@@ -10,9 +10,10 @@ data class Item(
     val sellerId: String = "",
     val category: String = "OTHER",
     val title: String = "",
-    val description: String = "",
+    val description: String? = null,
     val price: Double = 0.0,
     @SerialName("photo_url")
-    val photoUrl: String = "",
+    val photoUrl: String? = null,
     val status: String = "OPEN"
 )
+

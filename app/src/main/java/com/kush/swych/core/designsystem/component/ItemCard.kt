@@ -1,4 +1,4 @@
-﻿package com.kush.swych.core.designsystem.component
+package com.kush.swych.core.designsystem.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
@@ -52,7 +52,7 @@ fun ItemCard(
         Column(modifier = Modifier.fillMaxSize()) {
             // Item Image
             AsyncImage(
-                model = item.photoUrl.ifBlank { null },
+                model = item.photoUrl?.ifBlank { null },
                 contentDescription = item.title,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,7 +92,7 @@ fun ItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "₹" + "%.0f".format(item.price),
+                        text = "?" + "%.0f".format(item.price),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
@@ -135,6 +135,7 @@ fun ItemCard(
         }
     }
 }
+
 
 
 

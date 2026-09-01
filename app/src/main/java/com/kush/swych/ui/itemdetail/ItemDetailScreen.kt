@@ -101,7 +101,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                             .height(300.dp)
                     ) {
                         AsyncImage(
-                            model = it.photoUrl.ifBlank { null },
+                            model = it.photoUrl?.ifBlank { null },
                             contentDescription = it.title,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -192,7 +192,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         Divider()
 
                         // Description
-                        if (it.description.isNotBlank()) {
+                        if (!it.description.isNullOrBlank()) {
                             Text(
                                 text = "About this item",
                                 style = MaterialTheme.typography.titleSmall,
@@ -200,7 +200,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = it.description,
+                                  text = it.description ?: "",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -261,7 +261,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                                 itemId = it.id,
                                                 sellerId = it.sellerId,
                                                 itemTitle = it.title,
-                                                itemPhotoUrl = it.photoUrl,
+                                                itemPhotoUrl = it.photoUrl ?: "",
                                                 agreedPrice = offerPrice
                                             )
                                             isSubmittingOffer = false
@@ -307,4 +307,6 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
         }
     }
 }
+
+
 
