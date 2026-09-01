@@ -23,10 +23,22 @@ class ItemRepository(private val context: Context) {
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
             val sellerId = prefs.getString("current_uid", null) ?: return Result.failure(Exception("Not logged in"))
             
-            val photoUrl = photoUri
+            // Upload to Cloudinary
+            var photoUrl = photoUri
+            if (photoUri.startsWith("file://")) {
+                val path = android.net.Uri.parse(photoUri).path
+                if (path != null) {
+                    val uploadResult = com.kush.swych.core.network.CloudinaryManager.uploadImage(context, path)
+                    if (uploadResult.isSuccess) {
+                        photoUrl = uploadResult.getOrNull() ?: photoUri
+                    } else {
+                        return Result.failure(uploadResult.exceptionOrNull() ?: Exception("Cloudinary upload failed"))
+                    }
+                }
+            }
 
             val item = Item(
-                id = "item_",
+                id = "item_" + java.util.UUID.randomUUID().toString().substring(0, 8),
                 sellerId = sellerId,
                 title = title,
                 description = description,
@@ -109,3 +121,4 @@ class ItemRepository(private val context: Context) {
         }
     }
 }
+

@@ -71,7 +71,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
             selectedImageBitmap = bitmap
             imageError = false
             // Save bitmap to cache dir to get a URI for later upload
-            val file = File(context.cacheDir, "item_photo_{System.currentTimeMillis()}.jpg")
+            val file = File(context.cacheDir, "item_photo_${System.currentTimeMillis()}.jpg")
             val out = FileOutputStream(file)
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
             out.flush()
@@ -270,4 +270,5 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         )
     }
 }
+
 
