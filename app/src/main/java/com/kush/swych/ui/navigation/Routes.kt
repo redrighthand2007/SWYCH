@@ -26,8 +26,7 @@ data object PostItemRoute
 @Serializable
 data class ItemDetailRoute(val itemId: String)
 
-@Serializable
-data class OffersRoute(val itemId: String)
+
 
 @Serializable
 data object DealsRoute
@@ -35,8 +34,9 @@ data object DealsRoute
 @Serializable
 data object ProfileRoute
 
-@Serializable
-data object GlobalOffersRoute
+
+
+
 
 
 

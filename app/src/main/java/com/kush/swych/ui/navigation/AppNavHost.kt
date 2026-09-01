@@ -8,9 +8,7 @@ import androidx.navigation.toRoute
 import com.kush.swych.ui.auth.AuthScreen
 import com.kush.swych.ui.itemdetail.ItemDetailScreen
 import com.kush.swych.ui.main.MainScreen
-import com.kush.swych.ui.offers.OffersScreen
-import com.kush.swych.ui.navigation.OffersRoute
-import com.kush.swych.ui.navigation.GlobalOffersRoute
+
 
 import com.kush.swych.core.data.AuthRepository
 
@@ -63,16 +61,7 @@ fun AppNavHost() {
                 navController = navController
             )
         }
-        composable<OffersRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<OffersRoute>()
-            OffersScreen(
-                itemId = route.itemId,
-                navController = navController
-            )
-        }
-        composable<GlobalOffersRoute> {
-            com.kush.swych.ui.offers.GlobalOffersScreen(navController = navController, onNavigateToMainTab = {})
-        }
+        
         composable<DealsRoute> {
             MainScreen(
                 navController = navController,
@@ -87,6 +76,9 @@ fun AppNavHost() {
         }
     }
 }
+
+
+
 
 
 
