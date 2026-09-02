@@ -1,4 +1,4 @@
-package com.kush.swych.core.model
+﻿package com.kush.swych.core.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -8,7 +8,7 @@ data class Item(
     val id: String = "",
     @SerialName("seller_id")
     val sellerId: String = "",
-    val category: String = "OTHER",
+    val category: String = "SNACKS",
     val title: String = "",
     val description: String? = null,
     val price: Double = 0.0,
@@ -16,4 +16,5 @@ data class Item(
     val photoUrl: String? = null,
     val status: String = "OPEN"
 )
+
 

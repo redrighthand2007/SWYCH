@@ -2,7 +2,7 @@
 <resources>
     <style name="Theme.Swych" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowSplashScreenBackground">@color/splash_bg</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_swych_logo_fg</item>
         <item name="android:windowBackground">@color/splash_bg</item>
     </style>
 </resources>

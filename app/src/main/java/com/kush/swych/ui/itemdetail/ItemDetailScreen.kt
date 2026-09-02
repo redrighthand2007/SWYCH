@@ -1,4 +1,4 @@
-package com.kush.swych.ui.itemdetail
+﻿package com.kush.swych.ui.itemdetail
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -79,7 +79,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
         } else if (item == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("😕", fontSize = 48.sp)
+                    Text("ðŸ˜•", fontSize = 48.sp)
                     Spacer(Modifier.height(12.dp))
                     Text("Item not found", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
@@ -94,7 +94,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    // — Parallax Image —
+                    // â€” Parallax Image â€”
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -133,7 +133,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         }
                     }
 
-                    // — Content —
+                    // â€” Content â€”
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -207,11 +207,11 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                             Divider()
                         }
 
-                        // — Make an Offer / Own listing —
+                        // â€” Make an Offer / Own listing â€”
                         if (it.status.uppercase() == "OPEN" && it.sellerId != currentUid) {
                             // Make an offer section
                             Text(
-                                text = "Make an Offer 🤝",
+                                text = "Make an Offer ðŸ¤",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -227,7 +227,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Text("✅", fontSize = 24.sp)
+                                        Text("âœ…", fontSize = 24.sp)
                                         Text(
                                             "Deal initiated! The seller will see your offer.",
                                             style = MaterialTheme.typography.bodyMedium,
@@ -281,7 +281,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                     if (isSubmittingOffer) {
                                         CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
                                     } else {
-                                        Text("Submit Deal 🤝", fontWeight = FontWeight.Bold)
+                                        Text("Submit Deal ðŸ¤", fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -307,6 +307,10 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
         }
     }
 }
+
+
+
+
 
 
 

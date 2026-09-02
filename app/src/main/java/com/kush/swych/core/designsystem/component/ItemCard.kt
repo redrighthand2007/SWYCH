@@ -52,7 +52,7 @@ fun ItemCard(
         Column(modifier = Modifier.fillMaxSize()) {
             // Item Image
             AsyncImage(
-                model = item.photoUrl?.ifBlank { null },
+                model = item.photoUrl?.takeIf { it.isNotBlank() },
                 contentDescription = item.title,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,7 +92,7 @@ fun ItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "?" + "%.0f".format(item.price),
+                        text = "₹" + "%.0f".format(item.price),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
@@ -135,6 +135,9 @@ fun ItemCard(
         }
     }
 }
+
+
+
 
 
 

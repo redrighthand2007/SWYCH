@@ -1,4 +1,4 @@
-package com.kush.swych.ui.browse
+﻿package com.kush.swych.ui.browse
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -210,7 +210,7 @@ fun BrowseContent(
 
             // Sorting
             filteredItems = when (selectedSort) {
-                SortOption.RECENT -> filteredItems // Assume order fetched is recent
+                SortOption.RECENT -> filteredItems.reversed() // Reverse insertion order to show latest first
                 SortOption.LOW_TO_HIGH -> filteredItems.sortedBy { it.price }
             }
 
@@ -255,6 +255,7 @@ fun BrowseContent(
         }
     }
 }
+
 
 
 

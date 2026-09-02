@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.*
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,6 +50,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +65,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import com.kush.swych.core.data.DealRepository
 import com.kush.swych.ui.home.HomeContent
 import com.kush.swych.ui.browse.BrowseContent
 import com.kush.swych.ui.profile.ProfileScreen
@@ -85,6 +91,18 @@ fun MainScreen(
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(initialTab) }
     var browseCategory by remember { mutableStateOf(initialBrowseCategory) }
+    var hasPendingDeals by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val dealRepo = remember { DealRepository(context) }
+
+    LaunchedEffect(Unit) {
+        while(isActive) {
+            val result = dealRepo.getMyDeals()
+            hasPendingDeals = result.getOrNull()?.isNotEmpty() == true
+            delay(5000)
+        }
+    }
 
     BackHandler(enabled = selectedTabIndex != 0) {
         selectedTabIndex = 0
@@ -94,6 +112,7 @@ fun MainScreen(
         bottomBar = {
             SwychBottomBar(
                 selectedIndex = selectedTabIndex,
+                hasPendingDeals = hasPendingDeals,
                 onTabSelected = { index ->
                     selectedTabIndex = index
                     if (index == 1 && browseCategory.isNotEmpty()) {
@@ -108,7 +127,12 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (selectedTabIndex) {
+            androidx.compose.animation.AnimatedContent(
+                targetState = selectedTabIndex,
+                transitionSpec = { androidx.compose.animation.fadeIn() togetherWith androidx.compose.animation.fadeOut() },
+                label = "tab_transition"
+            ) { targetTab ->
+                when (targetTab) {
                 0 -> HomeContent(
                     navController = navController,
                     onCategoryClick = { category ->
@@ -130,12 +154,14 @@ fun MainScreen(
         }
     }
 }
+}
 
-// ????????? Bottom Navigation Bar ????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+// Bottom Navigation Bar ????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
 
 @Composable
 private fun SwychBottomBar(
     selectedIndex: Int,
+    hasPendingDeals: Boolean,
     onTabSelected: (Int) -> Unit
 ) {
     Surface(
@@ -167,26 +193,11 @@ private fun SwychBottomBar(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(bottom = 2.dp)
                         ) {
-                            AnimatedVisibility(
-                                visible = isSelected,
-                                enter = slideInVertically { it } + fadeIn(),
-                                exit = slideOutVertically { it } + fadeOut()
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(32.dp)
-                                        .height(3.dp)
-                                        .clip(RoundedCornerShape(50))
-                                        .background(MaterialTheme.colorScheme.primary)
-                                )
-                            }
-                            if (!isSelected) Spacer(Modifier.height(3.dp))
-                            Spacer(Modifier.height(4.dp))
                             Icon(
                                 imageVector = if (isSelected) tab.filledIcon else tab.outlinedIcon,
                                 contentDescription = null,
                                 modifier = Modifier.size((24 * iconScale).dp),
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (index == 3 && hasPendingDeals) Color.Red else if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     },
@@ -201,5 +212,8 @@ private fun SwychBottomBar(
         }
     }
 }
+
+
+
 
 

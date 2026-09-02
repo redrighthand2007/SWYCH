@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/res/drawable/logo.jpg" alt="Swych Logo" width="120" style="border-radius: 28px;" />
+<img src="app/src/main/res/drawable/logo.png" alt="Swych Logo" width="120" style="border-radius: 28px;" />
 
 # Swych
 
