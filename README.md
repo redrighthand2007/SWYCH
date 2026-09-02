@@ -18,21 +18,29 @@
 
 ---
 
-## What is Swych?
+## ?? Project Overview
+
+### What is it?
 
 Swych is a **peer-to-peer campus trading app** built for college students. It lets you list items you no longer need, discover what others are selling nearby, make offers, and lock in deals — all from your phone, all within your campus community.
 
 No middlemen. No shipping fees. Just students helping students.
 
+### Why did you build it?
+Existing campus trading happens in chaotic, fragmented WhatsApp or Telegram groups where listings get buried, negotiations are disorganized, and buyers frequently "ghost" on meetups.
+
 ---
 
-## Screenshots
+## ?? Screenshots & Demo
+
+**?? Demo � Coming Soon!**
+
 
 > *Coming soon — run the app to see it in action!*
 
 ---
 
-## Features
+### What does it do?
 
 | Feature | Status |
 |---------|--------|
@@ -67,7 +75,7 @@ No middlemen. No shipping fees. Just students helping students.
 
 ---
 
-## Architecture
+### How does it work? (Architecture)
 
 Swych uses a **Cloud-First** approach — no local database. All data lives in Supabase PostgreSQL and is fetched on demand. Screens show shimmer skeleton loaders while data loads, giving a fast, modern feel.
 
@@ -275,3 +283,4 @@ Built with ❤️ for campus students everywhere.
 ⭐ **Star this repo if Swych helped you!** ⭐
 
 </div>
+
