@@ -51,9 +51,7 @@ fun ProfileScreen(
     val scope = rememberCoroutineScope()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    val themeMode by SettingsManager.themeMode.collectAsState()
-    val isDarkTheme = themeMode == 2
-    
+
     val hapticEnabled by SettingsManager.hapticEnabled.collectAsState()
 
     var isCardExpanded by remember { mutableStateOf(false) }
@@ -198,26 +196,7 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Theme Toggle
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { SettingsManager.setThemeMode(if (isDarkTheme) 1 else 2) }
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(Modifier.width(16.dp))
-                        Text("App Theme (Dark Mode)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                    }
-                    Switch(
-                        checked = isDarkTheme,
-                        onCheckedChange = { isDark -> SettingsManager.setThemeMode(if (isDark) 2 else 1) }
-                    )
-                }
+
 
                 // Haptic Feedback
                 Row(

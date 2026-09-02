@@ -25,12 +25,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            val themeMode by SettingsManager.themeMode.collectAsState()
-            val useDarkTheme = when (themeMode) {
-                0 -> isSystemInDarkTheme()
-                1 -> false
-                else -> true
-            }
+            val useDarkTheme = isSystemInDarkTheme()
 
             SwychTheme(darkTheme = useDarkTheme) {
                 AppNavHost()
