@@ -2,7 +2,7 @@
 
 <img src="docs/assets/logo.png" alt="Swych Logo" width="120" style="border-radius: 28px;" />
 
-# Swych
+# Swap n' Switch
 
 ### The campus marketplace that actually works.
 
@@ -12,7 +12,6 @@
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![API Level](https://img.shields.io/badge/Min_SDK-26%20(Android_8.0)-brightgreen)](https://developer.android.com/studio/releases/platforms)
-[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 </div>
 
@@ -54,8 +53,6 @@ Existing campus trading happens in chaotic, fragmented WhatsApp or Telegram grou
 | **My Deals tracker** | ✅ Live |
 | **User Profiles (Block/Hostel tracking)** | ✅ Live |
 | **Dark Mode / Light Mode Support** | ✅ Live |
-| **Push Notifications (Firebase)** | ⏳ Planned |
-| **In-app Chat** | ⏳ Planned |
 
 ---
 
@@ -93,20 +90,6 @@ Swych is built entirely with modern Android development standards.
 When a buyer submits an offer, the item and deal status are instantly locked to **PENDING**. The seller can then either **Accept** (marks as SOLD and hides from feed) or **Reject** (returns item to OPEN).
 
 ---
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Whether it's squashing bugs, suggesting new features, or improving the documentation, we'd love your help.
-
-Please read our [Contributing Guidelines](.github/CONTRIBUTING.md) to get started. Don't forget to check our [Code of Conduct](.github/CODE_OF_CONDUCT.md).
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 <div align="center">
 Made with ❤️ for campus communities.
