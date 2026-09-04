@@ -129,7 +129,15 @@ fun MainScreen(
         ) {
             androidx.compose.animation.AnimatedContent(
                 targetState = selectedTabIndex,
-                transitionSpec = { androidx.compose.animation.fadeIn() togetherWith androidx.compose.animation.fadeOut() },
+                transitionSpec = {
+                    if (targetState > initialState) {
+                        androidx.compose.animation.slideInHorizontally { width -> width } + androidx.compose.animation.fadeIn() togetherWith
+                        androidx.compose.animation.slideOutHorizontally { width -> -width } + androidx.compose.animation.fadeOut()
+                    } else {
+                        androidx.compose.animation.slideInHorizontally { width -> -width } + androidx.compose.animation.fadeIn() togetherWith
+                        androidx.compose.animation.slideOutHorizontally { width -> width } + androidx.compose.animation.fadeOut()
+                    }
+                },
                 label = "tab_transition"
             ) { targetTab ->
                 when (targetTab) {

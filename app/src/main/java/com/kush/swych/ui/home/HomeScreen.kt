@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.kush.swych.core.model.Category
 import com.kush.swych.ui.navigation.BrowseRoute
+import kotlinx.coroutines.launch
 
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.ui.graphics.Brush
@@ -36,6 +37,8 @@ fun HomeContent(
     navController: NavController,
     onCategoryClick: (String) -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -75,7 +78,15 @@ fun HomeContent(
                     Surface(
                         shape = RoundedCornerShape(100),
                         color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.clickable {
+                            val hapticManager = com.kush.swych.core.util.HapticManager(context)
+                            hapticManager.triggerFeedback()
+                            val itemRepo = com.kush.swych.core.data.ItemRepository(context)
+                            scope.launch {
+                                itemRepo.getAllItems(forceRefresh = true)
+                            }
+                        }
                     ) {
                         Text(
                             text = "Swap n' Switch",

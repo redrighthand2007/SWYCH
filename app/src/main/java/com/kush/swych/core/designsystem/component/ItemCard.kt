@@ -32,7 +32,8 @@ fun ItemCard(
     onDealClick: () -> Unit,
     isApplied: Boolean = false,
     onRemoveClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomActions: (@Composable () -> Unit)? = null
 ) {
     val scale by animateFloatAsState(
         targetValue = 1f,
@@ -109,49 +110,53 @@ fun ItemCard(
 
                 Spacer(Modifier.height(8.dp))
 
-                // Price + Deal Button row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "₹" + "%.0f".format(item.price),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    if (!isOwnItem) {
-                        Button(
-                            onClick = onDealClick,
-                            enabled = !isApplied,
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                            modifier = Modifier.height(32.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isApplied) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
-                                contentColor = if (isApplied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        ) {
-                            Text(
-                                text = if (isApplied) "Applied" else "Deal",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
-                            )
-                        }
-                    } else {
-                        androidx.compose.material3.IconButton(
-                            onClick = onRemoveClick,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Remove Item",
-                                tint = MaterialTheme.colorScheme.error
-                            )
+                if (bottomActions != null) {
+                    bottomActions()
+                } else {
+                    // Price + Deal Button row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "₹" + "%.0f".format(item.price),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        if (!isOwnItem) {
+                            Button(
+                                onClick = onDealClick,
+                                enabled = !isApplied,
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                modifier = Modifier.height(32.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isApplied) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
+                                    contentColor = if (isApplied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
+                                Text(
+                                    text = if (isApplied) "Applied" else "Deal",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        } else {
+                            androidx.compose.material3.IconButton(
+                                onClick = onRemoveClick,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove Item",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
                         }
                     }
                 }

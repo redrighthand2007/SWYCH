@@ -1,4 +1,4 @@
-﻿package com.kush.swych.ui.browse
+package com.kush.swych.ui.browse
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -94,8 +94,8 @@ fun BrowseContent(
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "Browse Items",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
-                color = MaterialTheme.colorScheme.onBackground
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary
             )
             androidx.compose.material3.IconButton(onClick = { 
                 scope.launch { 

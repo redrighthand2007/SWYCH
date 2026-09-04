@@ -27,13 +27,21 @@ fun DealButton(
     isLoading: Boolean = false,
     enabled: Boolean = true
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val hapticManager = androidx.compose.runtime.remember { com.kush.swych.core.util.HapticManager(context) }
+    
     val alpha by animateFloatAsState(
         targetValue = if (enabled && !isLoading) 1f else 0.6f,
         label = "button_alpha"
     )
 
     Button(
-        onClick = { if (!isLoading) onClick() },
+        onClick = { 
+            if (!isLoading) {
+                hapticManager.triggerFeedback()
+                onClick() 
+            }
+        },
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp)
@@ -66,8 +74,14 @@ fun DealOutlinedButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val hapticManager = androidx.compose.runtime.remember { com.kush.swych.core.util.HapticManager(context) }
+    
     OutlinedButton(
-        onClick = onClick,
+        onClick = {
+            hapticManager.triggerFeedback()
+            onClick()
+        },
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp),

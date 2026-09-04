@@ -275,7 +275,8 @@ fun SignUpScreen(navController: NavController) {
                             val isNameValid = name.isNotBlank()
                             val isBlockValid = hostelBlock.isNotBlank()
                             val isPhoneValid = phone.length == 10
-                            val isEmailValid = email.isNotBlank() && email.endsWith("@vitstudent.ac.in")
+                            val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
+                            val isEmailValid = email.isNotBlank() && email.endsWith("@vitstudent.ac.in") && email.matches(emailRegex)
                             val hasLetterAndNumber = password.any { it.isLetter() } && password.any { it.isDigit() }
                             val isPasswordValid = password.length in 6..9 && hasLetterAndNumber
                             val isConfirmValid = password == confirmPassword

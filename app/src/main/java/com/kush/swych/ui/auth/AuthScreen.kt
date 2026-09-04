@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +56,7 @@ fun AuthScreen(navController: NavController) {
             enter = fadeIn(animationSpec = tween(durationMillis = 800))
         ) {
             Text(
-                text = "lets Deal",
+                text = "Swipe n' Switch",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.ExtraBold
                 ),
@@ -78,25 +79,31 @@ fun AuthScreen(navController: NavController) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                DealButton(
-                    text = "Login",
-                    onClick = { navController.navigate(LoginRoute) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                TextButton(
-                    onClick = { navController.navigate(SignUpRoute) }
+                // "New to VIT" is now a lighter tonal button
+                androidx.compose.material3.FilledTonalButton(
+                    onClick = { navController.navigate(SignUpRoute) },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = androidx.compose.material3.ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 ) {
                     Text(
                         text = "New To VIT",
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold
-                        ),
-                        color = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
+
+                DealButton(
+                    text = "Login",
+                    onClick = { navController.navigate(LoginRoute) },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
 
