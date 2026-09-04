@@ -65,10 +65,18 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
         loadDeals()
     }
 
-    Box(
+    Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
-        val currentDeals = deals
+        Text(
+            text = "Deals",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+            val currentDeals = deals
         if (isLoading && currentDeals == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -104,12 +112,16 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                 }
                 if (buyingDeals.isEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = "No offers sent yet.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 24.dp)
-                        )
+                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "No offers sent yet.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 } else {
                     items(buyingDeals, key = { it.id }) { deal ->
@@ -160,12 +172,16 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                 }
                 if (sellingDeals.isEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = "No incoming requests yet.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 24.dp)
-                        )
+                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "No incoming requests yet.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 } else {
                     items(sellingDeals, key = { it.id }) { deal ->
@@ -211,6 +227,7 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
             }
         }
     }
+}
 }
 
 @Composable

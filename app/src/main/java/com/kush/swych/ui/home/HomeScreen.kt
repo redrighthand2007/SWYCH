@@ -78,15 +78,7 @@ fun HomeContent(
                     Surface(
                         shape = RoundedCornerShape(100),
                         color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.clickable {
-                            val hapticManager = com.kush.swych.core.util.HapticManager(context)
-                            hapticManager.triggerFeedback()
-                            val itemRepo = com.kush.swych.core.data.ItemRepository(context)
-                            scope.launch {
-                                itemRepo.getAllItems(forceRefresh = true)
-                            }
-                        }
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ) {
                         Text(
                             text = "Swap n' Switch",

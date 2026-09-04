@@ -108,15 +108,20 @@ fun MainScreen(
         selectedTabIndex = 0
     }
 
+    val hapticManager = remember { com.kush.swych.core.util.HapticManager(context) }
+
     Scaffold(
         bottomBar = {
             SwychBottomBar(
                 selectedIndex = selectedTabIndex,
                 hasPendingDeals = hasPendingDeals,
                 onTabSelected = { index ->
-                    selectedTabIndex = index
-                    if (index == 1 && browseCategory.isNotEmpty()) {
-                        browseCategory = ""
+                    if (selectedTabIndex != index) {
+                        hapticManager.triggerFeedback()
+                        selectedTabIndex = index
+                        if (index == 1 && browseCategory.isNotEmpty()) {
+                            browseCategory = ""
+                        }
                     }
                 }
             )

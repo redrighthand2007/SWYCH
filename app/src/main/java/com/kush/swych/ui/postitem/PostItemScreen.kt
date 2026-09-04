@@ -91,9 +91,9 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         ) {
             Text(
                 text = "Sell an Item",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.primary
             )
 
             AnimatedVisibility(
