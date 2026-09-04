@@ -1,4 +1,4 @@
-﻿# ðŸ› ï¸ Development Setup Guide
+# 🛠️ Development Setup Guide
 
 Follow this guide to set up the Swych project for local development.
 
@@ -13,25 +13,25 @@ Follow this guide to set up the Swych project for local development.
 | Kotlin | 2.1+ |
 | Gradle | 8.x (bundled with project) |
 
-## ðŸ“± Step 1: Clone the Repository
+## 📱 Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/swych.git
 cd swych
 ```
 
-## ðŸ”¥ Step 2: Supabase Setup
+## 🔥 Step 2: Supabase Setup
 
 ### 2.1 Create Supabase Project
 
 1. Go to [Supabase Console](https://console.Supabase.google.com/)
-2. Click **"Add project"** â†’ Name it `swych`
+2. Click **"Add project"** → Name it `swych`
 3. Disable Google Analytics (optional for v1)
 4. Click **Create project**
 
 ### 2.2 Register Android App
 
-1. In Supabase Console â†’ **Add app** â†’ **Android**
+1. In Supabase Console → **Add app** → **Android**
 2. Package name: `com.vit.swych`
 3. App nickname: `Swych`
 4. Debug signing certificate SHA-1:
@@ -45,41 +45,41 @@ cd swych
 ### 2.3 Enable Supabase Services
 
 #### Phone Authentication
-1. Supabase Console â†’ **Authentication** â†’ **Sign-in method**
+1. Supabase Console → **Authentication** → **Sign-in method**
 2. Enable **Phone** provider
 3. Add test phone numbers for development:
-   - `+1 650-555-1234` â†’ Code: `123456`
-   - `+91 9999999999` â†’ Code: `123456`
+   - `+1 650-555-1234` → Code: `123456`
+   - `+91 9999999999` → Code: `123456`
 
 #### Cloud Postgres
-1. Supabase Console â†’ **Postgres Database** â†’ **Create database**
+1. Supabase Console → **Postgres Database** → **Create database**
 2. Start in **test mode** (we'll add security rules later)
 3. Choose a region close to your users (e.g., `asia-south1` for India)
 
 #### Supabase Storage
-1. Supabase Console â†’ **Storage** â†’ **Get started**
+1. Supabase Console → **Storage** → **Get started**
 2. Start in **test mode**
 3. Same region as Postgres
 
-## ðŸ—ï¸ Step 3: Build & Run
+## 🏗️ Step 3: Build & Run
 
 ### Open in Android Studio
 1. Open Android Studio
-2. **File â†’ Open** â†’ Select the project directory
+2. **File → Open** → Select the project directory
 3. Wait for Gradle sync to complete
 
 ### Run on Emulator
-1. Create an AVD: **Tools â†’ Device Manager â†’ Create Device**
+1. Create an AVD: **Tools → Device Manager → Create Device**
    - Recommended: Pixel 7 / API 34
-2. Click **Run â–¶ï¸** or press `Shift + F10`
+2. Click **Run ▶️** or press `Shift + F10`
 
 ### Run on Physical Device
 1. Enable **Developer Options** and **USB Debugging** on your phone
 2. Connect via USB
 3. Select your device in the toolbar
-4. Click **Run â–¶ï¸**
+4. Click **Run ▶️**
 
-## ðŸ§ª Step 4: Run Tests
+## 🧪 Step 4: Run Tests
 
 ```bash
 # Unit tests
@@ -92,7 +92,7 @@ cd swych
 ./gradlew lintDebug
 ```
 
-## ðŸ” Step 5: Postgres Security Rules
+## 🔐 Step 5: Postgres Security Rules
 
 Deploy security rules from the `Postgres.rules` file:
 
@@ -105,11 +105,11 @@ Supabase login
 Supabase deploy --only Postgres:rules
 ```
 
-## ðŸ“‚ Project Structure
+## 📂 Project Structure
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
-## â“ Troubleshooting
+## ❓ Troubleshooting
 
 ### "google-services.json not found"
 - Ensure the file is in the `app/` directory (not the project root)
@@ -121,11 +121,11 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 - Ensure you've added the SHA-1 certificate
 
 ### "Gradle sync failed"
-- File â†’ Invalidate Caches and Restart
+- File → Invalidate Caches and Restart
 - Delete `.gradle/` and `build/` directories, then re-sync
 
 ### "Postgres permission denied"
 - Check that your security rules allow the operation
 - Verify the user is authenticated
-- Check Postgres Console â†’ Rules for any errors
+- Check Postgres Console → Rules for any errors
 

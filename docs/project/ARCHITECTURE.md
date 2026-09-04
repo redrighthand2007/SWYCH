@@ -1,37 +1,37 @@
-﻿# ðŸ—ï¸ Architecture Overview
+# 🏗️ Architecture Overview
 
 ## High-Level Architecture
 
 Swych follows **MVVM + Clean Architecture** principles, ensuring separation of concerns, testability, and scalability.
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    UI LAYER                          â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚ Screens  â”‚  â”‚ViewModelsâ”‚  â”‚  UI State/Events â”‚   â”‚
-â”‚  â”‚(Compose) â”‚â—„â”€â”¤(StateFlowâ”‚â”€â”€â”¤ (Sealed Classes) â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â”‚                     â”‚                                â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚               DOMAIN LAYER                           â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
-â”‚  â”‚              Use Cases                   â”‚         â”‚
-â”‚  â”‚  PostItemUseCase  â”‚  AcceptOfferUseCase  â”‚         â”‚
-â”‚  â”‚  SendOtpUseCase   â”‚  MarkCompleteUseCase â”‚         â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
-â”‚  â”‚         Repository Interfaces            â”‚         â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                DATA LAYER                            â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
-â”‚  â”‚        Repository Implementations        â”‚         â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”‚
-â”‚  â”‚ Supabase â”‚ â”‚ Postgres  â”‚ â”‚   Supabase    â”‚      â”‚
-â”‚  â”‚   Auth   â”‚ â”‚  Database  â”‚ â”‚   Cloudinary     â”‚      â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────┐
+│                    UI LAYER                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐   │
+│  │ Screens  │  │ViewModels│  │  UI State/Events │   │
+│  │(Compose) │◄─┤(StateFlow│──┤ (Sealed Classes) │   │
+│  └──────────┘  └────┬─────┘  └──────────────────┘   │
+│                     │                                │
+├─────────────────────┼────────────────────────────────┤
+│               DOMAIN LAYER                           │
+│  ┌──────────────────┴──────────────────────┐         │
+│  │              Use Cases                   │         │
+│  │  PostItemUseCase  │  AcceptOfferUseCase  │         │
+│  │  SendOtpUseCase   │  MarkCompleteUseCase │         │
+│  └──────────────────┬──────────────────────┘         │
+│  ┌──────────────────┴──────────────────────┐         │
+│  │         Repository Interfaces            │         │
+│  └──────────────────┬──────────────────────┘         │
+├─────────────────────┼────────────────────────────────┤
+│                DATA LAYER                            │
+│  ┌──────────────────┴──────────────────────┐         │
+│  │        Repository Implementations        │         │
+│  └──────────────────┬──────────────────────┘         │
+│  ┌──────────┐ ┌─────┴──────┐ ┌───────────────┐      │
+│  │ Supabase │ │ Postgres  │ │   Supabase    │      │
+│  │   Auth   │ │  Database  │ │   Cloudinary     │      │
+│  └──────────┘ └────────────┘ └───────────────┘      │
+└─────────────────────────────────────────────────────┘
 ```
 
 ## Layer Details
@@ -42,16 +42,16 @@ Each feature is organized into its own package containing:
 
 | File | Purpose |
 |------|--------|
-| `XxxScreen.kt` | Composable UI â€” renders state, dispatches events |
+| `XxxScreen.kt` | Composable UI — renders state, dispatches events |
 | `XxxViewModel.kt` | Holds UI state as `StateFlow`, processes events |
 | `XxxUiState.kt` | Sealed interface defining all possible screen states |
 
 **Pattern:** Unidirectional Data Flow (UDF)
 ```
-User Action â†’ ViewModel.onEvent() â†’ UseCase â†’ Repository â†’ Postgres
-                    â†“
+User Action → ViewModel.onEvent() → UseCase → Repository → Postgres
+                    ↓
               StateFlow<UiState>
-                    â†“
+                    ↓
               Composable recomposes
 ```
 
@@ -59,13 +59,13 @@ User Action â†’ ViewModel.onEvent() â†’ UseCase â†’ Repository â
 
 - **Use Cases**: Single-responsibility classes encapsulating business logic
 - **Repository Interfaces**: Contracts that the data layer must fulfill
-- **No framework dependencies** â€” pure Kotlin
+- **No framework dependencies** — pure Kotlin
 
 ### Data Layer (`data/`)
 
 - **Repository Implementations**: Concrete implementations using Supabase SDKs
 - **Data Sources**: Direct Supabase API wrappers
-- **Model Mapping**: Postgres documents â†” domain models
+- **Model Mapping**: Postgres documents ↔ domain models
 
 ### Core (`core/`)
 
@@ -77,62 +77,62 @@ User Action â†’ ViewModel.onEvent() â†’ UseCase â†’ Repository â
 ## Navigation Architecture
 
 ```
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚   App Start  â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-                           â”‚
-                    â”Œâ”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”
-                    â”‚  Auth Check  â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”
-            Not Logged In    â”‚    Logged In
-                  â”‚          â”‚         â”‚
-          â”Œâ”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”  â”Œâ”€â”€â”€â–¼â”€â”€â”€â”€â”   â”Œâ–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-          â”‚Auth Screenâ”‚  â”‚Profile â”‚   â”‚   Home    â”‚
-          â”‚(Phone OTP)â”‚  â”‚ Setup  â”‚   â”‚  Screen   â”‚
-          â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”˜  â””â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜
-                  â”‚         â”‚               â”‚
-                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”Œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                      â”‚     â”‚          â”‚
-                                â”Œâ”€â”€â”€â”€â”€â–¼â” â”Œâ”€â”€â–¼â”€â”€â”€â”€â” â”Œâ”€â”€â–¼â”€â”€â”€â”€â”€â”€â”
-                                â”‚ Post â”‚ â”‚ Item  â”‚ â”‚   My    â”‚
-                                â”‚ Item â”‚ â”‚Detail â”‚ â”‚Listings â”‚
-                                â””â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”¬â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
-                                             â”‚          â”‚
-                                        â”Œâ”€â”€â”€â”€â–¼â”€â”€â”€â”€â”â”Œâ”€â”€â”€â”€â–¼â”€â”€â”€â”€â”
-                                        â”‚  Submit â”‚â”‚ Offers  â”‚
-                                        â”‚  Offer  â”‚â”‚ Review  â”‚
-                                        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
-                                                        â”‚
-                                                   â”Œâ”€â”€â”€â”€â–¼â”€â”€â”€â”€â”
-                                                   â”‚  Deal   â”‚
-                                                   â”‚ Screen  â”‚
-                                                   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                    ┌─────────────┐
+                    │   App Start  │
+                    └──────┬──────┘
+                           │
+                    ┌──────▼──────┐
+                    │  Auth Check  │
+                    └──────┬──────┘
+                  ┌────────┼────────┐
+            Not Logged In    │    Logged In
+                  │          │         │
+          ┌───────▼──┐  ┌───▼────┐   ┌▼──────────┐
+          │Auth Screen│  │Profile │   │   Home    │
+          │(Phone OTP)│  │ Setup  │   │  Screen   │
+          └───────┬──┘  └───┬────┘   └─────┬─────┘
+                  │         │               │
+                  └─────────┘         ┌─────┼──────────┐
+                                      │     │          │
+                                ┌─────▼┐ ┌──▼────┐ ┌──▼──────┐
+                                │ Post │ │ Item  │ │   My    │
+                                │ Item │ │Detail │ │Listings │
+                                └──────┘ └───┬───┘ └────┬────┘
+                                             │          │
+                                        ┌────▼────┐┌────▼────┐
+                                        │  Submit ││ Offers  │
+                                        │  Offer  ││ Review  │
+                                        └─────────┘└────┬────┘
+                                                        │
+                                                   ┌────▼────┐
+                                                   │  Deal   │
+                                                   │ Screen  │
+                                                   └─────────┘
 ```
 
 ## Data Flow: Accept Offer (Critical Path)
 
-The most complex operation â€” accepting an offer â€” uses a Postgres **batch write** for atomicity:
+The most complex operation — accepting an offer — uses a Postgres **batch write** for atomicity:
 
 ```
 Seller taps "Accept" on an offer
-        â”‚
-        â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚     AcceptOfferUseCase            â”‚
-â”‚                                   â”‚
-â”‚  1. Batch write:                  â”‚
-â”‚     â€¢ offers/{accepted} â†’ status: "accepted"  â”‚
-â”‚     â€¢ offers/{others}   â†’ status: "rejected"  â”‚
-â”‚     â€¢ items/{id}        â†’ status: "locked"     â”‚
-â”‚     â€¢ deals/{new}       â†’ create with:         â”‚
-â”‚         - finalPrice from accepted offer       â”‚
-â”‚         - completionDeadline = now + 3 days    â”‚
-â”‚         - status: "locked"                     â”‚
-â”‚  2. Commit atomically                          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-        â”‚
-        â–¼
+        │
+        ▼
+┌───────────────────────────────────┐
+│     AcceptOfferUseCase            │
+│                                   │
+│  1. Batch write:                  │
+│     • offers/{accepted} → status: "accepted"  │
+│     • offers/{others}   → status: "rejected"  │
+│     • items/{id}        → status: "locked"     │
+│     • deals/{new}       → create with:         │
+│         - finalPrice from accepted offer       │
+│         - completionDeadline = now + 3 days    │
+│         - status: "locked"                     │
+│  2. Commit atomically                          │
+└───────────────────────────────────┘
+        │
+        ▼
   Both users see WhatsApp deep link
   to arrange the handoff
 ```
@@ -141,18 +141,18 @@ Seller taps "Accept" on an offer
 
 ```
  Deal Locked (3-day window)
-        â”‚
-    â”Œâ”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚                       â”‚
+        │
+    ┌───┴───────────────────┐
+    │                       │
  Both confirm              Buyer doesn't confirm
-    â”‚                       â”‚
-    â–¼                       â–¼
- +1 ðŸŸ¢ to BOTH         Seller taps "Re-list"
- users                     â”‚
-                           â–¼
-                    +1 ðŸ”´ to BUYER
-                    Item â†’ status: "open"
-                    Deal â†’ status: "expired"
+    │                       │
+    ▼                       ▼
+ +1 🟢 to BOTH         Seller taps "Re-list"
+ users                     │
+                           ▼
+                    +1 🔴 to BUYER
+                    Item → status: "open"
+                    Deal → status: "expired"
 ```
 
 ## Tech Stack

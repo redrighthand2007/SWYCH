@@ -1,4 +1,4 @@
-﻿# ðŸ—„ï¸ Postgres Database Schema
+# 🗄️ Postgres Database Schema
 
 This document describes the Cloud Postgres data model for Swych.
 
@@ -6,24 +6,24 @@ This document describes the Cloud Postgres data model for Swych.
 
 ```
 Postgres/
-â”œâ”€â”€ users/{uid}                    # User profiles
-â”œâ”€â”€ items/{itemId}                 # Item listings
-â”‚   â””â”€â”€ offers/{offerId}           # Offers on an item (subcollection)
-â””â”€â”€ deals/{dealId}                 # Locked/completed deals
+├── users/{uid}                    # User profiles
+├── items/{itemId}                 # Item listings
+│   └── offers/{offerId}           # Offers on an item (subcollection)
+└── deals/{dealId}                 # Locked/completed deals
 ```
 
-## ðŸ‘¤ Users Collection
+## 👤 Users Collection
 
 **Path:** `users/{uid}`
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `phone` | `string` | âœ… | Verified phone number (from Supabase Auth) |
-| `name` | `string` | âœ… | Display name |
-| `block` | `string` | âœ… | Hostel/block (from fixed dropdown) |
-| `greenDots` | `number` | âœ… | Count of successfully completed deals |
-| `redDots` | `number` | âœ… | Count of missed completions (as buyer) |
-| `createdAt` | `timestamp` | âœ… | Account creation time |
+| `phone` | `string` | ✅ | Verified phone number (from Supabase Auth) |
+| `name` | `string` | ✅ | Display name |
+| `block` | `string` | ✅ | Hostel/block (from fixed dropdown) |
+| `greenDots` | `number` | ✅ | Count of successfully completed deals |
+| `redDots` | `number` | ✅ | Count of missed completions (as buyer) |
+| `createdAt` | `timestamp` | ✅ | Account creation time |
 
 **Example Document:**
 ```json
@@ -37,26 +37,26 @@ Postgres/
 }
 ```
 
-## ðŸ“¦ Items Collection
+## 📦 Items Collection
 
 **Path:** `items/{itemId}`
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `sellerId` | `string` | âœ… | Reference to `users/{uid}` |
-| `category` | `string` | âœ… | One of the 8 fixed categories |
-| `title` | `string` | âœ… | Item title |
-| `description` | `string` | âœ… | Item description |
-| `price` | `number` | âœ… | Asking price (INR) |
-| `photoUrl` | `string` | âœ… | Supabase Storage download URL |
-| `status` | `string` | âœ… | `open` / `locked` / `sold` |
-| `createdAt` | `timestamp` | âœ… | Listing creation time |
+| `sellerId` | `string` | ✅ | Reference to `users/{uid}` |
+| `category` | `string` | ✅ | One of the 8 fixed categories |
+| `title` | `string` | ✅ | Item title |
+| `description` | `string` | ✅ | Item description |
+| `price` | `number` | ✅ | Asking price (INR) |
+| `photoUrl` | `string` | ✅ | Supabase Storage download URL |
+| `status` | `string` | ✅ | `open` / `locked` / `sold` |
+| `createdAt` | `timestamp` | ✅ | Listing creation time |
 
 **Status Transitions:**
 ```
-  open â”€â”€(seller accepts offer)â”€â”€â–º locked â”€â”€(both complete)â”€â”€â–º sold
-   â–²                                  â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€(seller re-lists)â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+  open ──(seller accepts offer)──► locked ──(both complete)──► sold
+   ▲                                  │
+   └───────(seller re-lists)──────────┘
 ```
 
 **Categories (fixed v1 list):**
@@ -69,46 +69,46 @@ Postgres/
 7. `Study Notes`
 8. `Game Accounts`
 
-## ðŸ’° Offers Subcollection
+## 💰 Offers Subcollection
 
 **Path:** `items/{itemId}/offers/{offerId}`
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `buyerId` | `string` | âœ… | Reference to `users/{uid}` |
-| `amount` | `number` | âœ… | Cash offer amount (INR) |
-| `note` | `string` | âŒ | Optional short message |
-| `status` | `string` | âœ… | `pending` / `accepted` / `rejected` |
-| `createdAt` | `timestamp` | âœ… | Offer submission time |
+| `buyerId` | `string` | ✅ | Reference to `users/{uid}` |
+| `amount` | `number` | ✅ | Cash offer amount (INR) |
+| `note` | `string` | ❌ | Optional short message |
+| `status` | `string` | ✅ | `pending` / `accepted` / `rejected` |
+| `createdAt` | `timestamp` | ✅ | Offer submission time |
 
 **Status Transitions:**
 ```
-  pending â”€â”€(seller accepts THIS offer)â”€â”€â–º accepted
-  pending â”€â”€(seller accepts OTHER offer)â”€â”€â–º rejected
+  pending ──(seller accepts THIS offer)──► accepted
+  pending ──(seller accepts OTHER offer)──► rejected
 ```
 
-## ðŸ¤ Deals Collection
+## 🤝 Deals Collection
 
 **Path:** `deals/{dealId}`
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `itemId` | `string` | âœ… | Reference to `items/{itemId}` |
-| `sellerId` | `string` | âœ… | Reference to `users/{uid}` |
-| `buyerId` | `string` | âœ… | Reference to `users/{uid}` |
-| `finalPrice` | `number` | âœ… | Accepted offer amount |
-| `lockedAt` | `timestamp` | âœ… | When seller accepted the offer |
-| `completionDeadline` | `timestamp` | âœ… | `lockedAt + 3 days` |
-| `status` | `string` | âœ… | `locked` / `completed` / `expired` |
-| `completedAt` | `timestamp` | âŒ | When both parties confirmed completion |
+| `itemId` | `string` | ✅ | Reference to `items/{itemId}` |
+| `sellerId` | `string` | ✅ | Reference to `users/{uid}` |
+| `buyerId` | `string` | ✅ | Reference to `users/{uid}` |
+| `finalPrice` | `number` | ✅ | Accepted offer amount |
+| `lockedAt` | `timestamp` | ✅ | When seller accepted the offer |
+| `completionDeadline` | `timestamp` | ✅ | `lockedAt + 3 days` |
+| `status` | `string` | ✅ | `locked` / `completed` / `expired` |
+| `completedAt` | `timestamp` | ❌ | When both parties confirmed completion |
 
 **Status Transitions:**
 ```
-  locked â”€â”€(both mark complete within 3 days)â”€â”€â–º completed
-  locked â”€â”€(seller re-lists after deadline)â”€â”€â”€â”€â–º expired
+  locked ──(both mark complete within 3 days)──► completed
+  locked ──(seller re-lists after deadline)────► expired
 ```
 
-## ðŸ” Common Queries
+## 🔍 Common Queries
 
 | Query | Collection | Filters | Order |
 |-------|-----------|---------|-------|
@@ -118,9 +118,9 @@ Postgres/
 | Offers for item | `items/{id}/offers` | (all) | `amount DESC` |
 | My deals (buyer) | `deals` | `buyerId == currentUser` | `lockedAt DESC` |
 | My deals (seller) | `deals` | `sellerId == currentUser` | `lockedAt DESC` |
-| Expired deals | `deals` | `status == "locked"`, `completionDeadline < now` | â€” |
+| Expired deals | `deals` | `status == "locked"`, `completionDeadline < now` | — |
 
-## ðŸ“ Indexes Required
+## 📐 Indexes Required
 
 Postgres requires composite indexes for queries with multiple filters:
 
