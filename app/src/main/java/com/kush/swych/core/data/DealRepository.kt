@@ -33,10 +33,37 @@ class DealRepository(private val context: Context) {
             
             // Also update item status
             SupabaseManager.client.postgrest["items"].update({
-                set("status", "LOCKED")
+                set("status", "PENDING")
             }) {
                 filter { eq("id", itemId) }
             }
+            
+            ItemRepository.cachedItems = null // invalidate cache
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateDealStatus(dealId: String, itemId: String, newStatus: String): Result<Unit> {
+        return try {
+            // Update deal status
+            SupabaseManager.client.postgrest["deals"].update({
+                set("status", newStatus)
+            }) {
+                filter { eq("id", dealId) }
+            }
+            
+            // If new status is REJECTED, item goes back to OPEN. If SOLD, item goes to SOLD.
+            val itemStatus = if (newStatus == "REJECTED") "OPEN" else "SOLD"
+            SupabaseManager.client.postgrest["items"].update({
+                set("status", itemStatus)
+            }) {
+                filter { eq("id", itemId) }
+            }
+            
+            ItemRepository.cachedItems = null // invalidate cache
             
             Result.success(Unit)
         } catch (e: Exception) {

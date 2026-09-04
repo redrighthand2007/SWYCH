@@ -3,6 +3,7 @@ package com.kush.swych.core.designsystem.component
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -51,15 +52,38 @@ fun ItemCard(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Item Image
-            AsyncImage(
-                model = item.photoUrl?.takeIf { it.isNotBlank() },
-                contentDescription = item.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .clip(MaterialTheme.shapes.large),
-                contentScale = ContentScale.Crop
-            )
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                AsyncImage(
+                    model = item.photoUrl?.takeIf { it.isNotBlank() },
+                    contentDescription = item.title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(MaterialTheme.shapes.large),
+                    contentScale = ContentScale.Crop
+                )
+                
+                if (item.status.uppercase() == "PENDING") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            color = Color(0xFFF57F17),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                "PENDING", 
+                                color = Color.White, 
+                                fontWeight = FontWeight.Black, 
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                }
+            }
 
             Column(
                 modifier = Modifier.padding(12.dp)

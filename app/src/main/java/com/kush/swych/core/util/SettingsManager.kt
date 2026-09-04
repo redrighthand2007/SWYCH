@@ -1,6 +1,7 @@
 package com.kush.swych.core.util
 
 import android.content.Context
+import androidx.core.content.edit
 import android.content.SharedPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,12 +27,12 @@ object SettingsManager {
     }
 
     fun setThemeMode(mode: Int) {
-        prefs.edit().putInt(KEY_THEME, mode).apply()
+        prefs.edit { putInt(KEY_THEME, mode) }
         _themeMode.value = mode
     }
 
     fun setHapticEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_HAPTIC, enabled).apply()
+        prefs.edit { putBoolean(KEY_HAPTIC, enabled) }
         _hapticEnabled.value = enabled
     }
 }

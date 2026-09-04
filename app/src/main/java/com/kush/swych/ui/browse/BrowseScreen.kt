@@ -2,6 +2,8 @@
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -88,12 +91,21 @@ fun BrowseContent(
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         
         // Header
-        Text(
-            text = "Browse Items",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "Browse Items",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            androidx.compose.material3.IconButton(onClick = { 
+                scope.launch { 
+                    val result = itemRepo.getAllItems(forceRefresh = true)
+                    items = result.getOrNull() ?: emptyList()
+                } 
+            }) {
+                androidx.compose.material3.Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            }
+        }
 
         // Categories
         val categories = listOf("All") + Category.values().map { it.name }
@@ -198,7 +210,7 @@ fun BrowseContent(
                 }
             }
         } else {
-            var filteredItems = if (selectedCategory == "All") items!! else items!!.filter { it.category == selectedCategory }
+            var filteredItems = (if (selectedCategory == "All") items!! else items!!.filter { it.category == selectedCategory }).filter { it.status != "SOLD" }
             
             // Location filtering
             if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {

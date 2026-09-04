@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -174,6 +175,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                             shape = RoundedCornerShape(8.dp),
                             color = when (it.status.uppercase()) {
                                 "OPEN" -> Color(0xFF1B5E20).copy(alpha = 0.15f)
+                                "PENDING" -> Color(0xFFF57F17).copy(alpha = 0.15f)
                                 else -> Color.Gray.copy(alpha = 0.15f)
                             }
                         ) {
@@ -183,13 +185,14 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                 fontWeight = FontWeight.Bold,
                                 color = when (it.status.uppercase()) {
                                     "OPEN" -> Color(0xFF4CAF50)
+                                    "PENDING" -> Color(0xFFF57F17)
                                     else -> Color.Gray
                                 },
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }
 
-                        Divider()
+                        HorizontalDivider()
 
                         // Description
                         if (!it.description.isNullOrBlank()) {
@@ -204,7 +207,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            Divider()
+                            HorizontalDivider()
                         }
 
                         // â€” Make an Offer / Own listing â€”
@@ -284,6 +287,20 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                         Text("Submit Deal ðŸ¤", fontWeight = FontWeight.Bold)
                                     }
                                 }
+                            }
+                        } else if (it.status.uppercase() == "PENDING" && it.sellerId != currentUid) {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xFFFFF9C4).copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    "This item is currently pending a deal.",
+                                    modifier = Modifier.padding(16.dp),
+                                    color = Color(0xFFF57F17),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         } else {
                             Surface(

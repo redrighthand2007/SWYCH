@@ -1,6 +1,7 @@
 package com.kush.swych.core.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.kush.swych.core.model.User
 import com.kush.swych.core.network.SupabaseManager
 import io.github.jan.supabase.postgrest.postgrest
@@ -31,7 +32,7 @@ class AuthRepository(private val context: Context) {
             SupabaseManager.client.postgrest["users"].insert(user)
             
             val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            prefs.edit().putString("current_uid", user.uid).apply()
+            prefs.edit { putString("current_uid", user.uid) }
             
             cachedUsers = null
             Result.success(Unit)
@@ -63,7 +64,7 @@ class AuthRepository(private val context: Context) {
             
             if (user != null) {
                 val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-                prefs.edit().putString("current_uid", user.uid).apply()
+                prefs.edit { putString("current_uid", user.uid) }
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("User not found"))
@@ -96,7 +97,7 @@ class AuthRepository(private val context: Context) {
 
     fun logout() {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-        prefs.edit().clear().apply()
+        prefs.edit { clear() }
         cachedUsers = null
     }
 }

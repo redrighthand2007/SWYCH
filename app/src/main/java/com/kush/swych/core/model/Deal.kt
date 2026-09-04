@@ -18,6 +18,6 @@ data class Deal(
     val itemPhotoUrl: String = "",
     @SerialName("final_price")
     val finalPrice: Double = 0.0,
-    val status: String = "LOCKED",
+    val status: String = "PENDING",
     val timestamp: Long = System.currentTimeMillis()
 )

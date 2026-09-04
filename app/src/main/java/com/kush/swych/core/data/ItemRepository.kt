@@ -1,6 +1,7 @@
 package com.kush.swych.core.data
 
 import android.content.Context
+import androidx.core.net.toUri
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.network.SupabaseManager
 import io.github.jan.supabase.postgrest.postgrest
@@ -27,7 +28,7 @@ class ItemRepository(private val context: Context) {
             // Upload to Supabase Storage
             var photoUrl = photoUri
             if (photoUri.startsWith("file://")) {
-                val path = android.net.Uri.parse(photoUri).path
+                val path = photoUri.toUri().path
                 if (path != null) {
                     val file = java.io.File(path)
                     val fileName = file.name
