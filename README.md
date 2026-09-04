@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/res/drawable/logo.png" alt="Swych Logo" width="120" style="border-radius: 28px;" />
+<img src="docs/assets/logo.png" alt="Swych Logo" width="120" style="border-radius: 28px;" />
 
 # Swych
 
@@ -18,7 +18,7 @@
 
 ---
 
-## ?? Project Overview
+## 📖 Project Overview
 
 ### What is it?
 
@@ -31,257 +31,95 @@ Existing campus trading happens in chaotic, fragmented WhatsApp or Telegram grou
 
 ---
 
-## ?? Screenshots & Demo
+## 📸 Screenshots & Demo
 
-**?? Demo � Coming Soon!**
+**🎥 Demo — Coming Soon!**
 
 
 > *Coming soon — run the app to see it in action!*
 
 ---
 
+## 🚀 Features & Status
+
 ### What does it do?
 
 | Feature | Status |
-|---------|--------|
-| Browse campus listings by category | ✅ Live |
-| List an item with photo | ✅ Live |
-| Make offers on items | ✅ Live |
-| Lock a deal & track status | ✅ Live |
-| My Listings dashboard | ✅ Live |
-| My Deals tracker | ✅ Live |
-| Shimmer skeleton loading | ✅ Live |
-| User profile with reputation dots | ✅ Live |
-| Register & Login | ✅ Live |
-| Cloudinary image uploads | 🔧 In Progress |
-| Push notifications | 📋 Planned |
-| Campus Beta Launch | 📋 Planned |
+| :--- | :--- |
+| **Browse campus listings by category** | ✅ Live |
+| **List an item with photo** | ✅ Live |
+| **Make offers on items** | ✅ Live |
+| **Lock a deal & track status** | ✅ Live |
+| **My Listings dashboard** | ✅ Live |
+| **My Deals tracker** | ✅ Live |
+| **User Profiles (Block/Hostel tracking)** | ✅ Live |
+| **Dark Mode / Light Mode Support** | ✅ Live |
+| **Push Notifications (Firebase)** | ⏳ Planned |
+| **In-app Chat** | ⏳ Planned |
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack & Architecture
 
-| Layer | Technology |
-|-------|------------|
-| **Language** | Kotlin 2.0 |
-| **UI** | Jetpack Compose + Material 3 |
-| **Navigation** | Compose Navigation (Type-safe Routes) |
-| **Database** | Supabase (PostgreSQL) |
-| **Auth** | Supabase Auth (via SharedPreferences session) |
-| **Image Loading** | Coil 3 + OkHttp |
-| **Image Storage** | Cloudinary |
-| **Serialization** | Kotlinx Serialization |
-| **Architecture** | Cloud-First, MVVM-inspired |
+Swych is built entirely with modern Android development standards.
 
----
+### Client-Side (Android)
+* **Language:** Kotlin
+* **UI Toolkit:** Jetpack Compose (Material 3 Design)
+* **Architecture:** MVVM (Model-View-ViewModel) + Repository Pattern
+* **Image Loading:** Coil
+* **Navigation:** Jetpack Navigation Compose
+* **Asynchronous Logic:** Kotlin Coroutines & Flows
 
-### How does it work? (Architecture)
+### Backend-as-a-Service (Supabase)
+* **Database:** PostgreSQL (Supabase DB)
+* **Authentication:** Supabase Auth (Email/Password)
+* **Storage:** Cloudinary (for fast, optimized image hosting) & Supabase Storage
+* **API:** PostgREST via Supabase Kotlin Client
 
-Swych uses a **Cloud-First** approach — no local database. All data lives in Supabase PostgreSQL and is fetched on demand. Screens show shimmer skeleton loaders while data loads, giving a fast, modern feel.
-
-```
-UI Layer (Compose Screens)
-        ↓
-Repository Layer (Suspend functions → Result<T>)
-        ↓
-Supabase Client (PostgREST API)
-        ↓
-PostgreSQL Database (Supabase Cloud)
-```
-
-**Key design decisions:**
-- No Room DB — keeps the app simple and data always fresh
-- `Result<T>` return types for clean error handling
-- `LaunchedEffect` data fetching with `mutableStateOf<T?>(null)` shimmer pattern
-- Type-safe navigation routes using `@Serializable` data classes
+### System Architecture
+![Architecture Diagram](https://raw.githubusercontent.com/redrighthand2007/CacheDeal-App/main/docs/project/ARCHITECTURE.md) (See `docs/project/ARCHITECTURE.md` for full breakdown)
 
 ---
 
-## Database Schema
+## 💻 Getting Started (For Developers)
 
-<details>
-<summary><b>PostgreSQL Tables (click to expand)</b></summary>
-
-### `users`
-| Column | Type | Description |
-|--------|------|-------------|
-| `uid` | TEXT (PK) | Unique user ID |
-| `name` | TEXT | Display name |
-| `block` | TEXT | Hostel block |
-| `phone` | TEXT | Phone number |
-| `email` | TEXT | Email address |
-| `green_dots` | INTEGER | Completed deals (reputation) |
-| `red_dots` | INTEGER | Missed deals (reputation) |
-
-### `items`
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | TEXT (PK) | Unique item ID |
-| `seller_id` | TEXT (FK) | References `users.uid` |
-| `category` | TEXT | Item category |
-| `title` | TEXT | Item title |
-| `description` | TEXT | Item description |
-| `price` | REAL | Asking price (₹) |
-| `photo_url` | TEXT | Cloudinary image URL |
-| `status` | TEXT | `OPEN` / `LOCKED` / `SOLD` |
-
-### `deals`
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | TEXT (PK) | Unique deal ID |
-| `item_id` | TEXT (FK) | References `items.id` |
-| `buyer_id` | TEXT (FK) | References `users.uid` |
-| `seller_id` | TEXT (FK) | References `users.uid` |
-| `item_title` | TEXT | Snapshot of item name |
-| `item_photo_url` | TEXT | Snapshot of item photo |
-| `final_price` | REAL | Agreed deal price |
-| `status` | TEXT | `LOCKED` / `COMPLETED` / `EXPIRED` |
-| `timestamp` | BIGINT | Deal creation time |
-
-</details>
-
----
-
-## Project Structure
-
-```
-app/src/main/java/com/kush/swych/
-├── MainActivity.kt
-├── core/
-│   ├── data/              # Repositories (AuthRepository, ItemRepository, DealRepository)
-│   ├── designsystem/
-│   │   ├── component/     # ItemCard, DotBadge, CategoryChip, ShimmerEffect, DealButton
-│   │   └── theme/         # Colors, Typography, Shapes, Material 3 Theme
-│   ├── model/             # User, Item, Deal, Category (all @Serializable)
-│   ├── network/           # SupabaseManager, CloudinaryManager
-│   └── util/              # Constants, Resource, SettingsManager
-└── ui/
-    ├── auth/              # AuthScreen, LoginScreen, SignUpScreen
-    ├── browse/            # BrowseScreen (shimmer grid of items)
-    ├── deals/             # DealsScreen (live deal tracker)
-    ├── home/              # HomeScreen (bottom nav host)
-    ├── itemdetail/        # ItemDetailScreen (parallax + offer form)
-    ├── main/              # MainScreen (tab switcher)
-    ├── mylistings/        # MyListingsScreen (seller dashboard)
-    ├── navigation/        # AppNavHost, Routes
-    ├── offers/            # OffersScreen
-    ├── postitem/          # PostItemScreen (image + form)
-    └── profile/           # ProfileScreen (user + reputation dots)
-```
-
----
-
-## Getting Started
+Want to run Swych on your own machine? 
 
 ### Prerequisites
+1. **Android Studio** (Koala or newer recommended)
+2. **JDK 21+**
+3. **Android SDK 35**
 
-- Android Studio **Hedgehog** (2023.1.1) or newer
-- JDK 17+
-- Android device or emulator running **Android 8.0 (API 26)+**
-- A [Supabase](https://supabase.com) project
+### Quick Setup
 
-### Setup
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/redrighthand2007/CacheDeal-App.git
+   cd Swych-App
+   ```
 
-```bash
-# 1. Clone the repo
-git clone https://github.com/redrighthand2007/Swych-App.git
-cd Swych-App
-```
+2. **Open the project in Android Studio.** Let Gradle sync (it might take a minute).
 
-**2. Set up Supabase:**
-- Go to your [Supabase dashboard](https://supabase.com/dashboard)
-- Open the **SQL Editor** and run the schema from `docs/SUPABASE_SCHEMA.md`
-- Copy your **Project URL** and **Anon Key**
+3. **Run the App:** 
+   Hit the green "Play" button in Android Studio to install the app on your emulator or physical Android device.
 
-**3. Add your credentials:**
-
-Open `app/src/main/java/com/kush/swych/core/network/SupabaseManager.kt` and update:
-
-```kotlin
-private const val SUPABASE_URL = "your-project-url"
-private const val SUPABASE_ANON_KEY = "your-anon-key"
-```
-
-**4. Run the app:**
-- Open the project in Android Studio
-- Click **Run ▶️**
+*Note: The app points to a live production database hosted on Supabase, so you can immediately create an account and start testing!*
 
 ---
 
-## Categories
+## 🤝 Contributing
 
-Swych is tuned for campus life. Current supported categories:
+We welcome contributions! Whether it's squashing bugs, suggesting new features, or improving the documentation, we'd love your help.
 
-- 🍱 **Eatables** — food, snacks, mess coupons
-- 👕 **Wearables** — clothes, shoes, accessories
-- 🚲 **Cycles** — bicycles, MTBs
-- 🧮 **Calculators** — scientific, graphing
-- 🥼 **Lab Coats** — lab essentials
-- 📱 **Subscription Plans** — Netflix, Spotify splits
-- 📚 **Study Notes** — handwritten, printed
-- 🎮 **Game Accounts** — BGMI, VALORANT, etc.
+Please read our [Contributing Guidelines](.github/CONTRIBUTING.md) to get started. Don't forget to check our [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ---
 
-## How Deals Work
+## 📄 License
 
-1. **Seller lists an item** → fills category, title, description, price, photo
-2. **Buyer browses** → taps item, sees full detail screen
-3. **Buyer makes an offer** → enters their price
-4. **Deal is created** → item status flips to `LOCKED`
-5. **Both parties meet on campus** → seller marks deal complete
-6. **Reputation updates** → green dot for success, red dot for a no-show
-
----
-
-## Reputation System
-
-Every user has two counters visible on their profile:
-
-- 🟢 **Green Dots** — number of successfully completed deals
-- 🔴 **Red Dots** — number of deals they backed out of
-
-This gives every buyer and seller an instant trust signal before committing to a deal.
-
----
-
-## Contributing
-
-Contributions are welcome! Here's how to get involved:
-
-1. Fork the repo
-2. Create a feature branch — `git checkout -b add-push-notifications`
-3. Make your changes
-4. Open a Pull Request with a short description
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
-
----
-
-## Roadmap
-
-- [ ] Cloudinary image uploads (in progress)
-- [ ] Real OTP-based phone authentication
-- [ ] Push notifications for new offers
-- [ ] Chat between buyer and seller
-- [ ] Campus-specific filtering (block-based proximity)
-- [ ] Admin panel for moderation
-- [ ] Android 15 edge-to-edge support
-
----
-
-## License
-
-Distributed under the **MIT License** — see [LICENSE](LICENSE) for more information.
-
----
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 <div align="center">
-
-Built with ❤️ for campus students everywhere.
-
-⭐ **Star this repo if Swych helped you!** ⭐
-
+Made with ❤️ for campus communities.
 </div>
-
-
