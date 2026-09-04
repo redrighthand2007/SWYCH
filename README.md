@@ -33,7 +33,7 @@ Existing campus trading happens in chaotic, fragmented WhatsApp or Telegram grou
 
 ## 📸 Screenshots & Demo
 
-**🎥 Demo — Coming Soon!**
+**▶️ Demo — Coming Soon!**
 
 
 > *Coming soon — run the app to see it in action!*
