@@ -78,33 +78,21 @@ Swych is built entirely with modern Android development standards.
 * **API:** PostgREST via Supabase Kotlin Client
 
 ### System Architecture
-[Read the System Architecture Document](docs/project/ARCHITECTURE.md) (See `docs/project/ARCHITECTURE.md` for full breakdown)
+### Architecture Overview (MVVM + Clean Architecture)
+* **UI Layer:** Jetpack Compose, ViewModels, StateFlow.
+* **Domain Layer:** Use Cases (PostItemUseCase, AcceptOfferUseCase).
+* **Data Layer:** SupabaseNetworkDataSource, DealRepository, ItemRepository.
+
+### Database Schema (Supabase)
+* **`users` table:** `uid`, `name`, `block`, `phone`, `email`.
+* **`items` table:** `id`, `seller_id`, `title`, `description`, `price`, `category`, `status`, `photo_url`.
+* **`deals` table:** `id`, `item_id`, `buyer_id`, `seller_id`, `status` (PENDING, SOLD, REJECTED).
+*(Row Level Security (RLS) is enabled for all tables to protect user data).*
+
+### Deal Flow Logic (First-Come-First-Serve)
+When a buyer submits an offer, the item and deal status are instantly locked to **PENDING**. The seller can then either **Accept** (marks as SOLD and hides from feed) or **Reject** (returns item to OPEN).
 
 ---
-
-## 💻 Getting Started (For Developers)
-
-Want to run Swych on your own machine? 
-
-### Prerequisites
-1. **Android Studio** (Koala or newer recommended)
-2. **JDK 21+**
-3. **Android SDK 35**
-
-### Quick Setup
-
-1. **Clone the repo:**
-   ```bash
-   git clone https://github.com/redrighthand2007/CacheDeal-App.git
-   cd Swych-App
-   ```
-
-2. **Open the project in Android Studio.** Let Gradle sync (it might take a minute).
-
-3. **Run the App:** 
-   Hit the green "Play" button in Android Studio to install the app on your emulator or physical Android device.
-
-*Note: The app points to a live production database hosted on Supabase, so you can immediately create an account and start testing!*
 
 ---
 
