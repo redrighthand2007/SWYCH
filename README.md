@@ -78,7 +78,7 @@ Swych is built entirely with modern Android development standards.
 * **API:** PostgREST via Supabase Kotlin Client
 
 ### System Architecture
-![Architecture Diagram](https://raw.githubusercontent.com/redrighthand2007/CacheDeal-App/main/docs/project/ARCHITECTURE.md) (See `docs/project/ARCHITECTURE.md` for full breakdown)
+[Read the System Architecture Document](docs/project/ARCHITECTURE.md) (See `docs/project/ARCHITECTURE.md` for full breakdown)
 
 ---
 
