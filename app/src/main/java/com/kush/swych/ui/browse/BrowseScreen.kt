@@ -100,6 +100,7 @@ fun BrowseContent(
                 color = MaterialTheme.colorScheme.primary
             )
             androidx.compose.material3.IconButton(onClick = { 
+                items = null
                 scope.launch { 
                     val result = itemRepo.getAllItems(forceRefresh = true)
                     items = result.getOrNull() ?: emptyList()
@@ -202,13 +203,13 @@ fun BrowseContent(
         // Grid
         if (items == null) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(1),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(6) {
-                    Box(modifier = Modifier.fillMaxWidth().aspectRatio(0.85f).clip(RoundedCornerShape(16.dp)).shimmerEffect())
+                    Box(modifier = Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(16.dp)).shimmerEffect())
                 }
             }
         } else {
@@ -243,7 +244,7 @@ fun BrowseContent(
                 }
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
+                    columns = GridCells.Fixed(1),
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)

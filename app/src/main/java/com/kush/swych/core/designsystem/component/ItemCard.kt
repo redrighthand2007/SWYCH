@@ -44,76 +44,53 @@ fun ItemCard(
         modifier = modifier
             .scale(scale)
             .clickable(onClick = onClick)
-            .aspectRatio(0.85f), // Boxy look without completely squishing text
+            .fillMaxWidth()
+            .height(120.dp),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Item Image
-            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            // Left 30%: Image
+            Box(modifier = Modifier.weight(0.3f).fillMaxHeight()) {
                 AsyncImage(
                     model = item.photoUrl?.takeIf { it.isNotBlank() },
                     contentDescription = item.title,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(MaterialTheme.shapes.large),
+                    modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                
-                if (item.status.uppercase() == "PENDING") {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.4f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Surface(
-                            color = Color(0xFFF57F17),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                "PENDING", 
-                                color = Color.White, 
-                                fontWeight = FontWeight.Black, 
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                    }
-                }
             }
 
+            // Right 70%: Details
             Column(
-                modifier = Modifier.padding(12.dp)
+                modifier = Modifier
+                    .weight(0.7f)
+                    .fillMaxHeight()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Title
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                // Hostel Block
-                Text(
-                    text = sellerBlock,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(Modifier.height(8.dp))
+                Column {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = sellerBlock,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
                 if (bottomActions != null) {
                     bottomActions()
                 } else {
-                    // Price + Deal Button row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -127,21 +104,23 @@ fun ItemCard(
                         )
                         
                         if (!isOwnItem) {
+                            val isPending = item.status.uppercase() == "PENDING"
+                            val buttonDisabled = isApplied || isPending
                             Button(
                                 onClick = onDealClick,
-                                enabled = !isApplied,
+                                enabled = !buttonDisabled,
                                 shape = RoundedCornerShape(8.dp),
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                                 modifier = Modifier.height(32.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isApplied) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
-                                    contentColor = if (isApplied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary,
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary,
                                     disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                                     disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             ) {
                                 Text(
-                                    text = if (isApplied) "Applied" else "Deal",
+                                    text = if (isApplied) "Applied" else if (isPending) "Pending" else "Deal",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 12.sp
                                 )

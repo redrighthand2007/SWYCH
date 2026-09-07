@@ -76,7 +76,7 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary
             )
-            IconButton(onClick = { isLoading = true; loadDeals() }) {
+            IconButton(onClick = { deals = null; isLoading = true; loadDeals() }) {
                 Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = MaterialTheme.colorScheme.primary)
             }
         }
@@ -96,7 +96,7 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
             val sellingDeals = currentDeals.filter { it.sellerId == currentUid }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(1),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
