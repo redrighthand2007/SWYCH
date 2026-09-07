@@ -4,7 +4,11 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Sell
@@ -15,6 +19,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +52,7 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
     val authRepo = remember { AuthRepository(context) }
     val hapticManager = remember { HapticManager(context) }
 
-    var deals by remember { mutableStateOf<List<Deal>?>(null) }
+    var allDeals by remember { mutableStateOf<List<Deal>?>(null) }
     var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -54,10 +60,12 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
 
     fun loadDeals() {
         coroutineScope.launch {
-            val res = dealRepo.getMyDeals()
-            val userRes = authRepo.getAllUsers()
+            val res = dealRepo.getAllDeals()
+            if (res.isSuccess) {
+                allDeals = res.getOrNull()
+            }
             
-            deals = res.getOrNull()
+            val userRes = authRepo.getAllUsers()
             users = userRes.getOrNull()?.associateBy { it.uid } ?: emptyMap()
             isLoading = false
         }
@@ -76,228 +84,216 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary
             )
-            IconButton(onClick = { deals = null; isLoading = true; loadDeals() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = MaterialTheme.colorScheme.primary)
-            }
         }
 
         Box(modifier = Modifier.fillMaxSize().weight(1f)) {
-            val currentDeals = deals
-        if (isLoading && currentDeals == null) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (currentDeals == null) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Failed to load deals.")
-            }
-        } else {
-            val buyingDeals = currentDeals.filter { it.buyerId == currentUid }
-            val sellingDeals = currentDeals.filter { it.sellerId == currentUid }
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(1),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            val currentDeals = allDeals?.filter { it.buyerId == currentUid || it.sellerId == currentUid }
+            
+            @OptIn(ExperimentalMaterial3Api::class)
+            PullToRefreshBox(
+                isRefreshing = isLoading && currentDeals == null,
+                onRefresh = { isLoading = true; loadDeals() },
+                modifier = Modifier.fillMaxSize()
             ) {
-                // Section 1: Offers (Buying)
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(
-                        text = "Offers",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                if (buyingDeals.isEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f), modifier = Modifier.size(48.dp))
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = "Explore & make your first offer!",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                if (isLoading && currentDeals == null) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else if (currentDeals == null) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Failed to load deals.")
                     }
                 } else {
-                    items(buyingDeals, key = { it.id }) { deal ->
-                        val seller = users[deal.sellerId]
-                        val dummyItem = Item(
-                            id = deal.itemId,
-                            sellerId = deal.sellerId,
-                            title = deal.itemTitle,
-                            description = "",
-                            price = deal.finalPrice,
-                            category = "Deals",
-                            status = deal.status,
-                            photoUrl = deal.itemPhotoUrl
-                        )
-                        ItemCard(
-                            item = dummyItem,
-                            sellerBlock = seller?.block ?: "Unknown",
-                            isOwnItem = false,
-                            onClick = {},
-                            onDealClick = {},
-                            bottomActions = {
-                                BuyerDealActions(deal = deal, sellerPhone = seller?.phone, hapticManager = hapticManager, onCancel = {
-                                    coroutineScope.launch {
-                                        try {
-                                            SupabaseManager.client.postgrest["deals"].delete {
-                                                filter { eq("id", deal.id) }
-                                            }
-                                            deals = deals?.filter { it.id != deal.id }
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    }
-                                })
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(1),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (currentDeals.isEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f), modifier = Modifier.size(48.dp))
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = "No deals yet! Make an offer or list an item.",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
-                        )
-                    }
-                }
-
-                // Section 2: My Products (Selling)
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(
-                        text = "My Products",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                }
-                if (sellingDeals.isEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Sell, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f), modifier = Modifier.size(48.dp))
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = "List an item to start receiving offers!",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                } else {
-                    items(sellingDeals, key = { it.id }) { deal ->
-                        val buyer = users[deal.buyerId]
-                        val dummyItem = Item(
-                            id = deal.itemId,
-                            sellerId = deal.sellerId,
-                            title = deal.itemTitle,
-                            description = "",
-                            price = deal.finalPrice,
-                            category = "Deals",
-                            status = deal.status,
-                            photoUrl = deal.itemPhotoUrl
-                        )
-                        ItemCard(
-                            item = dummyItem,
-                            sellerBlock = buyer?.block ?: "Unknown",
-                            isOwnItem = true,
-                            onClick = {},
-                            onDealClick = {},
-                            bottomActions = {
-                                SellerDealActions(
-                                    deal = deal,
-                                    buyerPhone = buyer?.phone,
-                                    hapticManager = hapticManager,
-                                    onAccept = {
-                                        coroutineScope.launch {
-                                            dealRepo.updateDealStatus(deal.id, deal.itemId, "SOLD")
-                                            loadDeals()
-                                        }
-                                    },
-                                    onReject = {
-                                        coroutineScope.launch {
-                                            dealRepo.updateDealStatus(deal.id, deal.itemId, "REJECTED")
-                                            loadDeals()
+                        } else {
+                            items(currentDeals, key = { it.id }) { deal ->
+                                val isBuyer = deal.buyerId == currentUid
+                                val otherUser = if (isBuyer) users[deal.sellerId] else users[deal.buyerId]
+                                val sellerName = otherUser?.name ?: "Unknown"
+                                
+                                val otherUserDeals = allDeals?.filter { it.sellerId == otherUser?.uid } ?: emptyList()
+                                val dealsMade = otherUserDeals.count { it.status == "SOLD" }
+                                val dealsExpired = otherUserDeals.count { it.status == "REJECTED" }
+                                
+                                val dummyItem = Item(
+                                    id = deal.itemId,
+                                    sellerId = deal.sellerId,
+                                    title = deal.itemTitle,
+                                    description = "",
+                                    price = deal.finalPrice,
+                                    category = "Deals",
+                                    status = deal.status,
+                                    photoUrl = deal.itemPhotoUrl
+                                )
+                                ItemCard(
+                                    item = dummyItem,
+                                    sellerName = sellerName,
+                                    sellerBlock = otherUser?.block ?: "Unknown",
+                                    dealsMade = dealsMade,
+                                    dealsExpired = dealsExpired,
+                                    isOwnItem = !isBuyer,
+                                    onClick = {},
+                                    onDealClick = {},
+                                    bottomActions = {
+                                        if (isBuyer) {
+                                            BuyerDealActions(deal = deal, sellerPhone = otherUser?.phone, hapticManager = hapticManager, onCancel = {
+                                                coroutineScope.launch {
+                                                    try {
+                                                        SupabaseManager.client.postgrest["deals"].delete {
+                                                            filter { eq("id", deal.id) }
+                                                        }
+                                                        allDeals = allDeals?.filter { it.id != deal.id }
+                                                    } catch (e: Exception) {
+                                                        e.printStackTrace()
+                                                    }
+                                                }
+                                            })
+                                        } else {
+                                            SellerDealActions(
+                                                deal = deal,
+                                                buyerPhone = otherUser?.phone,
+                                                hapticManager = hapticManager,
+                                                onAccept = {
+                                                    coroutineScope.launch {
+                                                        dealRepo.updateDealStatus(deal.id, deal.itemId, "SOLD")
+                                                        loadDeals()
+                                                    }
+                                                },
+                                                onReject = {
+                                                    coroutineScope.launch {
+                                                        dealRepo.updateDealStatus(deal.id, deal.itemId, "REJECTED")
+                                                        loadDeals()
+                                                    }
+                                                }
+                                            )
                                         }
                                     }
                                 )
                             }
-                        )
+                        }
                     }
                 }
             }
         }
     }
 }
-}
 
 @Composable
 fun BuyerDealActions(deal: Deal, sellerPhone: String?, hapticManager: HapticManager, onCancel: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = "₹" + "%.0f".format(deal.finalPrice),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Black,
             color = MaterialTheme.colorScheme.primary
         )
-        Spacer(Modifier.height(8.dp))
 
         if (deal.status == "PENDING") {
-            Button(
+            IconButton(
                 onClick = { hapticManager.triggerFeedback(); onCancel() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                modifier = Modifier.size(32.dp)
             ) {
-                Text(text = "Cancel", fontSize = 12.sp)
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Cancel Deal",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         } else if (deal.status == "REJECTED") {
             Button(
                 onClick = { hapticManager.triggerFeedback(); onCancel() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                modifier = Modifier.height(32.dp)
             ) {
                 Text(text = "Dismiss", fontSize = 12.sp)
             }
         } else if (deal.status == "SOLD") {
-            ContactReveal(phone = sellerPhone, hapticManager = hapticManager)
+            if (sellerPhone != null) {
+                com.kush.swych.ui.deals.ContactReveal(phone = sellerPhone, hapticManager = hapticManager)
+            } else {
+                Text(text = "Accepted", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
 
 @Composable
 fun SellerDealActions(deal: Deal, buyerPhone: String?, hapticManager: HapticManager, onAccept: () -> Unit, onReject: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = "₹" + "%.0f".format(deal.finalPrice),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Black,
             color = MaterialTheme.colorScheme.primary
         )
-        Spacer(Modifier.height(8.dp))
 
         if (deal.status == "PENDING") {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            var expanded by remember { mutableStateOf(false) }
+            Box {
                 Button(
-                    onClick = { hapticManager.triggerFeedback(); onReject() },
-                    modifier = Modifier.weight(1f).height(36.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                    onClick = { expanded = true },
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.height(32.dp)
                 ) {
-                    Text("Reject", fontSize = 12.sp)
+                    Text("Respond", fontSize = 12.sp)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
                 }
-                Button(
-                    onClick = { hapticManager.triggerFeedback(); onAccept() },
-                    modifier = Modifier.weight(1f).height(36.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50), contentColor = Color.White)
-                ) {
-                    Text("Accept", fontSize = 12.sp)
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    Row(modifier = Modifier.padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IconButton(
+                            onClick = { expanded = false; hapticManager.triggerFeedback(); onReject() },
+                            modifier = Modifier.size(36.dp),
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = "Reject", modifier = Modifier.size(20.dp))
+                        }
+                        IconButton(
+                            onClick = { expanded = false; hapticManager.triggerFeedback(); onAccept() },
+                            modifier = Modifier.size(36.dp),
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFF4CAF50), contentColor = Color.White)
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = "Accept", modifier = Modifier.size(20.dp))
+                        }
+                    }
                 }
             }
         } else if (deal.status == "SOLD") {
-            ContactReveal(phone = buyerPhone, hapticManager = hapticManager)
+            if (buyerPhone != null) {
+                com.kush.swych.ui.deals.ContactReveal(phone = buyerPhone, hapticManager = hapticManager)
+            } else {
+                Text(text = "Accepted", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+            }
         } else if (deal.status == "REJECTED") {
-             Text("Rejected", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+            Text(text = "Rejected", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -305,33 +301,18 @@ fun SellerDealActions(deal: Deal, buyerPhone: String?, hapticManager: HapticMana
 @Composable
 fun ContactReveal(phone: String?, hapticManager: HapticManager) {
     val context = LocalContext.current
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text("Contact:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(
-                text = phone ?: "No Phone",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        if (phone != null) {
-            IconButton(
-                onClick = {
-                    hapticManager.triggerFeedback()
-                    val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:$phone")
-                    }
-                    context.startActivity(intent)
-                },
-                modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp)).size(36.dp)
-            ) {
-                Icon(Icons.Default.Call, contentDescription = "Call", tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(18.dp))
-            }
+    if (phone != null) {
+        IconButton(
+            onClick = {
+                hapticManager.triggerFeedback()
+                val intent = Intent(Intent.ACTION_DIAL).apply {
+                    data = Uri.parse("tel:$phone")
+                }
+                context.startActivity(intent)
+            },
+            modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp)).size(36.dp)
+        ) {
+            Icon(Icons.Default.Call, contentDescription = "Call", tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(18.dp))
         }
     }
 }

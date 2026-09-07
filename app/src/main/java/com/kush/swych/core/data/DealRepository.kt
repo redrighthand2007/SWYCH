@@ -94,4 +94,21 @@ class DealRepository(private val context: Context) {
             Result.failure(e)
         }
     }
+
+    suspend fun getAllDeals(): Result<List<Deal>> {
+        return try {
+            val cached = cachedDeals
+            if (cached != null) return Result.success(cached)
+
+            val deals = SupabaseManager.client.postgrest["deals"].select().decodeList<Deal>()
+            cachedDeals = deals
+            Result.success(deals)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    companion object {
+        var cachedDeals: List<Deal>? = null
+    }
 }

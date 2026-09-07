@@ -99,6 +99,9 @@ fun MainScreen(
     val context = LocalContext.current
     val dealRepo = remember { DealRepository(context) }
 
+    var browseSortName by remember { mutableStateOf("RECENT") }
+    var browseLocationName by remember { mutableStateOf("CAMPUS") }
+
     LaunchedEffect(Unit) {
         while(isActive) {
             val result = dealRepo.getMyDeals()
@@ -109,6 +112,7 @@ fun MainScreen(
 
     BackHandler(enabled = selectedTabIndex != 0) {
         selectedTabIndex = 0
+        expandContactDev = false
     }
 
     val hapticManager = remember { com.kush.swych.core.util.HapticManager(context) }
@@ -125,6 +129,9 @@ fun MainScreen(
                         if (index == 1 && browseCategory.isNotEmpty()) {
                             browseCategory = ""
                         }
+                        if (index != 4) {
+                            expandContactDev = false
+                        }
                     }
                 }
             )
@@ -135,35 +142,7 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures { _, dragAmount ->
-                            if (dragAmount < -80 && selectedTabIndex < 4) {
-                                hapticManager.triggerFeedback()
-                                selectedTabIndex++
-                            } else if (dragAmount > 80 && selectedTabIndex > 0) {
-                                hapticManager.triggerFeedback()
-                                selectedTabIndex--
-                            }
-                        }
-                    }
-            ) {
-            androidx.compose.animation.AnimatedContent(
-                targetState = selectedTabIndex,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        androidx.compose.animation.slideInHorizontally { width -> width } + androidx.compose.animation.fadeIn() togetherWith
-                        androidx.compose.animation.slideOutHorizontally { width -> -width } + androidx.compose.animation.fadeOut()
-                    } else {
-                        androidx.compose.animation.slideInHorizontally { width -> -width } + androidx.compose.animation.fadeIn() togetherWith
-                        androidx.compose.animation.slideOutHorizontally { width -> width } + androidx.compose.animation.fadeOut()
-                    }
-                },
-                label = "tab_transition"
-            ) { targetTab ->
-                when (targetTab) {
+            when (selectedTabIndex) {
                 0 -> HomeContent(
                     navController = navController,
                     onCategoryClick = { category ->
@@ -177,7 +156,12 @@ fun MainScreen(
                 )
                 1 -> BrowseContent(
                     navController = navController,
-                    initialCategory = browseCategory
+                    category = browseCategory,
+                    onCategoryChange = { browseCategory = it },
+                    sortName = browseSortName,
+                    onSortChange = { browseSortName = it },
+                    locationName = browseLocationName,
+                    onLocationChange = { browseLocationName = it }
                 )
                 2 -> com.kush.swych.ui.postitem.PostItemScreen(navController = navController, onNavigateHome = { selectedTabIndex = 0 })
                 3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController, onNavigateToMainTab = { selectedTabIndex = it })
@@ -187,9 +171,7 @@ fun MainScreen(
                     expandContactDev = expandContactDev
                 )
             }
-            }
         }
-    }
     }
 }
 

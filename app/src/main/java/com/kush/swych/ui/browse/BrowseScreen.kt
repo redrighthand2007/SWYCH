@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -47,40 +49,46 @@ private enum class LocationFilter(val label: String) {
 @Composable
 fun BrowseContent(
     navController: NavController,
-    initialCategory: String = ""
+    category: String,
+    onCategoryChange: (String) -> Unit,
+    sortName: String,
+    onSortChange: (String) -> Unit,
+    locationName: String,
+    onLocationChange: (String) -> Unit
 ) {
     val context = LocalContext.current
     val itemRepo = remember { ItemRepository(context) }
     val authRepo = remember { AuthRepository(context) }
-    val dealRepo = remember { DealRepository(context) }
+    val dealRepo = remember { com.kush.swych.core.data.DealRepository(context) }
     
     // Initialize with cached items to avoid null state when popping back stack, which would reset scroll state
     var items by remember { mutableStateOf<List<Item>?>(ItemRepository.cachedItems) }
-    var users by remember { mutableStateOf<Map<String, User>>(AuthRepository.cachedUsers?.associateBy { it.uid } ?: emptyMap()) }
-    
-    val initialUid = authRepo.currentUserUid
-    var currentUser by remember { mutableStateOf<User?>(if (initialUid != null) users[initialUid] else null) }
-    
-    // Saveable state for filters
-    var selectedCategory by rememberSaveable { mutableStateOf(if (initialCategory.isBlank()) "All" else initialCategory) }
-    var selectedSortName by rememberSaveable { mutableStateOf(SortOption.RECENT.name) }
-    var locationFilterName by rememberSaveable { mutableStateOf(LocationFilter.CAMPUS.name) }
-    
-    val selectedSort = SortOption.valueOf(selectedSortName)
-    val locationFilter = LocationFilter.valueOf(locationFilterName)
-
-    // We store "applied" items in memory for prototype
-    var appliedItemIds by remember { mutableStateOf(setOf<String>()) }
+    var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
+    var allDeals by remember { mutableStateOf<List<com.kush.swych.core.model.Deal>>(emptyList()) }
+    var currentUser by remember { mutableStateOf<User?>(null) }
+    var appliedItemIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var fetchError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    
+    val selectedSort = SortOption.valueOf(sortName)
+    val locationFilter = LocationFilter.valueOf(locationName)
 
     LaunchedEffect(Unit) {
-        val currentUid = authRepo.currentUserUid
-        if (currentUid != null) {
-            val userResult = authRepo.getAllUsers()
-            val userList = userResult.getOrNull() ?: emptyList()
-            users = userList.associateBy { it.uid }
-            currentUser = users[currentUid]
+        val userResult = authRepo.getAllUsers()
+        if (userResult.isSuccess) {
+            users = userResult.getOrNull()?.associateBy { it.uid } ?: emptyMap()
+        }
+        
+        val currentUserResult = authRepo.getCurrentUserProfile()
+        if (currentUserResult.isSuccess) {
+            currentUser = currentUserResult.getOrNull()
+        }
+
+        val dealsResult = dealRepo.getAllDeals()
+        if (dealsResult.isSuccess) {
+            allDeals = dealsResult.getOrNull() ?: emptyList()
+            val myDeals = allDeals.filter { it.buyerId == currentUser?.uid }
+            appliedItemIds = myDeals.map { it.itemId }.toSet()
         }
         
         val result = itemRepo.getAllItems()
@@ -99,75 +107,56 @@ fun BrowseContent(
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary
             )
-            androidx.compose.material3.IconButton(onClick = { 
-                items = null
-                scope.launch { 
-                    val result = itemRepo.getAllItems(forceRefresh = true)
-                    items = result.getOrNull() ?: emptyList()
-                } 
-            }) {
-                androidx.compose.material3.Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-            }
         }
 
-        // Categories
-        val categories = listOf("All") + Category.values().map { it.name }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(categories) { cat ->
-                val isSelected = selectedCategory == cat
-                val bgColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                val textColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
-                
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(bgColor)
-                        .clickable { selectedCategory = cat }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = cat.lowercase().replaceFirstChar { it.uppercase() },
-                        color = textColor,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Filters (Campus/Hostel and Sort)
+        // Filters (All, Campus/Hostel, Sort)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Location Filter
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                LocationFilter.values().forEach { filter ->
-                    val isSelected = locationFilter == filter
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable { locationFilterName = filter.name }
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = filter.label,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                // All Button
+                val isAllSelected = category.isBlank() || category.equals("All", ignoreCase = true)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { onCategoryChange("All") }
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "All",
+                        color = if (isAllSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Location Filter
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    LocationFilter.values().forEach { filter ->
+                        val isSelected = locationFilter == filter
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                                .clickable { onLocationChange(filter.name) }
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = filter.label,
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -184,8 +173,8 @@ fun BrowseContent(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable { selectedSortName = filter.name }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .clickable { onSortChange(filter.name) }
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = filter.label,
@@ -201,19 +190,33 @@ fun BrowseContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Grid
-        if (items == null) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(1),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(6) {
-                    Box(modifier = Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(16.dp)).shimmerEffect())
+        @OptIn(ExperimentalMaterial3Api::class)
+        PullToRefreshBox(
+            isRefreshing = items == null,
+            onRefresh = {
+                items = null
+                scope.launch { 
+                    val result = itemRepo.getAllItems(forceRefresh = true)
+                    items = result.getOrNull() ?: emptyList()
+                } 
+            },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (items == null) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(1),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(6) {
+                        Box(modifier = Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(16.dp)).shimmerEffect())
+                    }
                 }
-            }
         } else {
-            var filteredItems = (if (selectedCategory == "All") items!! else items!!.filter { it.category == selectedCategory }).filter { it.status != "SOLD" }
+            val selectedCat = if (category.isBlank()) "All" else category
+            var filteredItems = (if (selectedCat == "All") items!! else items!!.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status != "SOLD" }
             
             // Location filtering
             if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {
@@ -254,10 +257,18 @@ fun BrowseContent(
                         key = { it.id } // Use item ID as key to help Compose preserve scroll position across recompositions!
                     ) { item ->
                         val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
+                        val sellerName = users[item.sellerId]?.name ?: "Unknown"
+                        val sellerDeals = allDeals.filter { it.sellerId == item.sellerId }
+                        val dealsMade = sellerDeals.count { it.status == "SOLD" }
+                        val dealsExpired = sellerDeals.count { it.status == "REJECTED" }
                         val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+                        
                         ItemCard(
                             item = item,
+                            sellerName = sellerName,
                             sellerBlock = sellerBlock,
+                            dealsMade = dealsMade,
+                            dealsExpired = dealsExpired,
                             isOwnItem = item.sellerId == currentUser?.uid,
                             isApplied = appliedItemIds.contains(item.id),
                             onClick = { navController.navigate(ItemDetailRoute(item.id)) },
@@ -289,6 +300,7 @@ fun BrowseContent(
                         )
                     }
                 }
+            }
             }
         }
     }

@@ -48,7 +48,26 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val authRepo = remember { AuthRepository(context) }
+    val dealRepo = remember { com.kush.swych.core.data.DealRepository(context) }
     var user by remember { mutableStateOf<User?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var dealsMade by remember { mutableIntStateOf(0) }
+    var dealsExpired by remember { mutableIntStateOf(0) }
+    var scrollState = androidx.compose.foundation.rememberScrollState()
+    
+    LaunchedEffect(Unit) {
+        val uid = authRepo.currentUserUid
+        if (uid != null) {
+            val result = authRepo.getCurrentUserProfile()
+            user = result.getOrNull()
+            
+            val dealResult = dealRepo.getMyDeals()
+            val myDeals = dealResult.getOrNull() ?: emptyList()
+            dealsMade = myDeals.count { it.status == "SOLD" }
+            dealsExpired = myDeals.count { it.status == "REJECTED" } // Using REJECTED as expired
+        }
+        isLoading = false
+    }
     val scope = rememberCoroutineScope()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -57,15 +76,23 @@ fun ProfileScreen(
 
     var isCardExpanded by remember { mutableStateOf(false) }
 
+
+    var isContactDevExpanded by remember { mutableStateOf(expandContactDev) }
+    var isFeedbackExpanded by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
-        val result = authRepo.getCurrentUserProfile()
-        user = result.getOrNull()
+        scrollState.scrollTo(0)
+        isCardExpanded = false
+        isContactDevExpanded = expandContactDev
+        isFeedbackExpanded = false
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(scrollState),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header (matching BrowseScreen structure exactly)
         Text(
@@ -78,7 +105,6 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -157,7 +183,7 @@ fun ProfileScreen(
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.SemiBold
                                 )
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
                                 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
@@ -225,11 +251,17 @@ fun ProfileScreen(
                 ExpandableProfileOption(
                     icon = Icons.Default.Code, 
                     text = "Contact Developer",
-                    startExpanded = expandContactDev
+                    isExpanded = isContactDevExpanded,
+                    onExpandedChange = { isContactDevExpanded = it }
                 ) {
                     Text("Email: support@swych.app", style = MaterialTheme.typography.bodyMedium)
                 }
-                ExpandableProfileOption(icon = Icons.Default.Feedback, text = "Feedback") {
+                ExpandableProfileOption(
+                    icon = Icons.Default.Feedback, 
+                    text = "Feedback",
+                    isExpanded = isFeedbackExpanded,
+                    onExpandedChange = { isFeedbackExpanded = it }
+                ) {
                     Text("We'd love to hear your thoughts! Drop us a review.", style = MaterialTheme.typography.bodyMedium)
                 }
                 ExpandableProfileOption(icon = Icons.Default.HelpOutline, text = "FAQs") {
@@ -291,17 +323,27 @@ fun ProfileScreen(
 fun ExpandableProfileOption(
     icon: ImageVector,
     text: String,
-    startExpanded: Boolean = false,
+    isExpanded: Boolean = false,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(startExpanded) }
+    var internalExpanded by remember { mutableStateOf(false) }
+    val expanded = if (onExpandedChange != null) isExpanded else internalExpanded
+    
+    val toggle = {
+        if (onExpandedChange != null) {
+            onExpandedChange(!isExpanded)
+        } else {
+            internalExpanded = !internalExpanded
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(if (expanded) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.Transparent)
-            .clickable { expanded = !expanded }
+            .clickable(onClick = toggle)
             .padding(vertical = 14.dp, horizontal = 16.dp)
     ) {
         Row(

@@ -94,62 +94,67 @@ fun HomeContent(
             }
         }
 
-        // Title for categories - WITH PADDING
-        item {
-            Text(
-                text = "Explore Categories",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
+        // Category Groups
+        val categoryGroups = listOf(
+            "Hungry ?" to listOf("Snacks", "Drinks", "Puffs", "Sweets", "Cooking"),
+            "Lock In." to listOf("Books", "Notes", "Stationery", "CAT-1", "CAT-2"),
+            "Wanna' Chill..." to listOf("Games", "Movies", "Music", "CAT-1", "CAT-2"),
+            "Care" to listOf("Meds", "Skincare", "Hygiene", "CAT-1", "CAT-2"),
+            "Need something ?" to listOf("Services", "Tech", "Tools", "CAT-1", "CAT-2"),
+            "2nd Hand Items" to listOf("Electronics", "Cycles", "Furniture", "CAT-1", "CAT-2")
+        )
 
-        // Category Items - WITH PADDING
-        val chunkedCategories = Category.values().toList().chunked(2)
-        items(chunkedCategories) { rowItems ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                rowItems.forEach { category ->
-                    Box(modifier = Modifier.weight(1f)) {
-                        CategoryBox(
-                            category = category,
-                            onClick = {
-                                navController.navigate(BrowseRoute(category.displayName))
-                                onCategoryClick(category.displayName)
-                            }
-                        )
+        categoryGroups.forEach { (groupName, categories) ->
+            item {
+                Text(
+                    text = groupName,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            item {
+                androidx.compose.foundation.lazy.LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(categories) { category ->
+                        Box(modifier = Modifier.width(140.dp)) {
+                            CategoryBox(
+                                categoryName = category,
+                                onClick = {
+                                    onCategoryClick(category)
+                                }
+                            )
+                        }
                     }
                 }
-                if (rowItems.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // Footer link
         item {
-            Text(
-                text = "Suggest more needy categories →",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onNavigateToProfile() }
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-            )
+                    .padding(horizontal = 16.dp, vertical = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Suggest more needy categories",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { onNavigateToProfile() }
+                )
+            }
         }
     }
 }
 
 @Composable
 fun CategoryBox(
-    category: Category,
+    categoryName: String,
     onClick: () -> Unit
 ) {
     Box(
@@ -161,7 +166,7 @@ fun CategoryBox(
     ) {
         AsyncImage(
             model = "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?q=80&w=400",
-            contentDescription = category.displayName,
+            contentDescription = categoryName,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -174,7 +179,7 @@ fun CategoryBox(
         )
         
         Text(
-            text = category.displayName,
+            text = categoryName,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = Color.White,
             modifier = Modifier.align(Alignment.Center)

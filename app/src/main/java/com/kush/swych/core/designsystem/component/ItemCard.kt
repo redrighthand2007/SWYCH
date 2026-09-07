@@ -26,7 +26,10 @@ import com.kush.swych.core.model.Item
 @Composable
 fun ItemCard(
     item: Item,
+    sellerName: String = "",
     sellerBlock: String,
+    dealsMade: Int = 0,
+    dealsExpired: Int = 0,
     isOwnItem: Boolean,
     onClick: () -> Unit,
     onDealClick: () -> Unit,
@@ -67,42 +70,68 @@ fun ItemCard(
             Column(
                 modifier = Modifier
                     .weight(0.7f)
-                    .fillMaxHeight()
-                    .padding(12.dp),
+                    .padding(12.dp)
+                    .fillMaxHeight(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = sellerBlock,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                if (bottomActions != null) {
-                    bottomActions()
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    // First line: name, block, price
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
-                            text = "₹" + "%.0f".format(item.price),
-                            style = MaterialTheme.typography.titleLarge,
+                            text = "${item.title} • $sellerBlock",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "₹%.0f".format(item.price),
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Black,
                             color = MaterialTheme.colorScheme.primary
                         )
-                        
+                    }
+                    
+                    Spacer(Modifier.height(4.dp))
+                    
+                    // Second line: name of seller
+                    if (sellerName.isNotEmpty()) {
+                        Text(
+                            text = sellerName,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.height(4.dp))
+                    }
+                    
+                    // Third line: Green/Red dots
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFF4CAF50)))
+                        Spacer(Modifier.width(4.dp))
+                        Text("$dealsMade", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.width(12.dp))
+                        Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFFF44336)))
+                        Spacer(Modifier.width(4.dp))
+                        Text("$dealsExpired", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                // Bottom Row for Actions
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    if (bottomActions != null) {
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                            bottomActions()
+                        }
+                    } else {
                         if (!isOwnItem) {
                             val isPending = item.status.uppercase() == "PENDING"
                             val buttonDisabled = isApplied || isPending
@@ -126,6 +155,10 @@ fun ItemCard(
                                 )
                             }
                         } else {
+                            Spacer(Modifier.weight(1f))
+                        }
+
+                        if (isOwnItem) {
                             androidx.compose.material3.IconButton(
                                 onClick = onRemoveClick,
                                 modifier = Modifier.size(32.dp)

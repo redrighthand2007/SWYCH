@@ -80,14 +80,10 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         }
     }
 
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { visible = true }
-
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Sell an Item",
@@ -95,12 +91,8 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
                 color = MaterialTheme.colorScheme.primary
             )
-
-            AnimatedVisibility(
-                visible = visible,
-                enter = slideInVertically(initialOffsetY = { 50 }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400))
-            ) {
-                Column(
+            
+            Column(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
@@ -109,7 +101,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(220.dp)
+                            .height(120.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (imageError) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
@@ -162,7 +154,12 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                     // Item Name
                     OutlinedTextField(
                         value = title,
-                        onValueChange = { title = it; titleError = false },
+                        onValueChange = { newValue ->
+                            if (!newValue.contains(" ")) {
+                                title = newValue
+                                titleError = false
+                            }
+                        },
                         label = { Text("Item Name") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -268,7 +265,6 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(40.dp))
                 }
-            }
         }
         SnackbarHost(
             hostState = snackbarHostState,
