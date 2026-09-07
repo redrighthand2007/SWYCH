@@ -43,7 +43,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    onNavigateToMainTab: (Int) -> Unit
+    onNavigateToMainTab: (Int) -> Unit,
+    expandContactDev: Boolean = false
 ) {
     val context = LocalContext.current
     val authRepo = remember { AuthRepository(context) }
@@ -221,7 +222,11 @@ fun ProfileScreen(
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
 
-                ExpandableProfileOption(icon = Icons.Default.Code, text = "Contact Developer") {
+                ExpandableProfileOption(
+                    icon = Icons.Default.Code, 
+                    text = "Contact Developer",
+                    startExpanded = expandContactDev
+                ) {
                     Text("Email: support@swych.app", style = MaterialTheme.typography.bodyMedium)
                 }
                 ExpandableProfileOption(icon = Icons.Default.Feedback, text = "Feedback") {
@@ -286,9 +291,10 @@ fun ProfileScreen(
 fun ExpandableProfileOption(
     icon: ImageVector,
     text: String,
+    startExpanded: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(startExpanded) }
 
     Column(
         modifier = Modifier

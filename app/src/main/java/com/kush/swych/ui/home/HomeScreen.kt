@@ -35,7 +35,8 @@ import androidx.compose.foundation.lazy.items
 @Composable
 fun HomeContent(
     navController: NavController,
-    onCategoryClick: (String) -> Unit
+    onCategoryClick: (String) -> Unit,
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -128,6 +129,20 @@ fun HomeContent(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Footer link
+        item {
+            Text(
+                text = "Suggest more needy categories →",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToProfile() }
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+            )
         }
     }
 }

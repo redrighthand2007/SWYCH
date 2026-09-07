@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kush.swych.core.data.AuthRepository
+import com.kush.swych.core.data.DealRepository
 import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.ItemCard
 import com.kush.swych.core.designsystem.component.shimmerEffect
@@ -51,6 +52,7 @@ fun BrowseContent(
     val context = LocalContext.current
     val itemRepo = remember { ItemRepository(context) }
     val authRepo = remember { AuthRepository(context) }
+    val dealRepo = remember { DealRepository(context) }
     
     // Initialize with cached items to avoid null state when popping back stack, which would reset scroll state
     var items by remember { mutableStateOf<List<Item>?>(ItemRepository.cachedItems) }
@@ -259,7 +261,21 @@ fun BrowseContent(
                             isApplied = appliedItemIds.contains(item.id),
                             onClick = { navController.navigate(ItemDetailRoute(item.id)) },
                             onDealClick = {
-                                appliedItemIds = appliedItemIds + item.id
+                                coroutineScope.launch {
+                                    val result = dealRepo.createDeal(
+                                        itemId = item.id,
+                                        itemTitle = item.title,
+                                        itemPhotoUrl = item.photoUrl ?: "",
+                                        sellerId = item.sellerId,
+                                        agreedPrice = item.price
+                                    )
+                                    if (result.isSuccess) {
+                                        appliedItemIds = appliedItemIds + item.id
+                                        // Refresh items to reflect PENDING status
+                                        val refreshed = itemRepo.getAllItems(forceRefresh = true)
+                                        items = refreshed.getOrNull() ?: items
+                                    }
+                                }
                             },
                             onRemoveClick = {
                                 coroutineScope.launch {

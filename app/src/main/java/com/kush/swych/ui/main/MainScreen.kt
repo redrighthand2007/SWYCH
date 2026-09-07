@@ -66,6 +66,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.kush.swych.core.data.DealRepository
@@ -92,6 +94,7 @@ fun MainScreen(
     var selectedTabIndex by remember { mutableIntStateOf(initialTab) }
     var browseCategory by remember { mutableStateOf(initialBrowseCategory) }
     var hasPendingDeals by remember { mutableStateOf(false) }
+    var expandContactDev by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val dealRepo = remember { DealRepository(context) }
@@ -132,6 +135,21 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures { _, dragAmount ->
+                            if (dragAmount < -80 && selectedTabIndex < 4) {
+                                hapticManager.triggerFeedback()
+                                selectedTabIndex++
+                            } else if (dragAmount > 80 && selectedTabIndex > 0) {
+                                hapticManager.triggerFeedback()
+                                selectedTabIndex--
+                            }
+                        }
+                    }
+            ) {
             androidx.compose.animation.AnimatedContent(
                 targetState = selectedTabIndex,
                 transitionSpec = {
@@ -151,6 +169,10 @@ fun MainScreen(
                     onCategoryClick = { category ->
                         browseCategory = category
                         selectedTabIndex = 1
+                    },
+                    onNavigateToProfile = {
+                        expandContactDev = true
+                        selectedTabIndex = 4
                     }
                 )
                 1 -> BrowseContent(
@@ -161,12 +183,14 @@ fun MainScreen(
                 3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController, onNavigateToMainTab = { selectedTabIndex = it })
                 4 -> ProfileScreen(
                     navController = navController,
-                    onNavigateToMainTab = { tabIndex -> selectedTabIndex = tabIndex }
+                    onNavigateToMainTab = { tabIndex -> selectedTabIndex = tabIndex },
+                    expandContactDev = expandContactDev
                 )
+            }
             }
         }
     }
-}
+    }
 }
 
 // Bottom Navigation Bar ????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
