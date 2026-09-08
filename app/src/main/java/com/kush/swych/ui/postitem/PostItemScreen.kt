@@ -80,7 +80,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
