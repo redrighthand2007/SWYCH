@@ -288,13 +288,8 @@ fun SignUpScreen(navController: NavController) {
                                     val result = authRepo.registerUser(name, hostelBlock, phone, email, password)
                                     isLoading = false
                                     if (result.isSuccess) {
-                                        errorMessage = "Account created! Please check your email for the verification link before logging in."
-                                        // Give them a moment to read the message, then pop to AuthRoute
-                                        scope.launch {
-                                            kotlinx.coroutines.delay(3000)
-                                            navController.navigate(com.kush.swych.ui.navigation.AuthRoute) {
-                                                popUpTo(0) { inclusive = true }
-                                            }
+                                        navController.navigate(MainRoute) {
+                                            popUpTo(0) { inclusive = true }
                                         }
                                     } else {
                                         errorMessage = result.exceptionOrNull()?.message ?: "Registration failed"
