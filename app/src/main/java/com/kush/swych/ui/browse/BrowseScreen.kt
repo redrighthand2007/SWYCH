@@ -1,6 +1,7 @@
 package com.kush.swych.ui.browse
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -120,79 +121,142 @@ fun BrowseContent(
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
         
-        // Filters (All, Campus/Hostel, Sort)
+        // --- 1. Categories pill ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp)
+                .height(48.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .padding(4.dp)
+        ) {
+            val cats = listOf("All") + Category.values().map { it.name }
+            LazyRow(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items(cats) { catName ->
+                    val isSelected = if (catName == "All") category.isBlank() || category.equals("All", ignoreCase = true) else category.equals(catName, ignoreCase = true)
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(50))
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null
+                            ) { onCategoryChange(catName) }
+                            .padding(horizontal = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val color by animateColorAsState(targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                        val displayCat = if (catName == "All") "All" else Category.valueOf(catName).displayName
+                        Text(
+                            text = displayCat,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = color
+                        )
+                    }
+                }
+            }
+        }
+        
+        // --- 2. 50-50 Filters ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                // All Button
-                val isAllSelected = category.isBlank() || category.equals("All", ignoreCase = true)
+            // Location Segmented Control (50%)
+            BoxWithConstraints(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(4.dp)
+            ) {
+                val tabWidth = maxWidth / 2
+                val selectedIndex = LocationFilter.values().indexOf(locationFilter)
+                val indicatorOffset by animateDpAsState(
+                    targetValue = if (selectedIndex == 0) 0.dp else tabWidth,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+                )
+                
                 Box(
                     modifier = Modifier
+                        .offset(x = indicatorOffset)
+                        .width(tabWidth)
+                        .fillMaxHeight()
                         .clip(RoundedCornerShape(50))
-                        .background(if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable { onCategoryChange("All") }
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "All",
-                        color = if (isAllSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                // Location Filter
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    LocationFilter.values().forEach { filter ->
-                        val isSelected = locationFilter == filter
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                Row(modifier = Modifier.fillMaxSize()) {
+                    LocationFilter.values().forEachIndexed { index, filter ->
+                        val isSelected = selectedIndex == index
                         Box(
                             modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
                                 .clip(RoundedCornerShape(50))
-                                .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                                .clickable { onLocationChange(filter.name) }
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .clickable(
+                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                    indication = null
+                                ) { onLocationChange(filter.name) },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = filter.label,
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold
-                            )
+                            val color by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = filter.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = color)
                         }
                     }
                 }
             }
 
-            // Sort Filter
-            Row(
+            // Sort Segmented Control (50%)
+            BoxWithConstraints(
                 modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(4.dp)
             ) {
-                SortOption.values().forEach { filter ->
-                    val isSelected = selectedSort == filter
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable { onSortChange(filter.name) }
-                            .padding(horizontal = 8.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = filter.label,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                val tabWidth = maxWidth / 2
+                val selectedIndex = SortOption.values().indexOf(selectedSort)
+                val indicatorOffset by animateDpAsState(
+                    targetValue = if (selectedIndex == 0) 0.dp else tabWidth,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .offset(x = indicatorOffset)
+                        .width(tabWidth)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                Row(modifier = Modifier.fillMaxSize()) {
+                    SortOption.values().forEachIndexed { index, filter ->
+                        val isSelected = selectedIndex == index
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(50))
+                                .clickable(
+                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                    indication = null
+                                ) { onSortChange(filter.name) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val color by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = filter.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = color)
+                        }
                     }
                 }
             }
