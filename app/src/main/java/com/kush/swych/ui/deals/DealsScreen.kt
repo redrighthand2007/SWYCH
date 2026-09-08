@@ -106,7 +106,7 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(1),
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 24.dp),
+                        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 120.dp, top = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {

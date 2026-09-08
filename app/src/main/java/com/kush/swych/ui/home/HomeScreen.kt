@@ -44,7 +44,7 @@ fun HomeContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(bottom = 32.dp)
+        contentPadding = PaddingValues(bottom = 120.dp)
     ) {
         // Upper Half: Trendy branding (scrolls away) - FULL SCREEN WIDTH
         item {

@@ -86,7 +86,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                 .fillMaxSize()
         ) {
             Column(
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 120.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     
