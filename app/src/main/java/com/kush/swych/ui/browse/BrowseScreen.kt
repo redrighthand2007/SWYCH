@@ -59,43 +59,63 @@ fun BrowseContent(
     val context = LocalContext.current
     val itemRepo = remember { ItemRepository(context) }
     val authRepo = remember { AuthRepository(context) }
-    val dealRepo = remember { com.kush.swych.core.data.DealRepository(context) }
+    val dealRepo = remember { DealRepository(context) }
     
-    // Initialize with cached items to avoid null state when popping back stack, which would reset scroll state
     var items by remember { mutableStateOf<List<Item>?>(ItemRepository.cachedItems) }
     var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
     var allDeals by remember { mutableStateOf<List<com.kush.swych.core.model.Deal>>(emptyList()) }
     var currentUser by remember { mutableStateOf<User?>(null) }
     var appliedItemIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var fetchError by remember { mutableStateOf<String?>(null) }
+    var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     
-    val selectedSort = SortOption.valueOf(sortName)
-    val locationFilter = LocationFilter.valueOf(locationName)
+    val selectedSort = try { SortOption.valueOf(sortName) } catch (_: Exception) { SortOption.RECENT }
+    val locationFilter = try { LocationFilter.valueOf(locationName) } catch (_: Exception) { LocationFilter.CAMPUS }
+
+    // Centralized data loading function
+    fun loadAllData(forceRefresh: Boolean = false) {
+        scope.launch {
+            try {
+                val userResult = authRepo.getAllUsers(forceRefresh = forceRefresh)
+                if (userResult.isSuccess) {
+                    users = userResult.getOrNull()?.associateBy { it.uid } ?: emptyMap()
+                }
+                
+                val currentUserResult = authRepo.getCurrentUserProfile()
+                if (currentUserResult.isSuccess) {
+                    currentUser = currentUserResult.getOrNull()
+                }
+
+                val dealsResult = dealRepo.getAllDeals(forceRefresh = forceRefresh)
+                if (dealsResult.isSuccess) {
+                    allDeals = dealsResult.getOrNull() ?: emptyList()
+                    val myUid = currentUser?.uid
+                    if (myUid != null) {
+                        appliedItemIds = allDeals.filter { it.buyerId == myUid }.map { it.itemId }.toSet()
+                    }
+                }
+                
+                val result = itemRepo.getAllItems(forceRefresh = forceRefresh)
+                if (result.isFailure) {
+                    fetchError = result.exceptionOrNull()?.message ?: "Unknown error"
+                } else {
+                    fetchError = null
+                }
+                items = result.getOrNull() ?: items ?: emptyList()
+            } finally {
+                isRefreshing = false
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
-        val userResult = authRepo.getAllUsers()
-        if (userResult.isSuccess) {
-            users = userResult.getOrNull()?.associateBy { it.uid } ?: emptyMap()
+        if (items == null || items?.isEmpty() == true) {
+            loadAllData()
+        } else {
+            // Still load fresh data in background but don't show loading state
+            loadAllData()
         }
-        
-        val currentUserResult = authRepo.getCurrentUserProfile()
-        if (currentUserResult.isSuccess) {
-            currentUser = currentUserResult.getOrNull()
-        }
-
-        val dealsResult = dealRepo.getAllDeals()
-        if (dealsResult.isSuccess) {
-            allDeals = dealsResult.getOrNull() ?: emptyList()
-            val myDeals = allDeals.filter { it.buyerId == currentUser?.uid }
-            appliedItemIds = myDeals.map { it.itemId }.toSet()
-        }
-        
-        val result = itemRepo.getAllItems()
-        if (result.isFailure) {
-            fetchError = result.exceptionOrNull()?.message ?: "Unknown error"
-        }
-        items = result.getOrNull() ?: emptyList()
     }
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -189,20 +209,19 @@ fun BrowseContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Grid
+        // Grid with Pull-to-Refresh
         @OptIn(ExperimentalMaterial3Api::class)
         PullToRefreshBox(
-            isRefreshing = items == null,
+            isRefreshing = isRefreshing,
             onRefresh = {
-                items = null
-                scope.launch { 
-                    val result = itemRepo.getAllItems(forceRefresh = true)
-                    items = result.getOrNull() ?: emptyList()
-                } 
+                isRefreshing = true
+                loadAllData(forceRefresh = true)
             },
             modifier = Modifier.fillMaxSize()
         ) {
-            if (items == null) {
+            val currentItems = items
+            if (currentItems == null) {
+                // Initial loading — shimmer
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(1),
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
@@ -214,93 +233,92 @@ fun BrowseContent(
                         Box(modifier = Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(16.dp)).shimmerEffect())
                     }
                 }
-        } else {
-            val selectedCat = if (category.isBlank()) "All" else category
-            var filteredItems = (if (selectedCat == "All") items!! else items!!.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status != "SOLD" }
-            
-            // Location filtering
-            if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {
-                filteredItems = filteredItems.filter { item ->
-                    val itemSellerBlock = users[item.sellerId]?.block ?: ""
-                    itemSellerBlock == currentUser!!.block
-                }
-            }
-
-            // Sorting
-            filteredItems = when (selectedSort) {
-                SortOption.RECENT -> filteredItems.reversed() // Reverse insertion order to show latest first
-                SortOption.LOW_TO_HIGH -> filteredItems.sortedBy { it.price }
-            }
-
-            if (filteredItems.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = fetchError ?: "No items found.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(1),
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(
-                        items = filteredItems,
-                        key = { it.id } // Use item ID as key to help Compose preserve scroll position across recompositions!
-                    ) { item ->
-                        val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
-                        val sellerName = users[item.sellerId]?.name ?: "Unknown"
-                        val sellerDeals = allDeals.filter { it.sellerId == item.sellerId }
-                        val dealsMade = sellerDeals.count { it.status == "SOLD" }
-                        val dealsExpired = sellerDeals.count { it.status == "REJECTED" }
-                        val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
-                        
-                        ItemCard(
-                            item = item,
-                            sellerName = sellerName,
-                            sellerBlock = sellerBlock,
-                            dealsMade = dealsMade,
-                            dealsExpired = dealsExpired,
-                            isOwnItem = item.sellerId == currentUser?.uid,
-                            isApplied = appliedItemIds.contains(item.id),
-                            onClick = { navController.navigate(ItemDetailRoute(item.id)) },
-                            onDealClick = {
-                                coroutineScope.launch {
-                                    val result = dealRepo.createDeal(
-                                        itemId = item.id,
-                                        itemTitle = item.title,
-                                        itemPhotoUrl = item.photoUrl ?: "",
-                                        sellerId = item.sellerId,
-                                        agreedPrice = item.price
-                                    )
-                                    if (result.isSuccess) {
-                                        appliedItemIds = appliedItemIds + item.id
-                                        // Refresh items to reflect PENDING status
-                                        val refreshed = itemRepo.getAllItems(forceRefresh = true)
-                                        items = refreshed.getOrNull() ?: items
-                                    }
-                                }
-                            },
-                            onRemoveClick = {
-                                coroutineScope.launch {
-                                    val res = itemRepo.deleteItem(item.id)
-                                    if (res.isSuccess) {
-                                        items = items?.filter { it.id != item.id }
-                                    }
-                                }
-                            }
-                        )
+                val selectedCat = if (category.isBlank()) "All" else category
+                var filteredItems = (if (selectedCat == "All") currentItems else currentItems.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status != "SOLD" }
+                
+                // Location filtering
+                if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {
+                    filteredItems = filteredItems.filter { item ->
+                        val itemSellerBlock = users[item.sellerId]?.block ?: ""
+                        itemSellerBlock == currentUser?.block
                     }
                 }
-            }
+
+                // Sorting
+                filteredItems = when (selectedSort) {
+                    SortOption.RECENT -> filteredItems.reversed()
+                    SortOption.LOW_TO_HIGH -> filteredItems.sortedBy { it.price }
+                }
+
+                if (filteredItems.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = fetchError ?: "No items found.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(1),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(
+                            items = filteredItems,
+                            key = { it.id }
+                        ) { item ->
+                            val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
+                            val sellerName = users[item.sellerId]?.name ?: "Unknown"
+                            val sellerDeals = allDeals.filter { it.sellerId == item.sellerId }
+                            val dealsMade = sellerDeals.count { it.status == "SOLD" }
+                            val dealsExpired = sellerDeals.count { it.status == "REJECTED" }
+                            
+                            ItemCard(
+                                item = item,
+                                sellerName = sellerName,
+                                sellerBlock = sellerBlock,
+                                dealsMade = dealsMade,
+                                dealsExpired = dealsExpired,
+                                isOwnItem = item.sellerId == currentUser?.uid,
+                                isApplied = appliedItemIds.contains(item.id),
+                                onClick = { navController.navigate(ItemDetailRoute(item.id)) },
+                                onDealClick = {
+                                    scope.launch {
+                                        val result = dealRepo.createDeal(
+                                            itemId = item.id,
+                                            itemTitle = item.title,
+                                            itemPhotoUrl = item.photoUrl ?: "",
+                                            sellerId = item.sellerId,
+                                            agreedPrice = item.price
+                                        )
+                                        if (result.isSuccess) {
+                                            appliedItemIds = appliedItemIds + item.id
+                                            // Refresh all data to reflect changes
+                                            loadAllData(forceRefresh = true)
+                                        }
+                                    }
+                                },
+                                onRemoveClick = {
+                                    scope.launch {
+                                        val res = itemRepo.deleteItem(item.id)
+                                        if (res.isSuccess) {
+                                            // Refresh all data since deals may have been cleaned up too
+                                            loadAllData(forceRefresh = true)
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }

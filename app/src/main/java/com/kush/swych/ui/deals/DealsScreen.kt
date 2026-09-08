@@ -41,7 +41,6 @@ import com.kush.swych.core.model.User
 import com.kush.swych.core.network.SupabaseManager
 import com.kush.swych.core.designsystem.component.ItemCard
 import com.kush.swych.core.util.HapticManager
-import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,19 +54,24 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
     var allDeals by remember { mutableStateOf<List<Deal>?>(null) }
     var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
     var isLoading by remember { mutableStateOf(true) }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     val currentUid = authRepo.currentUserUid
 
-    fun loadDeals() {
+    fun loadDeals(forceRefresh: Boolean = false) {
         coroutineScope.launch {
-            val res = dealRepo.getAllDeals()
-            if (res.isSuccess) {
-                allDeals = res.getOrNull()
+            try {
+                val res = dealRepo.getAllDeals(forceRefresh = forceRefresh)
+                if (res.isSuccess) {
+                    allDeals = res.getOrNull()
+                }
+                
+                val userRes = authRepo.getAllUsers(forceRefresh = forceRefresh)
+                users = userRes.getOrNull()?.associateBy { it.uid } ?: emptyMap()
+            } finally {
+                isLoading = false
+                isRefreshing = false
             }
-            
-            val userRes = authRepo.getAllUsers()
-            users = userRes.getOrNull()?.associateBy { it.uid } ?: emptyMap()
-            isLoading = false
         }
     }
 
@@ -91,8 +95,11 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
             
             @OptIn(ExperimentalMaterial3Api::class)
             PullToRefreshBox(
-                isRefreshing = isLoading && currentDeals == null,
-                onRefresh = { isLoading = true; loadDeals() },
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    isRefreshing = true
+                    loadDeals(forceRefresh = true)
+                },
                 modifier = Modifier.fillMaxSize()
             ) {
                 if (isLoading && currentDeals == null) {
@@ -157,13 +164,9 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                                         if (isBuyer) {
                                             BuyerDealActions(deal = deal, sellerPhone = otherUser?.phone, hapticManager = hapticManager, onCancel = {
                                                 coroutineScope.launch {
-                                                    try {
-                                                        SupabaseManager.client.postgrest["deals"].delete {
-                                                            filter { eq("id", deal.id) }
-                                                        }
+                                                    val res = dealRepo.deleteDeal(deal.id, deal.itemId)
+                                                    if (res.isSuccess) {
                                                         allDeals = allDeals?.filter { it.id != deal.id }
-                                                    } catch (e: Exception) {
-                                                        e.printStackTrace()
                                                     }
                                                 }
                                             })
@@ -175,13 +178,13 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                                                 onAccept = {
                                                     coroutineScope.launch {
                                                         dealRepo.updateDealStatus(deal.id, deal.itemId, "SOLD")
-                                                        loadDeals()
+                                                        loadDeals(forceRefresh = true)
                                                     }
                                                 },
                                                 onReject = {
                                                     coroutineScope.launch {
                                                         dealRepo.updateDealStatus(deal.id, deal.itemId, "REJECTED")
-                                                        loadDeals()
+                                                        loadDeals(forceRefresh = true)
                                                     }
                                                 }
                                             )
@@ -305,10 +308,14 @@ fun ContactReveal(phone: String?, hapticManager: HapticManager) {
         IconButton(
             onClick = {
                 hapticManager.triggerFeedback()
-                val intent = Intent(Intent.ACTION_DIAL).apply {
-                    data = Uri.parse("tel:$phone")
+                try {
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:$phone")
+                    }
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                    // No dialer app available — safely ignore
                 }
-                context.startActivity(intent)
             },
             modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp)).size(36.dp)
         ) {

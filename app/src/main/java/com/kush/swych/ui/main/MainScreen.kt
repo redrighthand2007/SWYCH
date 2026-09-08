@@ -104,9 +104,13 @@ fun MainScreen(
 
     LaunchedEffect(Unit) {
         while(isActive) {
-            val result = dealRepo.getMyDeals()
-            hasPendingDeals = result.getOrNull()?.isNotEmpty() == true
-            delay(5000)
+            try {
+                val result = dealRepo.getMyDeals()
+                hasPendingDeals = result.getOrNull()?.any { it.status == "PENDING" } == true
+            } catch (_: Exception) {
+                // Silently ignore polling errors
+            }
+            delay(10000)
         }
     }
 

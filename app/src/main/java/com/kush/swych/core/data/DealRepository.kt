@@ -38,7 +38,9 @@ class DealRepository(private val context: Context) {
                 filter { eq("id", itemId) }
             }
             
-            ItemRepository.cachedItems = null // invalidate cache
+            // Invalidate BOTH caches so all screens see fresh data
+            ItemRepository.cachedItems = null
+            cachedDeals = null
             
             Result.success(Unit)
         } catch (e: Exception) {
@@ -48,14 +50,12 @@ class DealRepository(private val context: Context) {
 
     suspend fun updateDealStatus(dealId: String, itemId: String, newStatus: String): Result<Unit> {
         return try {
-            // Update deal status
             SupabaseManager.client.postgrest["deals"].update({
                 set("status", newStatus)
             }) {
                 filter { eq("id", dealId) }
             }
             
-            // If new status is REJECTED, item goes back to OPEN. If SOLD, item goes to SOLD.
             val itemStatus = if (newStatus == "REJECTED") "OPEN" else "SOLD"
             SupabaseManager.client.postgrest["items"].update({
                 set("status", itemStatus)
@@ -63,7 +63,36 @@ class DealRepository(private val context: Context) {
                 filter { eq("id", itemId) }
             }
             
-            ItemRepository.cachedItems = null // invalidate cache
+            // Invalidate BOTH caches
+            ItemRepository.cachedItems = null
+            cachedDeals = null
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Delete a deal AND reset the item status back to OPEN.
+     * Used when a buyer cancels their deal request.
+     */
+    suspend fun deleteDeal(dealId: String, itemId: String): Result<Unit> {
+        return try {
+            SupabaseManager.client.postgrest["deals"].delete {
+                filter { eq("id", dealId) }
+            }
+            
+            // Reset item back to OPEN so others can deal on it
+            SupabaseManager.client.postgrest["items"].update({
+                set("status", "OPEN")
+            }) {
+                filter { eq("id", itemId) }
+            }
+            
+            // Invalidate BOTH caches
+            ItemRepository.cachedItems = null
+            cachedDeals = null
             
             Result.success(Unit)
         } catch (e: Exception) {
@@ -79,8 +108,6 @@ class DealRepository(private val context: Context) {
             val deals = SupabaseManager.client.postgrest["deals"]
                 .select {
                     filter { 
-                        // Simplified filter: buyer or seller. 
-                        // In PostgREST, we'd use 'or' filter, but doing simple fetch for MVP
                         or {
                             eq("buyer_id", uid)
                             eq("seller_id", uid)
@@ -95,10 +122,12 @@ class DealRepository(private val context: Context) {
         }
     }
 
-    suspend fun getAllDeals(): Result<List<Deal>> {
+    suspend fun getAllDeals(forceRefresh: Boolean = false): Result<List<Deal>> {
         return try {
-            val cached = cachedDeals
-            if (cached != null) return Result.success(cached)
+            if (!forceRefresh) {
+                val cached = cachedDeals
+                if (cached != null) return Result.success(cached)
+            }
 
             val deals = SupabaseManager.client.postgrest["deals"].select().decodeList<Deal>()
             cachedDeals = deals
@@ -109,6 +138,7 @@ class DealRepository(private val context: Context) {
     }
 
     companion object {
+        @Volatile
         var cachedDeals: List<Deal>? = null
     }
 }

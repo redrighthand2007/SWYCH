@@ -11,6 +11,7 @@ import java.util.UUID
 class ItemRepository(private val context: Context) {
 
     companion object {
+        @Volatile
         var cachedItems: List<Item>? = null
     }
 
@@ -113,9 +114,16 @@ class ItemRepository(private val context: Context) {
     }
     suspend fun deleteItem(itemId: String): Result<Unit> {
         return try {
+            // Delete any deals associated with this item first
+            try {
+                SupabaseManager.client.postgrest["deals"]
+                    .delete { filter { eq("item_id", itemId) } }
+            } catch (_: Exception) { /* ignore if no deals */ }
+            
             SupabaseManager.client.postgrest["items"]
                 .delete { filter { eq("id", itemId) } }
             cachedItems = null
+            DealRepository.cachedDeals = null
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

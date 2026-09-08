@@ -10,6 +10,7 @@ import java.util.UUID
 class AuthRepository(private val context: Context) {
 
     companion object {
+        @Volatile
         var cachedUsers: List<User>? = null
     }
 
