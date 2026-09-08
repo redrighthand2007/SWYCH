@@ -123,7 +123,7 @@ fun LoginScreen(navController: NavController) {
                         email = it
                         if (errorMessage != null) errorMessage = null
                     },
-                    label = { Text("Email") },
+                    label = { Text("VIT Email or Phone Number") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Email,
@@ -132,7 +132,7 @@ fun LoginScreen(navController: NavController) {
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
+                        keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
                     ),
                     keyboardActions = KeyboardActions(
