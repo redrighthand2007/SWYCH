@@ -84,17 +84,15 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Column(
-                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 120.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    
-                    // Photo Placeholder
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
+            
+            // Photo Placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
                             .heightIn(min = 180.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(
@@ -258,7 +256,6 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(40.dp))
-                }
         }
         SnackbarHost(
             hostState = snackbarHostState,
