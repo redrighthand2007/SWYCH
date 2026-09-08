@@ -42,6 +42,10 @@ class AuthRepository(private val context: Context) {
             
             SupabaseManager.client.postgrest["users"].insert(user)
             
+            // Save UID to SharedPreferences so the app knows who is logged in
+            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+            prefs.edit { putString("current_uid", uid) }
+            
             cachedUsers = null
             Result.success(Unit)
         } catch (e: Exception) {
