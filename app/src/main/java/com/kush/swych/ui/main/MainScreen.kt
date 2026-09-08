@@ -1,16 +1,8 @@
 package com.kush.swych.ui.main
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.*
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.*
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -146,34 +138,48 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (selectedTabIndex) {
-                0 -> HomeContent(
-                    navController = navController,
-                    onCategoryClick = { category ->
-                        browseCategory = category
-                        selectedTabIndex = 1
-                    },
-                    onNavigateToProfile = {
-                        expandContactDev = true
-                        selectedTabIndex = 4
-                    }
-                )
-                1 -> BrowseContent(
-                    navController = navController,
-                    category = browseCategory,
-                    onCategoryChange = { browseCategory = it },
-                    sortName = browseSortName,
-                    onSortChange = { browseSortName = it },
-                    locationName = browseLocationName,
-                    onLocationChange = { browseLocationName = it }
-                )
-                2 -> com.kush.swych.ui.postitem.PostItemScreen(navController = navController, onNavigateHome = { selectedTabIndex = 0 })
-                3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController, onNavigateToMainTab = { selectedTabIndex = it })
-                4 -> ProfileScreen(
-                    navController = navController,
-                    onNavigateToMainTab = { tabIndex -> selectedTabIndex = tabIndex },
-                    expandContactDev = expandContactDev
-                )
+            AnimatedContent(
+                targetState = selectedTabIndex,
+                transitionSpec = {
+                    (slideInHorizontally(
+                        animationSpec = tween(300),
+                        initialOffsetX = { fullWidth -> if (targetState > initialState) fullWidth else -fullWidth }
+                    ) + fadeIn(animationSpec = tween(300))) togetherWith (slideOutHorizontally(
+                        animationSpec = tween(300),
+                        targetOffsetX = { fullWidth -> if (targetState > initialState) -fullWidth else fullWidth }
+                    ) + fadeOut(animationSpec = tween(300)))
+                },
+                label = "tab_transition"
+            ) { targetIndex ->
+                when (targetIndex) {
+                    0 -> HomeContent(
+                        navController = navController,
+                        onCategoryClick = { category ->
+                            browseCategory = category
+                            selectedTabIndex = 1
+                        },
+                        onNavigateToProfile = {
+                            expandContactDev = true
+                            selectedTabIndex = 4
+                        }
+                    )
+                    1 -> BrowseContent(
+                        navController = navController,
+                        category = browseCategory,
+                        onCategoryChange = { browseCategory = it },
+                        sortName = browseSortName,
+                        onSortChange = { browseSortName = it },
+                        locationName = browseLocationName,
+                        onLocationChange = { browseLocationName = it }
+                    )
+                    2 -> com.kush.swych.ui.postitem.PostItemScreen(navController = navController, onNavigateHome = { selectedTabIndex = 0 })
+                    3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController, onNavigateToMainTab = { selectedTabIndex = it })
+                    4 -> ProfileScreen(
+                        navController = navController,
+                        onNavigateToMainTab = { tabIndex -> selectedTabIndex = tabIndex },
+                        expandContactDev = expandContactDev
+                    )
+                }
             }
         }
     }
@@ -187,50 +193,59 @@ private fun SwychBottomBar(
     hasPendingDeals: Boolean,
     onTabSelected: (Int) -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.background,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        NavigationBar(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.navigationBars),
-            containerColor = Color.Transparent,
-            tonalElevation = 0.dp
+                .clip(RoundedCornerShape(32.dp)),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 8.dp,
+            shadowElevation = 8.dp
         ) {
-            navTabs.forEachIndexed { index, tab ->
-                val isSelected = selectedIndex == index
-                val iconScale by animateFloatAsState(
-                    targetValue = if (isSelected) 1.15f else 1f,
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-                    label = "nav_scale_$index"
-                )
+            NavigationBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp), // slightly smaller height for pill
+                containerColor = Color.Transparent,
+                tonalElevation = 0.dp,
+                windowInsets = WindowInsets(0.dp) // Remove default insets since we handle them outside
+            ) {
+                navTabs.forEachIndexed { index, tab ->
+                    val isSelected = selectedIndex == index
+                    val iconScale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.15f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                        label = "nav_scale_$index"
+                    )
 
-                NavigationBarItem(
-                    selected = isSelected,
-                    onClick = { onTabSelected(index) },
-                    icon = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(bottom = 2.dp)
-                        ) {
-                            Icon(
-                                imageVector = if (isSelected) tab.filledIcon else tab.outlinedIcon,
-                                contentDescription = null,
-                                modifier = Modifier.size((24 * iconScale).dp),
-                                tint = if (index == 3 && hasPendingDeals) Color.Red else if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        indicatorColor = Color.Transparent
-                    ),
-                    alwaysShowLabel = false
-                )
+                    NavigationBarItem(
+                        selected = isSelected,
+                        onClick = { onTabSelected(index) },
+                        icon = {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Icon(
+                                    imageVector = if (isSelected) tab.filledIcon else tab.outlinedIcon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size((24 * iconScale).dp),
+                                    tint = if (index == 3 && hasPendingDeals) Color.Red else if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            indicatorColor = Color.Transparent
+                        ),
+                        alwaysShowLabel = false
+                    )
+                }
             }
         }
     }
