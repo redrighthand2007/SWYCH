@@ -259,7 +259,18 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         }
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 100.dp)
+                .padding(horizontal = 24.dp),
+            snackbar = { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+                )
+            }
         )
     }
 }

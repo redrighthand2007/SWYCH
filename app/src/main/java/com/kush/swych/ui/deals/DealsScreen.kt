@@ -185,18 +185,12 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                                                     deal = deal,
                                                     sellerPhone = otherUser?.phone,
                                                     hapticManager = hapticManager,
-                                                    onCancel = {
+                                                    onDelete = {
                                                         coroutineScope.launch {
                                                             val res = dealRepo.deleteDeal(deal.id, deal.itemId)
                                                             if (res.isSuccess) {
                                                                 allDeals = allDeals?.filter { it.id != deal.id }
                                                             }
-                                                        }
-                                                    },
-                                                    onAccept = {
-                                                        coroutineScope.launch {
-                                                            dealRepo.updateDealStatus(deal.id, deal.itemId, "SOLD")
-                                                            loadDeals(forceRefresh = true)
                                                         }
                                                     }
                                                 )
@@ -205,10 +199,24 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
                                                     deal = deal,
                                                     buyerPhone = otherUser?.phone,
                                                     hapticManager = hapticManager,
-                                                    onDelete = {
+                                                    onAccept = {
+                                                        coroutineScope.launch {
+                                                            dealRepo.updateDealStatus(deal.id, deal.itemId, "SOLD")
+                                                            loadDeals(forceRefresh = true)
+                                                        }
+                                                    },
+                                                    onReject = {
                                                         coroutineScope.launch {
                                                             dealRepo.updateDealStatus(deal.id, deal.itemId, "REJECTED")
                                                             loadDeals(forceRefresh = true)
+                                                        }
+                                                    },
+                                                    onDelete = {
+                                                        coroutineScope.launch {
+                                                            val res = dealRepo.deleteDeal(deal.id, deal.itemId)
+                                                            if (res.isSuccess) {
+                                                                allDeals = allDeals?.filter { it.id != deal.id }
+                                                            }
                                                         }
                                                     }
                                                 )
@@ -226,19 +234,10 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
 }
 
 @Composable
-fun RowScope.BuyerDealActions(deal: Deal, sellerPhone: String?, hapticManager: HapticManager, onCancel: () -> Unit, onAccept: () -> Unit) {
+fun RowScope.BuyerDealActions(deal: Deal, sellerPhone: String?, hapticManager: HapticManager, onDelete: () -> Unit) {
     if (deal.status == "PENDING") {
         Button(
-            onClick = { hapticManager.triggerFeedback(); onAccept() },
-            shape = RoundedCornerShape(50),
-            contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.height(28.dp).weight(1f),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-        ) {
-            Text("Accept", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        }
-        Button(
-            onClick = { hapticManager.triggerFeedback(); onCancel() },
+            onClick = { hapticManager.triggerFeedback(); onDelete() },
             shape = RoundedCornerShape(50),
             contentPadding = PaddingValues(0.dp),
             modifier = Modifier.height(28.dp).weight(1f),
@@ -248,7 +247,7 @@ fun RowScope.BuyerDealActions(deal: Deal, sellerPhone: String?, hapticManager: H
         }
     } else if (deal.status == "REJECTED") {
         Button(
-            onClick = { hapticManager.triggerFeedback(); onCancel() },
+            onClick = { hapticManager.triggerFeedback(); onDelete() },
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
             contentPadding = PaddingValues(0.dp),
@@ -270,19 +269,35 @@ fun RowScope.BuyerDealActions(deal: Deal, sellerPhone: String?, hapticManager: H
 }
 
 @Composable
-fun RowScope.SellerDealActions(deal: Deal, buyerPhone: String?, hapticManager: HapticManager, onDelete: () -> Unit) {
-    if (deal.status == "PENDING" || deal.status == "REJECTED") {
+fun RowScope.SellerDealActions(deal: Deal, buyerPhone: String?, hapticManager: HapticManager, onAccept: () -> Unit, onReject: () -> Unit, onDelete: () -> Unit) {
+    if (deal.status == "PENDING") {
         Button(
-            onClick = { hapticManager.triggerFeedback(); onDelete() },
+            onClick = { hapticManager.triggerFeedback(); onAccept() },
             shape = RoundedCornerShape(50),
             contentPadding = PaddingValues(0.dp),
             modifier = Modifier.height(28.dp).weight(1f),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text("Delete", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text("Accept", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+        Button(
+            onClick = { hapticManager.triggerFeedback(); onReject() },
+            shape = RoundedCornerShape(50),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.height(28.dp).weight(1f),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+        ) {
+            Text("Reject", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+    } else if (deal.status == "REJECTED") {
+        Button(
+            onClick = { hapticManager.triggerFeedback(); onDelete() },
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.height(28.dp).weight(1f)
+        ) {
+            Text(text = "Delete", fontSize = 11.sp)
         }
     } else if (deal.status == "SOLD") {
         if (buyerPhone != null) {
