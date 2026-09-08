@@ -136,7 +136,6 @@ fun MainScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             AnimatedContent(
                 targetState = selectedTabIndex,
@@ -201,8 +200,8 @@ private fun SwychBottomBar(
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp)),
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(50),
             color = MaterialTheme.colorScheme.surfaceVariant,
             tonalElevation = 8.dp,
             shadowElevation = 8.dp

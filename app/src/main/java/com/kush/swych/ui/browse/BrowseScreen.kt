@@ -133,7 +133,7 @@ fun BrowseContent(
                 val isAllSelected = category.isBlank() || category.equals("All", ignoreCase = true)
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(50))
                         .background(if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                         .clickable { onCategoryChange("All") }
                         .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -149,14 +149,14 @@ fun BrowseContent(
                 // Location Filter
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(50))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     LocationFilter.values().forEach { filter ->
                         val isSelected = locationFilter == filter
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(50))
                                 .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
                                 .clickable { onLocationChange(filter.name) }
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -175,14 +175,14 @@ fun BrowseContent(
             // Sort Filter
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(50))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 SortOption.values().forEach { filter ->
                     val isSelected = selectedSort == filter
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(50))
                             .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
                             .clickable { onSortChange(filter.name) }
                             .padding(horizontal = 8.dp, vertical = 6.dp)
@@ -215,7 +215,7 @@ fun BrowseContent(
                 // Initial loading — shimmer
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(1),
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 120.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxSize()
@@ -258,7 +258,7 @@ fun BrowseContent(
                 } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(1),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 120.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
