@@ -95,28 +95,18 @@ fun ProfileScreen(
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header (matching BrowseScreen structure exactly)
-        Text(
-            text = "Profile",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-            color = MaterialTheme.colorScheme.primary
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             
-            // Profile Card (Horizontal Expandable)
+            // Profile Card
             if (user != null) {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .animateContentSize(animationSpec = tween(300))
-                        .clickable { isCardExpanded = !isCardExpanded },
+                        .fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                     elevation = CardDefaults.cardElevation(0.dp)
@@ -160,55 +150,47 @@ fun ProfileScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            
-                            Icon(
-                                imageVector = if (isCardExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Expand",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
 
                         // Expanded Info
-                        AnimatedVisibility(visible = isCardExpanded) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 20.dp),
-                            ) {
-                                HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
-                                Spacer(modifier = Modifier.height(16.dp))
-                                
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 20.dp),
+                        ) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Text(
+                                text = "Phone Number: " + user!!.phone,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Phone Number: " + user!!.phone,
+                                    text = "Successful Deals: " + user!!.greenDots,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.SemiBold
                                 )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "Successful Deals: " + user!!.greenDots,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    DotBadge(greenDots = 1, redDots = 0)
-                                }
-                                
-                                Spacer(modifier = Modifier.height(12.dp))
-                                
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "Cancelled Deals: " + user!!.redDots,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    DotBadge(greenDots = 0, redDots = 1)
-                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                DotBadge(greenDots = 1, redDots = 0)
+                            }
+                            
+                            Spacer(modifier = Modifier.height(12.dp))
+                            
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Cancelled Deals: " + user!!.redDots,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                DotBadge(greenDots = 0, redDots = 1)
                             }
                         }
                     }

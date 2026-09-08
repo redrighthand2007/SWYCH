@@ -85,15 +85,8 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Text(
-                text = "Sell an Item",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
-            
             Column(
-                    modifier = Modifier.padding(horizontal = 24.dp),
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     
@@ -101,7 +94,8 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .weight(1f)
+                            .heightIn(min = 180.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (imageError) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
