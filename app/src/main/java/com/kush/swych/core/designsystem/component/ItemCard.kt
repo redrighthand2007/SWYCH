@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -22,6 +23,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.kush.swych.core.model.Item
+
+@Composable
+private fun InfoPill(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .height(28.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(50))
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        content()
+    }
+}
 
 @Composable
 fun ItemCard(
@@ -36,7 +53,7 @@ fun ItemCard(
     isApplied: Boolean = false,
     onRemoveClick: () -> Unit = {},
     modifier: Modifier = Modifier,
-    bottomActions: (@Composable () -> Unit)? = null
+    bottomActions: (@Composable RowScope.() -> Unit)? = null
 ) {
     val scale by animateFloatAsState(
         targetValue = 1f,
@@ -51,7 +68,7 @@ fun ItemCard(
             .height(130.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -74,66 +91,77 @@ fun ItemCard(
             // Divider
             Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)))
 
-            // Right ~2/3 Details
+            // Right ~2/3 Details (Pill Layout)
             Column(
                 modifier = Modifier
                     .weight(0.65f)
-                    .padding(12.dp)
+                    .padding(8.dp)
                     .fillMaxHeight(),
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Top row: Item Name and Price Box
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                // Row 1: Item and Price
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    InfoPill(modifier = Modifier.weight(0.6f)) {
                         Text(
-                            text = "₹ %.0f".format(item.price),
-                            style = MaterialTheme.typography.titleSmall,
+                            text = item.title,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    InfoPill(modifier = Modifier.weight(0.4f)) {
+                        Text(
+                            text = "₹%.0f".format(item.price),
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
-                // Middle row: Seller First Name, Block, Dots
-                val firstName = sellerName.split(" ").firstOrNull() ?: "Unknown"
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "$firstName, $sellerBlock,",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Box(modifier = Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFF4CAF50)))
-                    Spacer(Modifier.width(2.dp))
-                    Text("$dealsMade", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.width(6.dp))
-                    Box(modifier = Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFFF44336)))
-                    Spacer(Modifier.width(2.dp))
-                    Text("$dealsExpired", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                // Row 2: Name, Block, Dots
+                val firstName = sellerName.split(" ").firstOrNull() ?: "User"
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    InfoPill(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = firstName,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    InfoPill(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = sellerBlock.takeIf { it.isNotBlank() } ?: "N/A",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    InfoPill(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                            Box(modifier = Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFF4CAF50)))
+                            Spacer(Modifier.width(2.dp))
+                            Text("$dealsMade", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, fontSize = 9.sp)
+                            Spacer(Modifier.width(4.dp))
+                            Box(modifier = Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFFF44336)))
+                            Spacer(Modifier.width(2.dp))
+                            Text("$dealsExpired", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, fontSize = 9.sp)
+                        }
+                    }
                 }
 
-                // Bottom row: Actions
+                // Row 3: Actions
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.Bottom
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (bottomActions != null) {
                         bottomActions()
@@ -145,9 +173,9 @@ fun ItemCard(
                             Button(
                                 onClick = onDealClick,
                                 enabled = !buttonDisabled,
-                                shape = RoundedCornerShape(24.dp),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-                                modifier = Modifier.height(28.dp),
+                                shape = RoundedCornerShape(50),
+                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier.height(28.dp).weight(1f),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
                                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -160,18 +188,11 @@ fun ItemCard(
                                 )
                             }
                         } else {
-                            // Empty space where Deal button would be
-                            Spacer(Modifier.width(60.dp))
-                        }
-                        
-                        Spacer(Modifier.weight(1f))
-
-                        if (isOwnItem) {
                             Button(
                                 onClick = onRemoveClick,
-                                shape = RoundedCornerShape(24.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                                modifier = Modifier.height(28.dp),
+                                shape = RoundedCornerShape(50),
+                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier.height(28.dp).weight(1f),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.errorContainer,
                                     contentColor = MaterialTheme.colorScheme.onErrorContainer

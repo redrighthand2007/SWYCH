@@ -82,15 +82,7 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
     Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Deals",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+        Box(modifier = Modifier.fillMaxSize().weight(1f).padding(top = 16.dp)) {
             val currentDeals = allDeals?.filter { it.buyerId == currentUid || it.sellerId == currentUid }
             
             @OptIn(ExperimentalMaterial3Api::class)
@@ -206,76 +198,72 @@ fun DealsScreen(navController: androidx.navigation.NavController, onNavigateToMa
 }
 
 @Composable
-fun BuyerDealActions(deal: Deal, sellerPhone: String?, hapticManager: HapticManager, onCancel: () -> Unit, onAccept: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (deal.status == "PENDING") {
-            Button(
-                onClick = { hapticManager.triggerFeedback(); onAccept() },
-                shape = RoundedCornerShape(24.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                modifier = Modifier.height(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text("Accept", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.width(8.dp))
-            Button(
-                onClick = { hapticManager.triggerFeedback(); onCancel() },
-                shape = RoundedCornerShape(24.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                modifier = Modifier.height(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
-            ) {
-                Text("Cancel", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-        } else if (deal.status == "REJECTED") {
-            Button(
-                onClick = { hapticManager.triggerFeedback(); onCancel() },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                modifier = Modifier.height(28.dp)
-            ) {
-                Text(text = "Dismiss", fontSize = 11.sp)
-            }
-        } else if (deal.status == "SOLD") {
-            if (sellerPhone != null) {
+fun RowScope.BuyerDealActions(deal: Deal, sellerPhone: String?, hapticManager: HapticManager, onCancel: () -> Unit, onAccept: () -> Unit) {
+    if (deal.status == "PENDING") {
+        Button(
+            onClick = { hapticManager.triggerFeedback(); onAccept() },
+            shape = RoundedCornerShape(50),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.height(28.dp).weight(1f),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Accept", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+        Button(
+            onClick = { hapticManager.triggerFeedback(); onCancel() },
+            shape = RoundedCornerShape(50),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.height(28.dp).weight(1f),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+        ) {
+            Text("Cancel", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+    } else if (deal.status == "REJECTED") {
+        Button(
+            onClick = { hapticManager.triggerFeedback(); onCancel() },
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.height(28.dp).weight(1f)
+        ) {
+            Text(text = "Dismiss", fontSize = 11.sp)
+        }
+    } else if (deal.status == "SOLD") {
+        if (sellerPhone != null) {
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 com.kush.swych.ui.deals.ContactReveal(phone = sellerPhone, hapticManager = hapticManager)
-            } else {
-                Text(text = "Accepted", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+            }
+        } else {
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                Text(text = "Accepted", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold, fontSize = 11.sp)
             }
         }
     }
 }
 
 @Composable
-fun SellerDealActions(deal: Deal, buyerPhone: String?, hapticManager: HapticManager, onDelete: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (deal.status == "PENDING" || deal.status == "REJECTED") {
-            Button(
-                onClick = { hapticManager.triggerFeedback(); onDelete() },
-                shape = RoundedCornerShape(24.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                modifier = Modifier.height(28.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                )
-            ) {
-                Text("Delete", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-        } else if (deal.status == "SOLD") {
-            if (buyerPhone != null) {
+fun RowScope.SellerDealActions(deal: Deal, buyerPhone: String?, hapticManager: HapticManager, onDelete: () -> Unit) {
+    if (deal.status == "PENDING" || deal.status == "REJECTED") {
+        Button(
+            onClick = { hapticManager.triggerFeedback(); onDelete() },
+            shape = RoundedCornerShape(50),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.height(28.dp).weight(1f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            )
+        ) {
+            Text("Delete", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+    } else if (deal.status == "SOLD") {
+        if (buyerPhone != null) {
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 com.kush.swych.ui.deals.ContactReveal(phone = buyerPhone, hapticManager = hapticManager)
-            } else {
-                Text(text = "Sold", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+            }
+        } else {
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                Text(text = "Sold", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold, fontSize = 11.sp)
             }
         }
     }
