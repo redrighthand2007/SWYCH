@@ -7,6 +7,9 @@ import com.kush.swych.core.network.SupabaseManager
 import io.github.jan.supabase.postgrest.postgrest
 import java.util.UUID
 
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+
 class AuthRepository(private val context: Context) {
 
     companion object {
@@ -22,8 +25,15 @@ class AuthRepository(private val context: Context) {
         password: String 
     ): Result<Unit> {
         return try {
+            val authResult = SupabaseManager.client.auth.signUpWith(Email) {
+                this.email = email
+                this.password = password
+            }
+            
+            val uid = authResult?.id ?: UUID.randomUUID().toString()
+
             val user = User(
-                uid = "user_",
+                uid = uid,
                 name = name,
                 block = block,
                 phone = phone,
@@ -31,9 +41,6 @@ class AuthRepository(private val context: Context) {
             )
             
             SupabaseManager.client.postgrest["users"].insert(user)
-            
-            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            prefs.edit { putString("current_uid", user.uid) }
             
             cachedUsers = null
             Result.success(Unit)
@@ -57,18 +64,35 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun loginUser(email: String, password: String): Result<Unit> {
+    suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> {
         return try {
-            val user = SupabaseManager.client.postgrest["users"]
-                .select { filter { eq("email", email) } }
-                .decodeSingleOrNull<User>()
-            
-            if (user != null) {
+            val actualEmail = if (!phoneOrEmail.contains("@")) {
+                val userRecord = SupabaseManager.client.postgrest["users"]
+                    .select { filter { eq("phone", phoneOrEmail) } }
+                    .decodeSingleOrNull<User>()
+                userRecord?.email ?: phoneOrEmail 
+            } else {
+                phoneOrEmail
+            }
+
+            SupabaseManager.client.auth.signInWith(Email) {
+                this.email = actualEmail
+                this.password = password
+            }
+
+            val authUser = SupabaseManager.client.auth.currentUserOrNull()
+            if (authUser != null) {
+                val userRecord = SupabaseManager.client.postgrest["users"]
+                    .select { filter { eq("email", actualEmail) } }
+                    .decodeSingleOrNull<User>()
+                
+                val finalUid = userRecord?.uid ?: authUser.id
+
                 val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-                prefs.edit { putString("current_uid", user.uid) }
+                prefs.edit { putString("current_uid", finalUid) }
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("User not found"))
+                Result.failure(Exception("Authentication failed"))
             }
         } catch (e: Exception) {
             Result.failure(e)
