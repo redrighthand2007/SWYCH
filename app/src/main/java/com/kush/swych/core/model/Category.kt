@@ -1,11 +1,28 @@
-﻿package com.kush.swych.core.model
+package com.kush.swych.core.model
 
 enum class Category(val displayName: String) {
     SNACKS("Snacks"),
     DRINKS("Drinks"),
-    SMOKES("Smokes"),
-    STUDYS("Study's"),
-    SUBSCRIPTIONS("Subscriptions"),
+    PUFFS("Puffs"),
+    SWEETS("Sweets"),
+    COOKING("Cooking"),
+    BOOKS("Books"),
+    NOTES("Notes"),
+    STATIONERY("Stationery"),
+    COURSES("Courses"),
+    EXAMS("Exams"),
+    GAMES("Games"),
+    MOVIES("Movies"),
+    MUSIC("Music"),
+    ADULT("Adult"),
+    ONLINE_GAMES("Online Games"),
+    MEDS("Meds"),
+    SKINCARE("Skincare"),
+    HYGIENE("Hygiene"),
     ACCESSORIES("Accessories"),
-    CYCLES("Cycles")
+    KETTLES("Kettles"),
+    EXT_BOARDS("Ext. Boards"),
+    CYCLES("Cycles"),
+    ONLINE_TO_CASH("Online -> Cash"),
+    CASH_TO_ONLINE("Cash -> Online")
 }
