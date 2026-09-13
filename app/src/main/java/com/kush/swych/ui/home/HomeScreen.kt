@@ -113,19 +113,26 @@ fun HomeContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            item {
-                androidx.compose.foundation.lazy.LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(categories) { category ->
-                        Box(modifier = Modifier.width(140.dp)) {
-                            CategoryBox(
-                                categoryName = category,
-                                onClick = {
-                                    onCategoryClick(category)
-                                }
-                            )
+            categories.chunked(2).forEach { rowItems ->
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        rowItems.forEach { category ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                CategoryBox(
+                                    categoryName = category,
+                                    onClick = {
+                                        onCategoryClick(category)
+                                    }
+                                )
+                            }
+                        }
+                        if (rowItems.size < 2) {
+                            Spacer(modifier = Modifier.weight(1f))
                         }
                     }
                 }
@@ -157,33 +164,40 @@ fun CategoryBox(
     categoryName: String,
     onClick: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val formattedName = categoryName.lowercase().replace(" ", "_").replace("-", "_")
+    val resId = context.resources.getIdentifier("cat_$formattedName", "drawable", context.packageName)
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() }
+            .aspectRatio(1.1f)
+            .clip(RoundedCornerShape(24.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
-            model = "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?q=80&w=400",
-            contentDescription = categoryName,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        
-        // Overlay to ensure text readability over image
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f))
-        )
-        
-        Text(
-            text = categoryName,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = Color.White,
-            modifier = Modifier.align(Alignment.Center)
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (resId != 0) {
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(id = resId),
+                    contentDescription = categoryName,
+                    modifier = Modifier.size(64.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Box(modifier = Modifier.size(64.dp).background(Color.Gray, RoundedCornerShape(16.dp)))
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = categoryName,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
