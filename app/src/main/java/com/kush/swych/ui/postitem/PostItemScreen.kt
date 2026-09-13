@@ -84,7 +84,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 120.dp),
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 100.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             
@@ -255,7 +255,6 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                         isLoading = isSubmitting,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(40.dp))
         }
         SnackbarHost(
             hostState = snackbarHostState,
