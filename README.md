@@ -2,11 +2,9 @@
 
 <img src="docs/assets/logo.png" alt="Swych Logo" width="120" style="border-radius: 28px;" />
 
-# Swap n' Switch
+# Swych (Swap n' Switch)
 
-### The campus marketplace that actually works.
-
-**Buy. Sell. Deal. On Campus.**
+The campus marketplace that actually works. Buy. Sell. Deal. On Campus.
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white&labelColor=7F52FF)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white&labelColor=4285F4)](https://developer.android.com/jetpack/compose)
@@ -15,82 +13,117 @@
 
 </div>
 
----
+## 📸 Preview / Demo
 
-## 📖 Project Overview
+> *Demo / Screenshots Coming Soon!*
 
-### What is it?
+## ✨ Features
 
-Swych is a **peer-to-peer campus trading app** built for college students. It lets you list items you no longer need, discover what others are selling nearby, make offers, and lock in deals — all from your phone, all within your campus community.
+- **Campus-Specific Browsing**: Filter items by category, location (Hostel/Campus), and sort by newest or price.
+- **Instant Listing**: Take a photo and post an item for sale in seconds.
+- **Deal Negotiation**: Make offers directly on items instead of sliding into messy DMs.
+- **Deal Management Dashboards**: Track the status of your offers and active listings as Pending, Sold, or Rejected.
+- **Integrated Contacting**: Once a deal is struck, instantly reveal the buyer/seller phone number to connect.
+- **User Profiles**: Track users by name, hostel block, and reputation dots (Deals Made / Deals Expired).
+- **Edge-to-Edge Design**: Beautiful UI with OLED dark mode support and floating, pill-shaped navigation bars.
 
-No middlemen. No shipping fees. Just students helping students.
+## 🎯 Why This Project?
 
-### Why did you build it?
 Existing campus trading happens in chaotic, fragmented WhatsApp or Telegram groups where listings get buried, negotiations are disorganized, and buyers frequently "ghost" on meetups.
 
----
+**Swych solves this by providing:**
+- A structured, visual marketplace.
+- A streamlined "First-Come-First-Serve" locking mechanism.
+- Accountability through profiles tracking completed vs expired deals.
 
-## 📸 Screenshots & Demo
+## 🛠️ Tech Stack
 
-**▶️ Demo — Coming Soon!**
+- **Frontend:** Android (Kotlin, Jetpack Compose, Material 3, Coil)
+- **Backend:** Supabase (Auth, PostgREST API)
+- **Database:** PostgreSQL (Supabase DB with Row Level Security)
+- **Storage:** Cloudinary / Supabase Storage (for fast, optimized image hosting)
 
+## 📁 Project Structure
 
-> *Coming soon — run the app to see it in action!*
+```text
+SWYCH/
+├── app/src/main/java/com/kush/swych/
+│   ├── core/                  # Core logic, network, and data models
+│   │   ├── data/              # Repositories (Auth, Deals, Items)
+│   │   ├── designsystem/      # Theme, Colors, Typography, Common UI Components
+│   │   ├── model/             # Data models (User, Item, Deal)
+│   │   └── network/           # Supabase client config
+│   ├── ui/                    # UI screens and navigation
+│   │   ├── auth/              # Login and Sign-up screens
+│   │   ├── browse/            # Marketplace feed
+│   │   ├── deals/             # User's offers and listings management
+│   │   ├── postitem/          # Item creation flow
+│   │   └── profile/           # User dashboard
+└── README.md
+```
 
----
+## ⚙️ Installation
 
-## 🚀 Features & Status
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/redrighthand2007/CacheDeal-App.git
+   cd SWYCH
+   ```
+2. **Open the project:**
+   Open the folder in **Android Studio** (Koala or newer recommended).
+3. **Sync Gradle:**
+   Allow Android Studio to sync the Gradle files and download all required dependencies.
 
-### What does it do?
+## 🚀 Usage
 
-| Feature | Status |
-| :--- | :--- |
-| **Browse campus listings by category** | ✅ Live |
-| **List an item with photo** | ✅ Live |
-| **Make offers on items** | ✅ Live |
-| **Lock a deal & track status** | ✅ Live |
-| **My Listings dashboard** | ✅ Live |
-| **My Deals tracker** | ✅ Live |
-| **User Profiles (Block/Hostel tracking)** | ✅ Live |
-| **Dark Mode / Light Mode Support** | ✅ Live |
+1. Build and run the app on an Android Emulator or physical device (API 26+).
+2. Create an account.
+3. Browse the marketplace or post an item to start trading!
 
----
+## 🔧 Configuration
 
-## 🛠️ Tech Stack & Architecture
+To run your own backend, you must configure Supabase:
 
-Swych is built entirely with modern Android development standards.
+1. Create a [Supabase](https://supabase.com/) project.
+2. In your Android Studio project, locate your Supabase initialization (inside `core/network/SupabaseManager.kt`).
+3. Replace the placeholder Supabase URL and Anon Key with your actual project credentials.
+4. Run the necessary SQL migrations to create the `users`, `items`, and `deals` tables.
 
-### Client-Side (Android)
-* **Language:** Kotlin
-* **UI Toolkit:** Jetpack Compose (Material 3 Design)
-* **Architecture:** MVVM (Model-View-ViewModel) + Repository Pattern
-* **Image Loading:** Coil
-* **Navigation:** Jetpack Navigation Compose
-* **Asynchronous Logic:** Kotlin Coroutines & Flows
+## 📊 Results / Performance
 
-### Backend-as-a-Service (Supabase)
-* **Database:** PostgreSQL (Supabase DB)
-* **Authentication:** Supabase Auth (Email/Password)
-* **Storage:** Cloudinary (for fast, optimized image hosting) & Supabase Storage
-* **API:** PostgREST via Supabase Kotlin Client
+> *Performance metrics and benchmarks coming soon.*
 
-### System Architecture
-### Architecture Overview (MVVM + Clean Architecture)
-* **UI Layer:** Jetpack Compose, ViewModels, StateFlow.
-* **Domain Layer:** Use Cases (PostItemUseCase, AcceptOfferUseCase).
-* **Data Layer:** SupabaseNetworkDataSource, DealRepository, ItemRepository.
+## 🧠 How It Works
 
-### Database Schema (Supabase)
-* **`users` table:** `uid`, `name`, `block`, `phone`, `email`.
-* **`items` table:** `id`, `seller_id`, `title`, `description`, `price`, `category`, `status`, `photo_url`.
-* **`deals` table:** `id`, `item_id`, `buyer_id`, `seller_id`, `status` (PENDING, SOLD, REJECTED).
-*(Row Level Security (RLS) is enabled for all tables to protect user data).*
+- **Architecture**: The app follows the **MVVM (Model-View-ViewModel)** architecture and uses Jetpack Compose for declarative UI. State is managed via `StateFlow` and Coroutines for asynchronous operations.
+- **Deal Flow Logic**: Swych uses a **First-Come-First-Serve** system. When a buyer submits an offer, the deal status locks to **PENDING**. The seller can then either **Accept** (marks as SOLD, hides from feed, reveals contact) or **Reject** (cancels deal, item returns to active pool).
 
-### Deal Flow Logic (First-Come-First-Serve)
-When a buyer submits an offer, the item and deal status are instantly locked to **PENDING**. The seller can then either **Accept** (marks as SOLD and hides from feed) or **Reject** (returns item to OPEN).
+## 🗺️ Roadmap
 
----
+- [x] Basic Authentication (Sign up / Login)
+- [x] Post items with images
+- [x] Browse marketplace and filter
+- [x] Make offers and manage deals
+- [ ] Push Notifications for new offers
+- [ ] In-app messaging system
+- [ ] iOS version using Kotlin Multiplatform
 
-<div align="center">
-Made with ❤️ for campus communities.
-</div>
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+Feel free to check the [issues page](https://github.com/redrighthand2007/CacheDeal-App/issues) if you want to contribute.
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 👨‍💻 Author
+
+**Kush**
+- GitHub: [@redrighthand2007](https://github.com/redrighthand2007)
+
+## ⭐ Acknowledgements
+
+- [Jetpack Compose](https://developer.android.com/jetpack/compose) for modern Android UI
+- [Supabase](https://supabase.com/) for a seamless open-source Firebase alternative
+- [Shields.io](https://shields.io/) for the clean repository badges
