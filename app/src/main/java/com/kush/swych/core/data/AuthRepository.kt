@@ -30,7 +30,14 @@ class AuthRepository(private val context: Context) {
                 this.password = password
             }
             
-            val uid = authResult?.id ?: UUID.randomUUID().toString()
+            // Explicitly login to ensure session is available for PostgREST
+            SupabaseManager.client.auth.signInWith(Email) {
+                this.email = email
+                this.password = password
+            }
+            
+            val currentUser = SupabaseManager.client.auth.currentUserOrNull()
+            val uid = currentUser?.id ?: authResult?.id ?: UUID.randomUUID().toString()
 
             val user = User(
                 uid = uid,
@@ -71,10 +78,14 @@ class AuthRepository(private val context: Context) {
     suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> {
         return try {
             val actualEmail = if (!phoneOrEmail.contains("@")) {
-                val userRecord = SupabaseManager.client.postgrest["users"]
+                val userRecords = SupabaseManager.client.postgrest["users"]
                     .select { filter { eq("phone", phoneOrEmail) } }
-                    .decodeSingleOrNull<User>()
-                userRecord?.email ?: phoneOrEmail 
+                    .decodeList<User>()
+                
+                if (userRecords.size > 1) {
+                    throw Exception("Multiple accounts linked to this phone. Please login using your Email.")
+                }
+                userRecords.firstOrNull()?.email ?: phoneOrEmail 
             } else {
                 phoneOrEmail
             }
@@ -128,5 +139,7 @@ class AuthRepository(private val context: Context) {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
         prefs.edit { clear() }
         cachedUsers = null
+        DealRepository.cachedDeals = null
+        ItemRepository.cachedItems = null
     }
 }

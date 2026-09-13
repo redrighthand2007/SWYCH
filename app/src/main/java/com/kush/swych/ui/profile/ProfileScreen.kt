@@ -205,9 +205,13 @@ fun ProfileScreen(
                         }
                     }
                 }
-            } else {
+            } else if (isLoading) {
                 Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            } else {
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                    Text("Profile not found or incomplete. Try logging out.", color = MaterialTheme.colorScheme.error)
                 }
             }
 
