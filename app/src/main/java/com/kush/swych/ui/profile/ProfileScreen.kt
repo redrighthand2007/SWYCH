@@ -177,7 +177,12 @@ fun ProfileScreen(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                DotBadge(greenDots = 1, redDots = 0)
+                                Box(
+                                    modifier = Modifier
+                                        .size(9.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                        .background(Color(0xFF4CAF50))
+                                )
                             }
                             
                             Spacer(modifier = Modifier.height(12.dp))
@@ -190,7 +195,12 @@ fun ProfileScreen(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                DotBadge(greenDots = 0, redDots = 1)
+                                Box(
+                                    modifier = Modifier
+                                        .size(9.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                        .background(Color(0xFFF44336))
+                                )
                             }
                         }
                     }
