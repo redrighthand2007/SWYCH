@@ -170,24 +170,18 @@ fun CategoryBox(
     val context = androidx.compose.ui.platform.LocalContext.current
     val formattedName = categoryName.lowercase().replace(" ", "_").replace("-", "_").replace(">", "_").replace(".", "")
     val resId = context.resources.getIdentifier("cat_$formattedName", "drawable", context.packageName)
-    val isBlocked = categoryName == "Puffs" || categoryName == "Hub"
-    
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.1f)
             .clip(RoundedCornerShape(24.dp))
-            .background(
-                if (isBlocked) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
-            .clickable(enabled = !isBlocked) { onClick() },
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.alpha(if (isBlocked) 0.5f else 1f)
+            verticalArrangement = Arrangement.Center
         ) {
             if (resId != 0) {
                 androidx.compose.foundation.Image(
@@ -203,16 +197,7 @@ fun CategoryBox(
             Text(
                 text = categoryName,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = if (isBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        
-        if (isBlocked) {
-            Icon(
-                imageVector = Icons.Default.Block,
-                contentDescription = "Blocked",
-                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                modifier = Modifier.size(80.dp)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
