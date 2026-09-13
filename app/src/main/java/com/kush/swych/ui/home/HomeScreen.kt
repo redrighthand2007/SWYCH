@@ -97,11 +97,10 @@ fun HomeContent(
         // Category Groups
         val categoryGroups = listOf(
             "Hungry ?" to listOf("Snacks", "Drinks", "Puffs", "Sweets", "Cooking"),
-            "Lock In." to listOf("Books", "Notes", "Stationery", "CAT-1", "CAT-2"),
-            "Wanna' Chill..." to listOf("Games", "Movies", "Music", "CAT-1", "CAT-2"),
-            "Care" to listOf("Meds", "Skincare", "Hygiene", "CAT-1", "CAT-2"),
-            "Need something ?" to listOf("Services", "Tech", "Tools", "CAT-1", "CAT-2"),
-            "2nd Hand Items" to listOf("Electronics", "Cycles", "Furniture", "CAT-1", "CAT-2")
+            "Lock In." to listOf("Books", "Notes", "Stationery", "Courses", "Exams"),
+            "Wanna' Chill..." to listOf("Games", "Movies", "Music", "Adult", "Online Games"),
+            "Care" to listOf("Meds", "Skincare", "Hygiene"),
+            "2nd Hand Items" to listOf("Accessories", "Kettles", "Ext. Boards", "Cycles", "Online -> Cash", "Cash -> Online")
         )
 
         categoryGroups.forEach { (groupName, categories) ->
@@ -126,7 +125,8 @@ fun HomeContent(
                                 CategoryBox(
                                     categoryName = category,
                                     onClick = {
-                                        onCategoryClick(category)
+                                        val enumName = Category.values().find { it.displayName == category }?.name ?: category
+                                        onCategoryClick(enumName)
                                     }
                                 )
                             }
@@ -165,7 +165,7 @@ fun CategoryBox(
     onClick: () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val formattedName = categoryName.lowercase().replace(" ", "_").replace("-", "_")
+    val formattedName = categoryName.lowercase().replace(" ", "_").replace("-", "_").replace(">", "_").replace(".", "")
     val resId = context.resources.getIdentifier("cat_$formattedName", "drawable", context.packageName)
     
     Box(

@@ -165,7 +165,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                         onExpandedChange = { categoryExpanded = !categoryExpanded }
                     ) {
                         OutlinedTextField(
-                            value = selectedCategory?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "",
+                            value = selectedCategory?.displayName ?: "",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Category") },
@@ -182,7 +182,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                         ) {
                             Category.values().forEach { cat ->
                                 DropdownMenuItem(
-                                    text = { Text(cat.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                    text = { Text(cat.displayName) },
                                     onClick = {
                                         selectedCategory = cat
                                         categoryError = false
