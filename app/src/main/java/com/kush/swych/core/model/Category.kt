@@ -14,7 +14,7 @@ enum class Category(val displayName: String) {
     GAMES("Games"),
     MOVIES("Movies"),
     MUSIC("Music"),
-    ADULT("Adult"),
+    HUB("Hub"),
     ONLINE_GAMES("Online Games"),
     MEDS("Meds"),
     SKINCARE("Skincare"),

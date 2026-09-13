@@ -85,7 +85,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 100.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             
             // Photo Placeholder
