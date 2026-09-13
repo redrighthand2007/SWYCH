@@ -38,7 +38,7 @@ Existing campus trading happens in chaotic, fragmented WhatsApp or Telegram grou
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Android (Kotlin, Jetpack Compose, Material 3, Coil)
+- **Frontend:** Android (100% Kotlin, Jetpack Compose, Material 3, Coil)
 - **Backend:** Supabase (Auth, PostgREST API)
 - **Database:** PostgreSQL (Supabase DB with Row Level Security)
 - **Storage:** Cloudinary / Supabase Storage (for fast, optimized image hosting)
@@ -53,12 +53,12 @@ SWYCH/
 │   │   ├── designsystem/      # Theme, Colors, Typography, Common UI Components
 │   │   ├── model/             # Data models (User, Item, Deal)
 │   │   └── network/           # Supabase client config
-│   ├── ui/                    # UI screens and navigation
-│   │   ├── auth/              # Login and Sign-up screens
-│   │   ├── browse/            # Marketplace feed
-│   │   ├── deals/             # User's offers and listings management
-│   │   ├── postitem/          # Item creation flow
-│   │   └── profile/           # User dashboard
+│   └── ui/                    # UI screens and navigation
+│       ├── auth/              # Login and Sign-up screens
+│       ├── browse/            # Marketplace feed
+│       ├── deals/             # User's offers and listings management
+│       ├── postitem/          # Item creation flow
+│       └── profile/           # User dashboard
 └── README.md
 ```
 
@@ -87,7 +87,7 @@ To run your own backend, you must configure Supabase:
 1. Create a [Supabase](https://supabase.com/) project.
 2. In your Android Studio project, locate your Supabase initialization (inside `core/network/SupabaseManager.kt`).
 3. Replace the placeholder Supabase URL and Anon Key with your actual project credentials.
-4. Run the necessary SQL migrations to create the `users`, `items`, and `deals` tables.
+4. Run the necessary SQL migrations and Row-Level Security policies to create and secure the `users`, `items`, and `deals` tables.
 
 ## 📊 Results / Performance
 
@@ -104,9 +104,9 @@ To run your own backend, you must configure Supabase:
 - [x] Post items with images
 - [x] Browse marketplace and filter
 - [x] Make offers and manage deals
-- [ ] Push Notifications for new offers
-- [ ] In-app messaging system
-- [ ] iOS version using Kotlin Multiplatform
+- [x] User Reputation System (Completed vs Cancelled)
+- [x] Backend Security (Row-Level Security Policies)
+- [x] Dynamic and Restricted Categories UI
 
 ## 🤝 Contributing
 
@@ -122,8 +122,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 **Kush**
 - GitHub: [@redrighthand2007](https://github.com/redrighthand2007)
 
-## ⭐ Acknowledgements
+## 🙌 Acknowledgements
 
 - [Jetpack Compose](https://developer.android.com/jetpack/compose) for modern Android UI
 - [Supabase](https://supabase.com/) for a seamless open-source Firebase alternative
+- [Icons8](https://icons8.com/) for category iconography
 - [Shields.io](https://shields.io/) for the clean repository badges
