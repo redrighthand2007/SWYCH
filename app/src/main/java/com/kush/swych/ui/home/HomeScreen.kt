@@ -8,10 +8,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -98,7 +101,7 @@ fun HomeContent(
         val categoryGroups = listOf(
             "Hungry ?" to listOf("Snacks", "Drinks", "Puffs", "Sweets", "Cooking"),
             "Lock In." to listOf("Books", "Notes", "Stationery", "Courses", "Exams"),
-            "Wanna' Chill..." to listOf("Games", "Movies", "Music", "Adult", "Online Games"),
+            "Wanna' Chill..." to listOf("Games", "Movies", "Music", "Hub", "Online Games"),
             "Care" to listOf("Meds", "Skincare", "Hygiene"),
             "2nd Hand Items" to listOf("Accessories", "Kettles", "Ext. Boards", "Cycles", "Online -> Cash", "Cash -> Online")
         )
@@ -167,19 +170,24 @@ fun CategoryBox(
     val context = androidx.compose.ui.platform.LocalContext.current
     val formattedName = categoryName.lowercase().replace(" ", "_").replace("-", "_").replace(">", "_").replace(".", "")
     val resId = context.resources.getIdentifier("cat_$formattedName", "drawable", context.packageName)
+    val isBlocked = categoryName == "Puffs" || categoryName == "Hub"
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.1f)
             .clip(RoundedCornerShape(24.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .clickable { onClick() },
+            .background(
+                if (isBlocked) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+            .clickable(enabled = !isBlocked) { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.alpha(if (isBlocked) 0.5f else 1f)
         ) {
             if (resId != 0) {
                 androidx.compose.foundation.Image(
@@ -195,7 +203,16 @@ fun CategoryBox(
             Text(
                 text = categoryName,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        if (isBlocked) {
+            Icon(
+                imageVector = Icons.Default.Block,
+                contentDescription = "Blocked",
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                modifier = Modifier.size(80.dp)
             )
         }
     }
