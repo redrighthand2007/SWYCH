@@ -290,7 +290,7 @@ fun BrowseContent(
                 }
             } else {
                 val selectedCat = if (category.isBlank()) "All" else category
-                var filteredItems = (if (selectedCat == "All") currentItems else currentItems.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status != "SOLD" }
+                var filteredItems = (if (selectedCat == "All") currentItems else currentItems.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status != "SOLD" && it.sellerId != currentUser?.uid }
                 
                 // Location filtering
                 if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {

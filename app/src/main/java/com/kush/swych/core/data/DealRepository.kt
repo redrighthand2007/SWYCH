@@ -31,13 +31,6 @@ class DealRepository(private val context: Context) {
             
             SupabaseManager.client.postgrest["deals"].insert(deal)
             
-            // Also update item status
-            SupabaseManager.client.postgrest["items"].update({
-                set("status", "PENDING")
-            }) {
-                filter { eq("id", itemId) }
-            }
-            
             // Invalidate BOTH caches so all screens see fresh data
             ItemRepository.cachedItems = null
             cachedDeals = null
@@ -61,6 +54,22 @@ class DealRepository(private val context: Context) {
                 set("status", itemStatus)
             }) {
                 filter { eq("id", itemId) }
+            }
+
+            if (newStatus == "SOLD") {
+                // Reject all other deals for this item
+                try {
+                    SupabaseManager.client.postgrest["deals"].update({
+                        set("status", "REJECTED")
+                    }) {
+                        filter { 
+                            eq("item_id", itemId)
+                            neq("id", dealId)
+                        }
+                    }
+                } catch (e: Exception) {
+                    // It's possible there are no other deals, which might throw an error depending on Supabase SDK version, so we catch it
+                }
             }
             
             // Invalidate BOTH caches
