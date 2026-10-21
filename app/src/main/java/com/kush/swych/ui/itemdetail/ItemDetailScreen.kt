@@ -1,4 +1,4 @@
-﻿package com.kush.swych.ui.itemdetail
+package com.kush.swych.ui.itemdetail
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -80,7 +80,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
         } else if (item == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("ðŸ˜•", fontSize = 48.sp)
+                    Text("😕", fontSize = 48.sp)
                     Spacer(Modifier.height(12.dp))
                     Text("Item not found", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
@@ -95,7 +95,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    // â€” Parallax Image â€”
+                    // — Parallax Image —
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -134,7 +134,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         }
                     }
 
-                    // â€” Content â€”
+                    // — Content —
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -210,11 +210,11 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                             HorizontalDivider()
                         }
 
-                        // â€” Make an Offer / Own listing â€”
+                        // — Make an Offer / Own listing —
                         if (it.status.uppercase() == "OPEN" && it.sellerId != currentUid) {
                             // Make an offer section
                             Text(
-                                text = "Make an Offer ðŸ¤",
+                                text = "Make an Offer 🤝",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -230,7 +230,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Text("âœ…", fontSize = 24.sp)
+                                        Text("✅", fontSize = 24.sp)
                                         Text(
                                             "Deal initiated! The seller will see your offer.",
                                             style = MaterialTheme.typography.bodyMedium,
@@ -284,7 +284,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                     if (isSubmittingOffer) {
                                         CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
                                     } else {
-                                        Text("Submit Deal ðŸ¤", fontWeight = FontWeight.Bold)
+                                        Text("Submit Deal 🤝", fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -300,6 +300,19 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                     color = Color(0xFFF57F17),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold
+                                )
+                            }
+                        } else if (it.sellerId == currentUid && it.status.uppercase() != "SOLD") {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                            ) {
+                                Text(
+                                    "This is your listing. Offers will appear in your Deals tab.",
+                                    modifier = Modifier.padding(16.dp),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         } else {

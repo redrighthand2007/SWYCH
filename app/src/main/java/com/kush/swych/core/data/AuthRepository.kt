@@ -135,7 +135,12 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    fun logout() {
+    suspend fun logout() {
+        try {
+            SupabaseManager.client.auth.signOut()
+        } catch (_: Exception) {
+            // Still clear local state if the network call fails
+        }
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
         prefs.edit { clear() }
         cachedUsers = null

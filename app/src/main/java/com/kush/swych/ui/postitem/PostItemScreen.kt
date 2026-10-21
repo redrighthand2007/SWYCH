@@ -147,10 +147,8 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                     OutlinedTextField(
                         value = title,
                         onValueChange = { newValue ->
-                            if (!newValue.contains(" ")) {
-                                title = newValue
-                                titleError = false
-                            }
+                            title = newValue.trimStart()
+                            titleError = false
                         },
                         label = { Text("Item Name") },
                         modifier = Modifier.fillMaxWidth(),
@@ -197,7 +195,7 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                     OutlinedTextField(
                         value = price,
                         onValueChange = { price = it; priceError = false },
-                        label = { Text("Price (?)") },
+                        label = { Text("Price (₹)") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -231,8 +229,8 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
                                 isSubmitting = true
                                 scope.launch {
                                     val result = itemRepo.postItem(
-                                        title = title,
-                                        description = description,
+                                        title = title.trim(),
+                                        description = description.trim(),
                                         price = price.toDouble(),
                                         category = selectedCategory!!.name,
                                         photoUri = savedImageUri.toString()
