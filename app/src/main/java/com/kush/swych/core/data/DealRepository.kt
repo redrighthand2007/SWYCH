@@ -92,11 +92,22 @@ class DealRepository(private val context: Context) {
                 filter { eq("id", dealId) }
             }
             
-            // Reset item back to OPEN so others can deal on it
-            SupabaseManager.client.postgrest["items"].update({
-                set("status", "OPEN")
-            }) {
-                filter { eq("id", itemId) }
+            // Reset item back to OPEN so others can deal on it,
+            // unless another deal on this item was already accepted
+            val soldDeals = SupabaseManager.client.postgrest["deals"]
+                .select {
+                    filter {
+                        eq("item_id", itemId)
+                        eq("status", "SOLD")
+                    }
+                }
+                .decodeList<Deal>()
+            if (soldDeals.isEmpty()) {
+                SupabaseManager.client.postgrest["items"].update({
+                    set("status", "OPEN")
+                }) {
+                    filter { eq("id", itemId) }
+                }
             }
             
             // Invalidate BOTH caches
