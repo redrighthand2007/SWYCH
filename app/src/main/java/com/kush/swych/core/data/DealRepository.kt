@@ -4,9 +4,20 @@ import android.content.Context
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.network.SupabaseManager
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.postgrest.rpc
+import kotlinx.serialization.json.buildJsonObject
+import com.kush.swych.core.util.decodeNullableString
+import kotlinx.serialization.json.put
 import java.util.UUID
 
-class DealRepository(private val context: Context) {
+/**
+ * Offers and deals. Creating an offer is a plain insert (checked by row level security);
+ * every later status change runs in a Supabase function so it happens in one transaction.
+ */
+class DealRepository(@Suppress("unused") private val context: Context) {
+
+    private val db get() = SupabaseManager.client.postgrest
 
     suspend fun createDeal(
         itemId: String,
@@ -14,151 +25,56 @@ class DealRepository(private val context: Context) {
         itemPhotoUrl: String,
         sellerId: String,
         agreedPrice: Double
-    ): Result<Unit> {
-        return try {
-            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            val buyerId = prefs.getString("current_uid", null) ?: return Result.failure(Exception("Not logged in"))
-            
-            val deal = Deal(
-                id = "deal_${UUID.randomUUID().toString().take(8)}",
-                itemId = itemId,
-                buyerId = buyerId,
-                sellerId = sellerId,
-                itemTitle = itemTitle,
-                itemPhotoUrl = itemPhotoUrl,
-                finalPrice = agreedPrice
-            )
-            
-            SupabaseManager.client.postgrest["deals"].insert(deal)
-            
-            // Invalidate BOTH caches so all screens see fresh data
-            ItemRepository.cachedItems = null
-            cachedDeals = null
-            
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    ): Result<Unit> = runCatching {
+        val buyerId = SupabaseManager.currentUid ?: throw Exception("Not logged in")
+        val deal = Deal(
+            id = "deal_${UUID.randomUUID().toString().take(8)}",
+            itemId = itemId,
+            buyerId = buyerId,
+            sellerId = sellerId,
+            itemTitle = itemTitle,
+            itemPhotoUrl = itemPhotoUrl,
+            finalPrice = agreedPrice
+        )
+        db["deals"].insert(deal)
     }
 
-    suspend fun updateDealStatus(dealId: String, itemId: String, newStatus: String): Result<Unit> {
-        return try {
-            SupabaseManager.client.postgrest["deals"].update({
-                set("status", newStatus)
-            }) {
-                filter { eq("id", dealId) }
-            }
-            
-            val itemStatus = if (newStatus == "REJECTED") "OPEN" else "SOLD"
-            SupabaseManager.client.postgrest["items"].update({
-                set("status", itemStatus)
-            }) {
-                filter { eq("id", itemId) }
-            }
+    /** Seller accepts: deal ACCEPTED, item LOCKED, other offers REJECTED. */
+    suspend fun acceptDeal(dealId: String): Result<Unit> = callDealFunction("accept_deal", dealId)
 
-            if (newStatus == "SOLD") {
-                // Reject all other deals for this item
-                try {
-                    SupabaseManager.client.postgrest["deals"].update({
-                        set("status", "REJECTED")
-                    }) {
-                        filter { 
-                            eq("item_id", itemId)
-                            neq("id", dealId)
-                        }
-                    }
-                } catch (e: Exception) {
-                    // It's possible there are no other deals, which might throw an error depending on Supabase SDK version, so we catch it
-                }
-            }
-            
-            // Invalidate BOTH caches
-            ItemRepository.cachedItems = null
-            cachedDeals = null
-            
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend fun rejectDeal(dealId: String): Result<Unit> = callDealFunction("reject_deal", dealId)
+
+    /** Buyer withdraws a pending offer, or either side backs out of an accepted deal. */
+    suspend fun cancelDeal(dealId: String): Result<Unit> = callDealFunction("cancel_deal", dealId)
+
+    /** Confirms the hand-over; the deal completes once both sides have confirmed. */
+    suspend fun confirmDeal(dealId: String): Result<Unit> = callDealFunction("confirm_deal", dealId)
+
+    /** Removes a rejected, cancelled or expired deal from the list. */
+    suspend fun dismissDeal(dealId: String): Result<Unit> = runCatching {
+        val deleted = db["deals"].delete {
+            select()
+            filter { eq("id", dealId) }
+        }.decodeList<Deal>()
+        if (deleted.isEmpty()) throw Exception("This deal can't be removed yet.")
     }
 
-    /**
-     * Delete a deal AND reset the item status back to OPEN.
-     * Used when a buyer cancels their deal request.
-     */
-    suspend fun deleteDeal(dealId: String, itemId: String): Result<Unit> {
-        return try {
-            SupabaseManager.client.postgrest["deals"].delete {
-                filter { eq("id", dealId) }
-            }
-            
-            // Reset item back to OPEN so others can deal on it,
-            // unless another deal on this item was already accepted
-            val soldDeals = SupabaseManager.client.postgrest["deals"]
-                .select {
-                    filter {
-                        eq("item_id", itemId)
-                        eq("status", "SOLD")
-                    }
-                }
-                .decodeList<Deal>()
-            if (soldDeals.isEmpty()) {
-                SupabaseManager.client.postgrest["items"].update({
-                    set("status", "OPEN")
-                }) {
-                    filter { eq("id", itemId) }
-                }
-            }
-            
-            // Invalidate BOTH caches
-            ItemRepository.cachedItems = null
-            cachedDeals = null
-            
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    /** Deals where the signed-in user is buyer or seller (row level security limits it to those). */
+    suspend fun getMyDeals(expireStale: Boolean = true): Result<List<Deal>> = runCatching {
+        // Closes accepted deals older than 3 days; failing here must not block the list
+        if (expireStale) runCatching { db.rpc("expire_stale_deals") }
+        db["deals"].select {
+            order("timestamp", Order.DESCENDING)
+        }.decodeList<Deal>()
     }
 
-    suspend fun getMyDeals(): Result<List<Deal>> {
-        return try {
-            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            val uid = prefs.getString("current_uid", null) ?: return Result.failure(Exception("Not logged in"))
-            
-            val deals = SupabaseManager.client.postgrest["deals"]
-                .select {
-                    filter { 
-                        or {
-                            eq("buyer_id", uid)
-                            eq("seller_id", uid)
-                        }
-                    }
-                }
-                .decodeList<Deal>()
-                
-            Result.success(deals)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    /** The other side's phone number, available once the deal is accepted. */
+    suspend fun getContactPhone(dealId: String): Result<String?> = runCatching {
+        db.rpc("get_deal_contact", buildJsonObject { put("p_deal_id", dealId) }).decodeNullableString()
     }
 
-    suspend fun getAllDeals(forceRefresh: Boolean = false): Result<List<Deal>> {
-        return try {
-            if (!forceRefresh) {
-                val cached = cachedDeals
-                if (cached != null) return Result.success(cached)
-            }
-
-            val deals = SupabaseManager.client.postgrest["deals"].select().decodeList<Deal>()
-            cachedDeals = deals
-            Result.success(deals)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    companion object {
-        @Volatile
-        var cachedDeals: List<Deal>? = null
+    private suspend fun callDealFunction(name: String, dealId: String): Result<Unit> = runCatching {
+        db.rpc(name, buildJsonObject { put("p_deal_id", dealId) })
+        ItemRepository.cachedItems = null
     }
 }

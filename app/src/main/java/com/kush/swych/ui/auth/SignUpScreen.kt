@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kush.swych.core.data.AuthRepository
+import com.kush.swych.core.util.userMessage
 import com.kush.swych.core.designsystem.component.DealButton
 import com.kush.swych.core.util.Constants
 import kotlinx.coroutines.launch
@@ -157,7 +158,7 @@ fun SignUpScreen(navController: NavController) {
             ) {
                 OutlinedTextField(
                     value = phone,
-                    onValueChange = { if (it.length <= 10) phone = it },
+                    onValueChange = { phone = it.filter { c -> c.isDigit() }.take(10) },
                     label = { Text("Phone Number") },
                     prefix = { Text("+91") },
                     leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
@@ -177,7 +178,7 @@ fun SignUpScreen(navController: NavController) {
                     animationSpec = tween(durationMillis = 300, delayMillis = 150)
                 ) + fadeIn(tween(300))
             ) {
-                val isEmailValid = email.isNotBlank() && email.endsWith("@vitstudent.ac.in")
+                val isEmailValid = email.trim().lowercase().endsWith("@vitstudent.ac.in")
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -188,7 +189,7 @@ fun SignUpScreen(navController: NavController) {
                     isError = showError && !isEmailValid,
                     supportingText = if (showError && email.isBlank()) {
                         { Text("Required field") }
-                    } else if (showError && !email.endsWith("@vitstudent.ac.in")) {
+                    } else if (showError && !isEmailValid) {
                         { Text("Must be a @vitstudent.ac.in address") }
                     } else null
                 )
@@ -202,11 +203,11 @@ fun SignUpScreen(navController: NavController) {
                 ) + fadeIn(tween(300))
             ) {
                 val hasLetterAndNumber = password.any { it.isLetter() } && password.any { it.isDigit() }
-                val isPasswordValid = password.length in 6..9 && hasLetterAndNumber
+                val isPasswordValid = password.length in 6..72 && hasLetterAndNumber
                 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { if (it.length < 10) password = it },
+                    onValueChange = { if (it.length <= 72) password = it },
                     label = { Text("Password") },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
@@ -222,7 +223,7 @@ fun SignUpScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     isError = showError && !isPasswordValid,
                     supportingText = if (showError && password.length < 6) {
-                        { Text("Firebase requires min 6 characters") }
+                        { Text("Must be at least 6 characters") }
                     } else if (showError && !hasLetterAndNumber) {
                         { Text("Must contain letters and numbers") }
                     } else null
@@ -276,23 +277,24 @@ fun SignUpScreen(navController: NavController) {
                             val isBlockValid = hostelBlock.isNotBlank()
                             val isPhoneValid = phone.length == 10
                             val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
-                            val isEmailValid = email.isNotBlank() && email.endsWith("@vitstudent.ac.in") && email.matches(emailRegex)
+                            val cleanEmail = email.trim().lowercase()
+                            val isEmailValid = cleanEmail.endsWith("@vitstudent.ac.in") && cleanEmail.matches(emailRegex)
                             val hasLetterAndNumber = password.any { it.isLetter() } && password.any { it.isDigit() }
-                            val isPasswordValid = password.length in 6..9 && hasLetterAndNumber
+                            val isPasswordValid = password.length in 6..72 && hasLetterAndNumber
                             val isConfirmValid = password == confirmPassword
 
                             if (isNameValid && isBlockValid && isPhoneValid && isEmailValid && isPasswordValid && isConfirmValid) {
                                 isLoading = true
                                 errorMessage = null
                                 scope.launch {
-                                    val result = authRepo.registerUser(name, hostelBlock, phone, email, password)
+                                    val result = authRepo.registerUser(name.trim(), hostelBlock, phone, cleanEmail, password)
                                     isLoading = false
                                     if (result.isSuccess) {
                                         navController.navigate(MainRoute) {
                                             popUpTo(0) { inclusive = true }
                                         }
                                     } else {
-                                        errorMessage = result.exceptionOrNull()?.message ?: "Registration failed"
+                                        errorMessage = result.exceptionOrNull()?.userMessage() ?: "Registration failed"
                                     }
                                 }
                             }

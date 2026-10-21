@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.designsystem.component.DealButton
+import com.kush.swych.core.util.userMessage
 import com.kush.swych.ui.navigation.MainRoute
 import kotlinx.coroutines.launch
 
@@ -80,8 +81,7 @@ fun LoginScreen(navController: NavController) {
                         popUpTo(0) { inclusive = true }
                     }
                 } else {
-                    errorMessage = result.exceptionOrNull()?.localizedMessage
-                        ?: result.exceptionOrNull()?.message
+                    errorMessage = result.exceptionOrNull()?.userMessage()
                         ?: "Login failed. Please check your credentials."
                 }
             }

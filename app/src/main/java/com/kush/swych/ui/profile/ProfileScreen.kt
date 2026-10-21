@@ -18,7 +18,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.*
@@ -48,24 +48,13 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val authRepo = remember { AuthRepository(context) }
-    val dealRepo = remember { com.kush.swych.core.data.DealRepository(context) }
     var user by remember { mutableStateOf<User?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var dealsMade by remember { mutableIntStateOf(0) }
-    var dealsExpired by remember { mutableIntStateOf(0) }
     var scrollState = androidx.compose.foundation.rememberScrollState()
     
     LaunchedEffect(Unit) {
-        val uid = authRepo.currentUserUid
-        if (uid != null) {
-            val result = authRepo.getCurrentUserProfile()
-            user = result.getOrNull()
-            
-            val dealResult = dealRepo.getMyDeals()
-            val myDeals = dealResult.getOrNull() ?: emptyList()
-            dealsMade = myDeals.count { it.status == "SOLD" }
-            dealsExpired = myDeals.count { it.status == "REJECTED" } // Using REJECTED as expired
-        }
+        // Reputation counts (green/red dots) are kept up to date by the deal functions in Supabase
+        user = authRepo.getCurrentUserProfile().getOrNull()
         isLoading = false
     }
     val scope = rememberCoroutineScope()
@@ -73,6 +62,7 @@ fun ProfileScreen(
 
 
     val hapticEnabled by SettingsManager.hapticEnabled.collectAsState()
+    val themeMode by SettingsManager.themeMode.collectAsState()
 
     var isCardExpanded by remember { mutableStateOf(false) }
 
@@ -222,6 +212,30 @@ fun ProfileScreen(
             ) {
 
 
+                // Theme
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(16.dp))
+                        Text("Theme", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        listOf("System", "Light", "Dark").forEachIndexed { mode, label ->
+                            FilterChip(
+                                selected = themeMode == mode,
+                                onClick = { SettingsManager.setThemeMode(mode) },
+                                label = { Text(label, fontSize = 12.sp) }
+                            )
+                        }
+                    }
+                }
+
                 // Haptic Feedback
                 Row(
                     modifier = Modifier
@@ -261,7 +275,7 @@ fun ProfileScreen(
                 ) {
                     Text("We'd love to hear your thoughts! Drop us a review.", style = MaterialTheme.typography.bodyMedium)
                 }
-                ExpandableProfileOption(icon = Icons.Default.HelpOutline, text = "FAQs") {
+                ExpandableProfileOption(icon = Icons.AutoMirrored.Filled.HelpOutline, text = "FAQs") {
                     Text("Q: How do I accept a deal?\nA: Just tap the deal and hit Accept!", style = MaterialTheme.typography.bodyMedium)
                 }
                 ExpandableProfileOption(icon = Icons.Default.Gavel, text = "Legal Info") {

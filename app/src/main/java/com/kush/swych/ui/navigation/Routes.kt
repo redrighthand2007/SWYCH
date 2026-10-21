@@ -11,32 +11,9 @@ data object SignUpRoute
 @Serializable
 data object LoginRoute
 
+/** Home, Browse, Post, Deals and Profile are tabs inside MainScreen. */
 @Serializable
 data object MainRoute
 
 @Serializable
-data object HomeRoute
-
-@Serializable
-data class BrowseRoute(val category: String = "")
-
-@Serializable
-data object PostItemRoute
-
-@Serializable
 data class ItemDetailRoute(val itemId: String)
-
-
-
-@Serializable
-data object DealsRoute
-
-@Serializable
-data object ProfileRoute
-
-
-
-
-
-
-

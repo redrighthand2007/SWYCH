@@ -14,7 +14,14 @@ data class Item(
     val price: Double = 0.0,
     @SerialName("photo_url")
     val photoUrl: String? = null,
-    val status: String = "OPEN"
+    val status: String = ItemStatus.OPEN
 )
 
-
+object ItemStatus {
+    /** Listed and accepting offers. */
+    const val OPEN = "OPEN"
+    /** Seller accepted an offer; waiting for the hand-over. */
+    const val LOCKED = "LOCKED"
+    /** Hand-over confirmed. */
+    const val SOLD = "SOLD"
+}

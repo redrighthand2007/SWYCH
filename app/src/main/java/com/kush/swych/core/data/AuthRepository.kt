@@ -4,147 +4,109 @@ import android.content.Context
 import androidx.core.content.edit
 import com.kush.swych.core.model.User
 import com.kush.swych.core.network.SupabaseManager
-import io.github.jan.supabase.postgrest.postgrest
-import java.util.UUID
-
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.rpc
+import kotlinx.serialization.json.buildJsonObject
+import com.kush.swych.core.util.decodeNullableString
+import kotlinx.serialization.json.put
 
 class AuthRepository(private val context: Context) {
 
     companion object {
         @Volatile
         var cachedUsers: List<User>? = null
+
+        // Phone and email are only readable through get_my_profile / get_deal_contact.
+        private val PUBLIC_USER_COLUMNS = Columns.list("uid", "name", "block", "green_dots", "red_dots")
     }
 
+    private val auth get() = SupabaseManager.client.auth
+    private val db get() = SupabaseManager.client.postgrest
+
+    /**
+     * Creates the auth account. The profile row is created by the on_auth_user_created
+     * trigger from the metadata below, in the same transaction, so a failed profile
+     * (for example a duplicate phone number) also fails the sign-up.
+     */
     suspend fun registerUser(
         name: String,
         block: String,
         phone: String,
         email: String,
-        password: String 
-    ): Result<Unit> {
-        return try {
-            val authResult = SupabaseManager.client.auth.signUpWith(Email) {
+        password: String
+    ): Result<Unit> = runCatching {
+        auth.signUpWith(Email) {
+            this.email = email
+            this.password = password
+            data = buildJsonObject {
+                put("name", name)
+                put("block", block)
+                put("phone", phone)
+            }
+        }
+        // Sign-up only returns a session when email confirmation is off
+        if (auth.currentSessionOrNull() == null) {
+            auth.signInWith(Email) {
                 this.email = email
                 this.password = password
             }
-            
-            // Explicitly login to ensure session is available for PostgREST
-            SupabaseManager.client.auth.signInWith(Email) {
-                this.email = email
-                this.password = password
-            }
-            
-            val currentUser = SupabaseManager.client.auth.currentUserOrNull()
-            val uid = currentUser?.id ?: authResult?.id ?: UUID.randomUUID().toString()
-
-            val user = User(
-                uid = uid,
-                name = name,
-                block = block,
-                phone = phone,
-                email = email
-            )
-            
-            SupabaseManager.client.postgrest["users"].insert(user)
-            
-            // Save UID to SharedPreferences so the app knows who is logged in
-            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            prefs.edit { putString("current_uid", uid) }
-            
-            cachedUsers = null
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
+        cachedUsers = null
     }
 
-    suspend fun getCurrentUserProfile(): Result<User> {
-        return try {
-            val uid = currentUserUid ?: return Result.failure(Exception("Not logged in"))
-            val cached = cachedUsers?.find { it.uid == uid }
-            if (cached != null) return Result.success(cached)
-
-            val user = SupabaseManager.client.postgrest["users"]
-                .select { filter { eq("uid", uid) } }
-                .decodeSingle<User>()
-            Result.success(user)
-        } catch(e: Exception) {
-            Result.failure(e)
-        }
+    suspend fun getCurrentUserProfile(): Result<User> = runCatching {
+        db.rpc("get_my_profile").decodeList<User>().firstOrNull()
+            ?: throw Exception("Profile not found. Please log out and sign up again.")
     }
 
-    suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> {
-        return try {
-            val actualEmail = if (!phoneOrEmail.contains("@")) {
-                val userRecords = SupabaseManager.client.postgrest["users"]
-                    .select { filter { eq("phone", phoneOrEmail) } }
-                    .decodeList<User>()
-                
-                if (userRecords.size > 1) {
-                    throw Exception("Multiple accounts linked to this phone. Please login using your Email.")
-                }
-                userRecords.firstOrNull()?.email ?: phoneOrEmail 
-            } else {
-                phoneOrEmail
-            }
-
-            SupabaseManager.client.auth.signInWith(Email) {
-                this.email = actualEmail
-                this.password = password
-            }
-
-            val authUser = SupabaseManager.client.auth.currentUserOrNull()
-            if (authUser != null) {
-                val userRecord = SupabaseManager.client.postgrest["users"]
-                    .select { filter { eq("email", actualEmail) } }
-                    .decodeSingleOrNull<User>()
-                
-                val finalUid = userRecord?.uid ?: authUser.id
-
-                val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-                prefs.edit { putString("current_uid", finalUid) }
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Authentication failed"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> = runCatching {
+        val input = phoneOrEmail.trim()
+        val email = if (input.contains("@")) {
+            input.lowercase()
+        } else {
+            val phone = input.filter { it.isDigit() }
+            db.rpc("get_login_email", buildJsonObject { put("p_phone", phone) }).decodeNullableString()
+                ?: throw Exception("No account found with this phone number.")
         }
+        auth.signInWith(Email) {
+            this.email = email
+            this.password = password
+        }
+        cachedUsers = null
     }
 
     val currentUserUid: String?
-        get() {
-            val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-            return prefs.getString("current_uid", null)
-        }
+        get() = SupabaseManager.currentUid
 
     suspend fun getAllUsers(forceRefresh: Boolean = false): Result<List<User>> {
-        if (!forceRefresh && cachedUsers != null) {
-            return Result.success(cachedUsers!!)
+        val cached = cachedUsers
+        if (!forceRefresh && cached != null) return Result.success(cached)
+        return runCatching {
+            db["users"].select(PUBLIC_USER_COLUMNS).decodeList<User>().also { cachedUsers = it }
         }
-        return try {
-            val users = SupabaseManager.client.postgrest["users"]
-                .select()
-                .decodeList<User>()
-            cachedUsers = users
-            Result.success(users)
-        } catch (e: Exception) {
-            Result.failure(e)
+    }
+
+    /** Users by id, refetching when someone new (e.g. a user who just signed up) is missing. */
+    suspend fun getUsers(ids: Collection<String>): Map<String, User> {
+        var users = getAllUsers().getOrNull().orEmpty().associateBy { it.uid }
+        if (ids.any { it !in users }) {
+            users = getAllUsers(forceRefresh = true).getOrNull()?.associateBy { it.uid } ?: users
         }
+        return users
     }
 
     suspend fun logout() {
         try {
-            SupabaseManager.client.auth.signOut()
+            auth.signOut()
         } catch (_: Exception) {
             // Still clear local state if the network call fails
         }
-        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-        prefs.edit { clear() }
+        // Older versions kept the signed-in user here
+        context.getSharedPreferences("auth", Context.MODE_PRIVATE).edit { clear() }
         cachedUsers = null
-        DealRepository.cachedDeals = null
         ItemRepository.cachedItems = null
     }
 }

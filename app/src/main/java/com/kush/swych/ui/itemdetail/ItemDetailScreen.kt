@@ -27,11 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.data.DealRepository
 import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.shimmerEffect
 import com.kush.swych.core.model.Item
+import com.kush.swych.core.model.ItemStatus
+import com.kush.swych.core.network.SupabaseManager
+import com.kush.swych.core.util.userMessage
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -42,7 +44,6 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
     val scope = rememberCoroutineScope()
     val itemRepo = remember { ItemRepository(context) }
     val dealRepo = remember { DealRepository(context) }
-    val authRepo = remember { AuthRepository(context) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     var item by remember { mutableStateOf<Item?>(null) }
@@ -51,11 +52,17 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
     var isSubmittingOffer by remember { mutableStateOf(false) }
     var offerSubmitted by remember { mutableStateOf(false) }
 
-    val currentUid = authRepo.currentUserUid
+    var showEditDialog by remember { mutableStateOf(false) }
+    var showRemoveDialog by remember { mutableStateOf(false) }
+    var isWorking by remember { mutableStateOf(false) }
 
+    val currentUid = SupabaseManager.currentUid
+
+    // Item is always fetched fresh; an existing live offer hides the offer form
     LaunchedEffect(itemId) {
-        val result = itemRepo.getItemById(itemId)
-        item = result.getOrNull()
+        item = itemRepo.getItemById(itemId).getOrNull()
+        offerSubmitted = dealRepo.getMyDeals().getOrNull().orEmpty()
+            .any { d -> d.itemId == itemId && d.buyerId == currentUid && d.isLive }
         isLoading = false
     }
 
@@ -173,19 +180,23 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         // Status badge
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = when (it.status.uppercase()) {
-                                "OPEN" -> Color(0xFF1B5E20).copy(alpha = 0.15f)
-                                "PENDING" -> Color(0xFFF57F17).copy(alpha = 0.15f)
+                            color = when (it.status) {
+                                ItemStatus.OPEN -> Color(0xFF1B5E20).copy(alpha = 0.15f)
+                                ItemStatus.LOCKED -> Color(0xFFF57F17).copy(alpha = 0.15f)
                                 else -> Color.Gray.copy(alpha = 0.15f)
                             }
                         ) {
                             Text(
-                                text = it.status.replaceFirstChar { c -> c.uppercase() },
+                                text = when (it.status) {
+                                    ItemStatus.OPEN -> "Available"
+                                    ItemStatus.LOCKED -> "Reserved"
+                                    else -> "Sold"
+                                },
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = when (it.status.uppercase()) {
-                                    "OPEN" -> Color(0xFF4CAF50)
-                                    "PENDING" -> Color(0xFFF57F17)
+                                color = when (it.status) {
+                                    ItemStatus.OPEN -> Color(0xFF4CAF50)
+                                    ItemStatus.LOCKED -> Color(0xFFF57F17)
                                     else -> Color.Gray
                                 },
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -211,7 +222,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                         }
 
                         // — Make an Offer / Own listing —
-                        if (it.status.uppercase() == "OPEN" && it.sellerId != currentUid) {
+                        if (it.status == ItemStatus.OPEN && it.sellerId != currentUid) {
                             // Make an offer section
                             Text(
                                 text = "Make an Offer 🤝",
@@ -232,7 +243,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                     ) {
                                         Text("✅", fontSize = 24.sp)
                                         Text(
-                                            "Deal initiated! The seller will see your offer.",
+                                            "You've made an offer. Track it in the Deals tab.",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = Color(0xFF4CAF50)
                                         )
@@ -272,7 +283,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                                 offerSubmitted = true
                                             } else {
                                                 snackbarHostState.showSnackbar(
-                                                    result.exceptionOrNull()?.message ?: "Failed to submit offer"
+                                                    result.exceptionOrNull()?.userMessage() ?: "Failed to submit offer"
                                                 )
                                             }
                                         }
@@ -288,31 +299,43 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                     }
                                 }
                             }
-                        } else if (it.status.uppercase() == "PENDING" && it.sellerId != currentUid) {
+                        } else if (it.sellerId == currentUid && it.status == ItemStatus.OPEN) {
+                            Text(
+                                "This is your listing. Offers appear in your Deals tab.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                OutlinedButton(
+                                    onClick = { showEditDialog = true },
+                                    enabled = !isWorking,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) { Text("Edit listing") }
+                                Button(
+                                    onClick = { showRemoveDialog = true },
+                                    enabled = !isWorking,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                ) { Text("Remove") }
+                            }
+                        } else if (it.status == ItemStatus.LOCKED) {
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 color = Color(0xFFFFF9C4).copy(alpha = 0.2f)
                             ) {
                                 Text(
-                                    "This item is currently pending a deal.",
+                                    if (it.sellerId == currentUid) "You accepted an offer for this item. Finish or cancel the deal in your Deals tab."
+                                    else "This item is reserved in another deal.",
                                     modifier = Modifier.padding(16.dp),
                                     color = Color(0xFFF57F17),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold
-                                )
-                            }
-                        } else if (it.sellerId == currentUid && it.status.uppercase() != "SOLD") {
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                            ) {
-                                Text(
-                                    "This is your listing. Offers will appear in your Deals tab.",
-                                    modifier = Modifier.padding(16.dp),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         } else {
@@ -335,6 +358,69 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                 }
             }
         }
+    }
+
+    val current = item
+    if (showEditDialog && current != null) {
+        var editTitle by remember { mutableStateOf(current.title) }
+        var editPrice by remember { mutableStateOf("%.0f".format(current.price)) }
+        var editDescription by remember { mutableStateOf(current.description.orEmpty()) }
+        val newPrice = editPrice.toDoubleOrNull()
+        val canSave = editTitle.isNotBlank() && newPrice != null && newPrice > 0
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Edit listing") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(value = editTitle, onValueChange = { v -> editTitle = v.trimStart() }, label = { Text("Item Name") }, singleLine = true)
+                    OutlinedTextField(
+                        value = editPrice,
+                        onValueChange = { v -> editPrice = v.filter { c -> c.isDigit() || c == '.' } },
+                        label = { Text("Price (₹)") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    )
+                    OutlinedTextField(value = editDescription, onValueChange = { v -> editDescription = v }, label = { Text("Description") }, maxLines = 4)
+                }
+            },
+            confirmButton = {
+                TextButton(enabled = canSave, onClick = {
+                    showEditDialog = false
+                    isWorking = true
+                    scope.launch {
+                        itemRepo.updateItem(current.id, editTitle.trim(), editDescription.trim(), newPrice ?: current.price)
+                            .onSuccess {
+                                item = itemRepo.getItemById(current.id).getOrNull() ?: item
+                                snackbarHostState.showSnackbar("Listing updated.")
+                            }
+                            .onFailure { e -> snackbarHostState.showSnackbar(e.userMessage()) }
+                        isWorking = false
+                    }
+                }) { Text("Save") }
+            },
+            dismissButton = { TextButton(onClick = { showEditDialog = false }) { Text("Cancel") } }
+        )
+    }
+
+    if (showRemoveDialog && current != null) {
+        AlertDialog(
+            onDismissRequest = { showRemoveDialog = false },
+            title = { Text("Remove listing?") },
+            text = { Text("${current.title} will be removed from Swych, along with any pending offers on it.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRemoveDialog = false
+                    isWorking = true
+                    scope.launch {
+                        itemRepo.deleteItem(current.id)
+                            .onSuccess { navController.popBackStack() }
+                            .onFailure { e -> snackbarHostState.showSnackbar(e.userMessage()) }
+                        isWorking = false
+                    }
+                }) { Text("Remove", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { showRemoveDialog = false }) { Text("Cancel") } }
+        )
     }
 }
 
