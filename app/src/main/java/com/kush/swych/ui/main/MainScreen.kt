@@ -97,8 +97,12 @@ fun MainScreen(
     LaunchedEffect(Unit) {
         while(isActive) {
             try {
-                val result = dealRepo.getMyDeals()
-                hasPendingDeals = result.getOrNull()?.any { it.status == "PENDING" } == true
+                val result = dealRepo.getMyDeals(expireStale = false)
+                // Only offers waiting on you as the seller, not your own outgoing ones
+                val myUid = com.kush.swych.core.network.SupabaseManager.currentUid
+                hasPendingDeals = result.getOrNull()?.any {
+                    it.sellerId == myUid && it.status == com.kush.swych.core.model.DealStatus.PENDING
+                } == true
             } catch (_: Exception) {
                 // Silently ignore polling errors
             }

@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.kush.swych.core.model.Category
-import com.kush.swych.ui.navigation.BrowseRoute
 import kotlinx.coroutines.launch
 
 import androidx.compose.foundation.lazy.grid.GridItemSpan

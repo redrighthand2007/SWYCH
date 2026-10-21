@@ -1,30 +1,58 @@
 package com.kush.swych.ui.navigation
 
-import androidx.compose.animation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.kush.swych.core.network.SupabaseManager
 import com.kush.swych.ui.auth.AuthScreen
+import com.kush.swych.ui.auth.LoginScreen
+import com.kush.swych.ui.auth.SignUpScreen
 import com.kush.swych.ui.itemdetail.ItemDetailScreen
 import com.kush.swych.ui.main.MainScreen
-
-
-import com.kush.swych.core.data.AuthRepository
-
-import android.content.Context
-import androidx.compose.ui.platform.LocalContext
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.status.SessionStatus
 
 @Composable
 fun AppNavHost() {
-    val context = LocalContext.current
+    // Logged-in state comes from the Supabase session, so the app never thinks it is
+    // signed in while every request is being rejected for a missing session.
+    val sessionStatus by SupabaseManager.client.auth.sessionStatus.collectAsState()
+
+    if (sessionStatus is SessionStatus.Initializing) {
+        // Saved session is still loading from storage
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+        return
+    }
+
     val navController = rememberNavController()
-    
-    val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-    val uid = prefs.getString("current_uid", null)
-    val startDest = if (uid != null) MainRoute else AuthRoute
-    
+    val startDest: Any = remember {
+        if (sessionStatus is SessionStatus.Authenticated) MainRoute else AuthRoute
+    }
+
+    LaunchedEffect(sessionStatus) {
+        if (sessionStatus is SessionStatus.NotAuthenticated) {
+            val destination = navController.currentDestination
+            val inApp = destination?.hasRoute<MainRoute>() == true || destination?.hasRoute<ItemDetailRoute>() == true
+            if (inApp) {
+                navController.navigate(AuthRoute) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = startDest
@@ -33,27 +61,13 @@ fun AppNavHost() {
             AuthScreen(navController = navController)
         }
         composable<SignUpRoute> {
-            com.kush.swych.ui.auth.SignUpScreen(navController = navController)
+            SignUpScreen(navController = navController)
         }
         composable<LoginRoute> {
-            com.kush.swych.ui.auth.LoginScreen(navController = navController)
+            LoginScreen(navController = navController)
         }
         composable<MainRoute> {
             MainScreen(navController = navController)
-        }
-        composable<BrowseRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<BrowseRoute>()
-            MainScreen(
-                navController = navController,
-                initialTab = 1,
-                initialBrowseCategory = route.category
-            )
-        }
-        composable<PostItemRoute> {
-            MainScreen(
-                navController = navController,
-                initialTab = 2
-            )
         }
         composable<ItemDetailRoute> { backStackEntry ->
             val route = backStackEntry.toRoute<ItemDetailRoute>()
@@ -62,29 +76,5 @@ fun AppNavHost() {
                 navController = navController
             )
         }
-        
-        composable<DealsRoute> {
-            MainScreen(
-                navController = navController,
-                initialTab = 3
-            )
-        }
-        composable<ProfileRoute> {
-            MainScreen(
-                navController = navController,
-                initialTab = 4
-            )
-        }
     }
 }
-
-
-
-
-
-
-
-
-
-
-

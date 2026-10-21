@@ -1,5 +1,6 @@
 package com.kush.swych.ui.browse
 
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -33,7 +34,10 @@ import com.kush.swych.core.designsystem.component.ItemCard
 import com.kush.swych.core.designsystem.component.shimmerEffect
 import com.kush.swych.core.model.Category
 import com.kush.swych.core.model.Item
+import com.kush.swych.core.model.ItemStatus
 import com.kush.swych.core.model.User
+import com.kush.swych.core.network.SupabaseManager
+import com.kush.swych.core.util.userMessage
 import com.kush.swych.ui.navigation.ItemDetailRoute
 import kotlinx.coroutines.launch
 
@@ -64,7 +68,10 @@ fun BrowseContent(
     
     var items by remember { mutableStateOf<List<Item>?>(ItemRepository.cachedItems) }
     var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
-    var allDeals by remember { mutableStateOf<List<com.kush.swych.core.model.Deal>>(emptyList()) }
+    // Item awaiting the "send offer?" confirmation, and offers currently being sent
+    var pendingOffer by remember { mutableStateOf<Item?>(null) }
+    var sendingOfferIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    val myUid = SupabaseManager.currentUid
     var currentUser by remember { mutableStateOf<User?>(null) }
     var appliedItemIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var fetchError by remember { mutableStateOf<String?>(null) }
@@ -78,32 +85,21 @@ fun BrowseContent(
     fun loadAllData(forceRefresh: Boolean = false) {
         scope.launch {
             try {
-                val userResult = authRepo.getAllUsers(forceRefresh = forceRefresh)
-                if (userResult.isSuccess) {
-                    users = userResult.getOrNull()?.associateBy { it.uid } ?: emptyMap()
-                }
-                
                 val currentUserResult = authRepo.getCurrentUserProfile()
                 if (currentUserResult.isSuccess) {
                     currentUser = currentUserResult.getOrNull()
                 }
 
-                val dealsResult = dealRepo.getAllDeals(forceRefresh = forceRefresh)
-                if (dealsResult.isSuccess) {
-                    allDeals = dealsResult.getOrNull() ?: emptyList()
-                    val myUid = currentUser?.uid
-                    if (myUid != null) {
-                        appliedItemIds = allDeals.filter { it.buyerId == myUid }.map { it.itemId }.toSet()
-                    }
+                dealRepo.getMyDeals().onSuccess { myDeals ->
+                    appliedItemIds = myDeals.filter { it.buyerId == myUid && it.isLive }.map { it.itemId }.toSet()
                 }
-                
+
                 val result = itemRepo.getAllItems(forceRefresh = forceRefresh)
-                if (result.isFailure) {
-                    fetchError = result.exceptionOrNull()?.message ?: "Unknown error"
-                } else {
-                    fetchError = null
-                }
+                fetchError = result.exceptionOrNull()?.userMessage()
                 items = result.getOrNull() ?: items ?: emptyList()
+
+                // Refetches users when a seller is missing, e.g. someone who just signed up
+                users = authRepo.getUsers(items.orEmpty().map { it.sellerId }.toSet())
             } finally {
                 isRefreshing = false
             }
@@ -290,7 +286,7 @@ fun BrowseContent(
                 }
             } else {
                 val selectedCat = if (category.isBlank()) "All" else category
-                var filteredItems = (if (selectedCat == "All") currentItems else currentItems.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status != "SOLD" && it.sellerId != currentUser?.uid }
+                var filteredItems = (if (selectedCat == "All") currentItems else currentItems.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status == ItemStatus.OPEN && it.sellerId != myUid }
                 
                 // Location filtering
                 if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {
@@ -302,7 +298,7 @@ fun BrowseContent(
 
                 // Sorting
                 filteredItems = when (selectedSort) {
-                    SortOption.RECENT -> filteredItems.reversed()
+                    SortOption.RECENT -> filteredItems // already newest first
                     SortOption.LOW_TO_HIGH -> filteredItems.sortedBy { it.price }
                 }
 
@@ -336,50 +332,53 @@ fun BrowseContent(
                         ) { item ->
                             val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
                             val sellerName = users[item.sellerId]?.name ?: "Unknown"
-                            val sellerDeals = allDeals.filter { it.sellerId == item.sellerId }
-                            val dealsMade = sellerDeals.count { it.status == "SOLD" }
-                            val dealsExpired = sellerDeals.count { it.status == "REJECTED" }
+                            val seller = users[item.sellerId]
                             
                             ItemCard(
                                 item = item,
                                 sellerName = sellerName,
                                 sellerBlock = sellerBlock,
-                                dealsMade = dealsMade,
-                                dealsExpired = dealsExpired,
-                                isOwnItem = item.sellerId == currentUser?.uid,
-                                isApplied = appliedItemIds.contains(item.id),
+                                dealsMade = seller?.greenDots ?: 0,
+                                dealsExpired = seller?.redDots ?: 0,
+                                isOwnItem = item.sellerId == myUid,
+                                isApplied = item.id in appliedItemIds || item.id in sendingOfferIds,
                                 onClick = { navController.navigate(ItemDetailRoute(item.id)) },
-                                onDealClick = {
-                                    scope.launch {
-                                        val result = dealRepo.createDeal(
-                                            itemId = item.id,
-                                            itemTitle = item.title,
-                                            itemPhotoUrl = item.photoUrl ?: "",
-                                            sellerId = item.sellerId,
-                                            agreedPrice = item.price
-                                        )
-                                        if (result.isSuccess) {
-                                            appliedItemIds = appliedItemIds + item.id
-                                            // Refresh all data to reflect changes
-                                            loadAllData(forceRefresh = true)
-                                        }
-                                    }
-                                },
-                                onRemoveClick = {
-                                    scope.launch {
-                                        val res = itemRepo.deleteItem(item.id)
-                                        if (res.isSuccess) {
-                                            // Refresh all data since deals may have been cleaned up too
-                                            loadAllData(forceRefresh = true)
-                                        }
-                                    }
-                                }
+                                onDealClick = { pendingOffer = item }
                             )
                         }
                     }
                 }
             }
         }
+    }
+
+    pendingOffer?.let { item ->
+        AlertDialog(
+            onDismissRequest = { pendingOffer = null },
+            title = { Text("Send offer?") },
+            text = { Text("Offer ₹%.0f for %s? The seller will see your offer and can accept or reject it.".format(item.price, item.title)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingOffer = null
+                    if (item.id in sendingOfferIds) return@TextButton
+                    sendingOfferIds = sendingOfferIds + item.id
+                    scope.launch {
+                        val result = dealRepo.createDeal(
+                            itemId = item.id,
+                            itemTitle = item.title,
+                            itemPhotoUrl = item.photoUrl ?: "",
+                            sellerId = item.sellerId,
+                            agreedPrice = item.price
+                        )
+                        result.onSuccess { appliedItemIds = appliedItemIds + item.id }
+                            .onFailure { Toast.makeText(context, it.userMessage(), Toast.LENGTH_LONG).show() }
+                        sendingOfferIds = sendingOfferIds - item.id
+                        loadAllData(forceRefresh = true)
+                    }
+                }) { Text("Send offer") }
+            },
+            dismissButton = { TextButton(onClick = { pendingOffer = null }) { Text("Cancel") } }
+        )
     }
 }
 

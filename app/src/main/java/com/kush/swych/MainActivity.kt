@@ -4,10 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.lifecycle.lifecycleScope
 import com.kush.swych.core.designsystem.theme.SwychTheme
 import com.kush.swych.ui.navigation.AppNavHost
-import kotlinx.coroutines.launch
 
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,7 +23,12 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            val useDarkTheme = isSystemInDarkTheme()
+            val themeMode by SettingsManager.themeMode.collectAsState()
+            val useDarkTheme = when (themeMode) {
+                1 -> false
+                2 -> true
+                else -> isSystemInDarkTheme()
+            }
 
             SwychTheme(darkTheme = useDarkTheme) {
                 AppNavHost()
