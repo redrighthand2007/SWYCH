@@ -1,12 +1,11 @@
 # Swych Privacy Policy
 
-_Last updated: [DATE]_
+_Last updated: 25 October 2026_
 
-> **Draft.** Fill in the bracketed fields, have it reviewed, and host it at a public URL
-> (for example GitHub Pages) before submitting to Google Play. Google requires the link in
-> the Play Console and in the app's store listing.
+> Host this page at a public URL (for example GitHub Pages) and add the link in the Play
+> Console and the app's store listing before publishing.
 
-Swych ("we", "the app") is a marketplace for students of [COLLEGE NAME] to exchange items
+Swych ("we", "the app") is a marketplace for students of VIT Vellore to exchange items
 with each other. This policy explains what information the app collects and how it is used.
 
 ## Information we collect
@@ -39,9 +38,9 @@ show ads.
 
 You can delete your account at any time from **Profile → Delete account**. This
 permanently removes your profile, listings and deals. Photos you uploaded may remain in
-storage for up to [N] days before being removed.
+storage until removed manually; email us to have them deleted.
 
-To request deletion without the app, email [CONTACT EMAIL].
+To request deletion without the app, email whiterighthand2007@gmail.com.
 
 ## Security
 
@@ -59,4 +58,4 @@ We will update this page if this policy changes and note the date above.
 
 ## Contact
 
-[CONTACT EMAIL]
+whiterighthand2007@gmail.com

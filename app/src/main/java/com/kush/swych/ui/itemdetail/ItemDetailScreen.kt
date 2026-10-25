@@ -30,6 +30,7 @@ import coil3.compose.AsyncImage
 import com.kush.swych.core.data.DealRepository
 import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.shimmerEffect
+import com.kush.swych.core.model.Category
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.model.ItemStatus
 import com.kush.swych.core.network.SupabaseManager
@@ -154,7 +155,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
                             Text(
-                                text = it.category,
+                                text = Category.fromName(it.category)?.displayName ?: it.category,
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)

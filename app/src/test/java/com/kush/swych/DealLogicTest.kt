@@ -56,6 +56,15 @@ class DealLogicTest {
     }
 
     @Test
+    fun categoriesAreUniqueAndLookupWorks() {
+        val names = Category.entries.map { it.displayName }
+        assertEquals(names.size, names.toSet().size)
+        assertTrue(CategoryGroup.entries.all { group -> Category.entries.any { it.group == group } })
+        assertEquals(Category.SNACKS, Category.fromName("snacks"))
+        assertEquals(null, Category.fromName("UNKNOWN"))
+    }
+
+    @Test
     fun otherErrorsKeepTheirMessage() {
         assertEquals("No account found with this phone number.", Exception("No account found with this phone number.").userMessage())
         assertEquals("Something went wrong. Please try again.", RuntimeException().userMessage())

@@ -1,42 +1,27 @@
 package com.kush.swych.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.alpha
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import coil3.compose.AsyncImage
 import com.kush.swych.core.model.Category
-import kotlinx.coroutines.launch
-
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.ui.graphics.Brush
-
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import com.kush.swych.core.model.CategoryGroup
 
 @Composable
 fun HomeContent(
-    navController: NavController,
     onCategoryClick: (String) -> Unit,
     onNavigateToProfile: () -> Unit = {}
 ) {
@@ -94,26 +79,21 @@ fun HomeContent(
             }
         }
 
-        // Category Groups
-        val categoryGroups = listOf(
-            "Hungry ?" to listOf("Snacks", "Drinks", "Puffs", "Sweets", "Cooking"),
-            "Lock In." to listOf("Books", "Notes", "Stationery", "Courses", "Exams"),
-            "Wanna' Chill..." to listOf("Games", "Movies", "Music", "Hub", "Online Games"),
-            "Care" to listOf("Meds", "Skincare", "Hygiene"),
-            "2nd Hand Items" to listOf("Accessories", "Kettles", "Ext. Boards", "Cycles", "Online -> Cash", "Cash -> Online")
-        )
+        // Category groups, straight from the Category list so Home always matches Browse and Post
+        CategoryGroup.entries.forEach { group ->
+            val categories = Category.entries.filter { it.group == group }
+            if (categories.isEmpty()) return@forEach
 
-        categoryGroups.forEach { (groupName, categories) ->
-            item {
+            item(key = "group_${group.name}") {
                 Text(
-                    text = groupName,
+                    text = group.title,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp),
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
             categories.chunked(2).forEach { rowItems ->
-                item {
+                item(key = "row_${rowItems.first().name}") {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -123,11 +103,8 @@ fun HomeContent(
                         rowItems.forEach { category ->
                             Box(modifier = Modifier.weight(1f)) {
                                 CategoryBox(
-                                    categoryName = category,
-                                    onClick = {
-                                        val enumName = Category.entries.find { it.displayName == category }?.name ?: category
-                                        onCategoryClick(enumName)
-                                    }
+                                    category = category,
+                                    onClick = { onCategoryClick(category.name) }
                                 )
                             }
                         }
@@ -161,12 +138,9 @@ fun HomeContent(
 
 @Composable
 fun CategoryBox(
-    categoryName: String,
+    category: Category,
     onClick: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val formattedName = categoryName.lowercase().replace(" ", "_").replace("-", "_").replace(">", "_").replace(".", "")
-    val resId = context.resources.getIdentifier("cat_$formattedName", "drawable", context.packageName)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -180,27 +154,18 @@ fun CategoryBox(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (resId != 0) {
-                androidx.compose.foundation.Image(
-                    painter = androidx.compose.ui.res.painterResource(id = resId),
-                    contentDescription = categoryName,
-                    modifier = Modifier.size(64.dp),
-                    contentScale = ContentScale.Fit
-                )
-            } else {
-                Box(modifier = Modifier.size(64.dp).background(Color.Gray, RoundedCornerShape(16.dp)))
-            }
+            Image(
+                painter = painterResource(id = category.iconRes),
+                contentDescription = category.displayName,
+                modifier = Modifier.size(64.dp),
+                contentScale = ContentScale.Fit
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = categoryName,
+                text = category.displayName,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
-
-
-
-
-
