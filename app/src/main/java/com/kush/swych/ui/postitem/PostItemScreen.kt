@@ -107,7 +107,8 @@ fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 100.dp),
+                // Bottom padding keeps the List Item button clear of the floating nav bar
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 132.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
