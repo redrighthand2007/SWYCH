@@ -40,8 +40,6 @@ fun HomeContent(
     onCategoryClick: (String) -> Unit,
     onNavigateToProfile: () -> Unit = {}
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -127,7 +125,7 @@ fun HomeContent(
                                 CategoryBox(
                                     categoryName = category,
                                     onClick = {
-                                        val enumName = Category.values().find { it.displayName == category }?.name ?: category
+                                        val enumName = Category.entries.find { it.displayName == category }?.name ?: category
                                         onCategoryClick(enumName)
                                     }
                                 )

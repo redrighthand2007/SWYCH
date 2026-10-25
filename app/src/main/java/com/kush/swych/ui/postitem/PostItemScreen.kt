@@ -24,7 +24,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.DealButton
@@ -36,7 +35,7 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostItemScreen(navController: NavController, onNavigateHome: () -> Unit) {
+fun PostItemScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val itemRepo = remember { ItemRepository(context) }

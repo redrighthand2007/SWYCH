@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kush.swych.core.data.AuthRepository
-import com.kush.swych.core.designsystem.component.DotBadge
 import com.kush.swych.core.model.User
 import android.widget.Toast
 import com.kush.swych.core.util.SettingsManager
@@ -46,7 +45,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    onNavigateToMainTab: (Int) -> Unit,
     expandContactDev: Boolean = false
 ) {
     val context = LocalContext.current
@@ -303,10 +301,24 @@ fun ProfileScreen(
                     Text("We'd love to hear your thoughts! Drop us a review.", style = MaterialTheme.typography.bodyMedium)
                 }
                 ExpandableProfileOption(icon = Icons.AutoMirrored.Filled.HelpOutline, text = "FAQs") {
-                    Text("Q: How do I accept a deal?\nA: Just tap the deal and hit Accept!", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        "Q: How do I buy something?\n" +
+                            "A: Tap Deal on an item (or make your own offer on its page). The seller sees it in their Deals tab.\n\n" +
+                            "Q: What happens when my offer is accepted?\n" +
+                            "A: The item is reserved for you and a Call button appears. Meet up, exchange the item, then both of you tap Done.\n\n" +
+                            "Q: What if we can't meet?\n" +
+                            "A: Either side can Cancel the deal and the item goes back on sale. Cancelling adds a red dot to your profile. Deals nobody confirms expire after 3 days.\n\n" +
+                            "Q: What do the dots mean?\n" +
+                            "A: Green = completed deals, red = deals you cancelled.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
                 ExpandableProfileOption(icon = Icons.Default.Gavel, text = "Legal Info") {
-                    Text("Terms of Service and Privacy Policy apply.", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        "Your phone number is only shared with the other person once a deal is accepted. " +
+                            "You can delete your account and all your data at any time below.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))

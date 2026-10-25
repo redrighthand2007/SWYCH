@@ -90,12 +90,10 @@ private val navTabs = listOf(
 
 @Composable
 fun MainScreen(
-    navController: NavController,
-    initialTab: Int = 0,
-    initialBrowseCategory: String = ""
+    navController: NavController
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(initialTab) }
-    var browseCategory by remember { mutableStateOf(initialBrowseCategory) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var browseCategory by remember { mutableStateOf("") }
     var hasPendingDeals by remember { mutableStateOf(false) }
     var expandContactDev by remember { mutableStateOf(false) }
 
@@ -186,11 +184,10 @@ fun MainScreen(
                         locationName = browseLocationName,
                         onLocationChange = { browseLocationName = it }
                     )
-                    2 -> com.kush.swych.ui.postitem.PostItemScreen(navController = navController, onNavigateHome = { selectedTabIndex = 0 })
-                    3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController, onNavigateToMainTab = { selectedTabIndex = it })
+                    2 -> com.kush.swych.ui.postitem.PostItemScreen()
+                    3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController)
                     4 -> ProfileScreen(
                         navController = navController,
-                        onNavigateToMainTab = { tabIndex -> selectedTabIndex = tabIndex },
                         expandContactDev = expandContactDev
                     )
                 }

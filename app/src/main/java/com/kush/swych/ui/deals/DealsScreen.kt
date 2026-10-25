@@ -56,7 +56,7 @@ private class PendingConfirmation(
 )
 
 @Composable
-fun DealsScreen(navController: NavController, onNavigateToMainTab: (Int) -> Unit) {
+fun DealsScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dealRepo = remember { DealRepository(context) }
