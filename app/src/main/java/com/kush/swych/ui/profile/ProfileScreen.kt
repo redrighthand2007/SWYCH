@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.*
@@ -36,7 +37,9 @@ import androidx.navigation.NavController
 import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.designsystem.component.DotBadge
 import com.kush.swych.core.model.User
+import android.widget.Toast
 import com.kush.swych.core.util.SettingsManager
+import com.kush.swych.core.util.userMessage
 import com.kush.swych.ui.navigation.AuthRoute
 import kotlinx.coroutines.launch
 
@@ -59,10 +62,13 @@ fun ProfileScreen(
     }
     val scope = rememberCoroutineScope()
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
 
 
     val hapticEnabled by SettingsManager.hapticEnabled.collectAsState()
     val themeMode by SettingsManager.themeMode.collectAsState()
+    val notificationsEnabled by SettingsManager.notificationsEnabled.collectAsState()
 
     var isCardExpanded by remember { mutableStateOf(false) }
 
@@ -236,6 +242,27 @@ fun ProfileScreen(
                     }
                 }
 
+                // Deal notifications
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { SettingsManager.setNotificationsEnabled(!notificationsEnabled) }
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(16.dp))
+                        Text("Deal Notifications", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                    }
+                    Switch(
+                        checked = notificationsEnabled,
+                        onCheckedChange = { SettingsManager.setNotificationsEnabled(it) }
+                    )
+                }
+
                 // Haptic Feedback
                 Row(
                     modifier = Modifier
@@ -299,7 +326,15 @@ fun ProfileScreen(
                     Spacer(Modifier.width(8.dp))
                     Text("Log Out", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
-                
+
+                TextButton(
+                    onClick = { showDeleteDialog = true },
+                    enabled = !isDeleting,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Delete account", color = MaterialTheme.colorScheme.error)
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
@@ -324,6 +359,37 @@ fun ProfileScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showLogoutDialog = false }) { Text("Cancel") }
+                }
+            )
+        }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Delete account?") },
+                text = { Text("This permanently deletes your account, your listings and your deal history. It can't be undone.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            isDeleting = true
+                            scope.launch {
+                                authRepo.deleteAccount()
+                                    .onSuccess {
+                                        navController.navigate(AuthRoute) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                    .onFailure { e ->
+                                        isDeleting = false
+                                        Toast.makeText(context, e.userMessage(), Toast.LENGTH_LONG).show()
+                                    }
+                            }
+                        }
+                    ) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
                 }
             )
         }

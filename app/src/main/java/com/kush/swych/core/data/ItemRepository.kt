@@ -28,14 +28,17 @@ class ItemRepository(@Suppress("unused") private val context: Context) {
         val sellerId = SupabaseManager.currentUid ?: throw Exception("Not logged in")
 
         // Upload to Supabase Storage
+        val bucket = SupabaseManager.client.storage["items"]
         var photoUrl = photoUri
+        var uploadedName: String? = null
         if (photoUri.startsWith("file://")) {
             val path = photoUri.toUri().path
             if (path != null) {
                 val file = java.io.File(path)
-                val bucket = SupabaseManager.client.storage["items"]
-                bucket.upload(file.name, file.readBytes()) { upsert = true }
-                photoUrl = bucket.publicUrl(file.name)
+                val name = "${sellerId}_${file.name}"
+                bucket.upload(name, file.readBytes()) { upsert = true }
+                uploadedName = name
+                photoUrl = bucket.publicUrl(name)
             }
         }
 
@@ -48,7 +51,13 @@ class ItemRepository(@Suppress("unused") private val context: Context) {
             category = category,
             photoUrl = photoUrl
         )
-        db["items"].insert(item)
+        try {
+            db["items"].insert(item)
+        } catch (e: Exception) {
+            // Don't leave an orphaned photo in storage when the listing itself fails
+            if (uploadedName != null) runCatching { bucket.delete(uploadedName) }
+            throw e
+        }
         cachedItems = null
     }
 

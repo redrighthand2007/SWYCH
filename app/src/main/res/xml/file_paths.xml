@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Camera writes full-size photos here before they are downscaled for upload -->
+    <cache-path name="photos" path="photos/" />
+</paths>

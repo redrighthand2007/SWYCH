@@ -60,6 +60,17 @@ import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import com.kush.swych.core.notifications.DealNotifier
+import com.kush.swych.core.util.SettingsManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.kush.swych.core.data.DealRepository
@@ -94,19 +105,37 @@ fun MainScreen(
     var browseSortName by remember { mutableStateOf("RECENT") }
     var browseLocationName by remember { mutableStateOf("CAMPUS") }
 
+    // Ask once for notification permission (Android 13+) so deal updates can be shown
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     LaunchedEffect(Unit) {
-        while(isActive) {
-            try {
-                val result = dealRepo.getMyDeals(expireStale = false)
-                // Only offers waiting on you as the seller, not your own outgoing ones
-                val myUid = com.kush.swych.core.network.SupabaseManager.currentUid
-                hasPendingDeals = result.getOrNull()?.any {
-                    it.sellerId == myUid && it.status == com.kush.swych.core.model.DealStatus.PENDING
-                } == true
-            } catch (_: Exception) {
-                // Silently ignore polling errors
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    // Checks for new offers every 10 s, only while the app is in the foreground
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (isActive) {
+                try {
+                    val result = dealRepo.getMyDeals(expireStale = false)
+                    // Only offers waiting on you as the seller, not your own outgoing ones
+                    val myUid = com.kush.swych.core.network.SupabaseManager.currentUid
+                    val deals = result.getOrNull()
+                    hasPendingDeals = deals?.any {
+                        it.sellerId == myUid && it.status == com.kush.swych.core.model.DealStatus.PENDING
+                    } == true
+                    if (deals != null && myUid != null && SettingsManager.notificationsEnabled.value) {
+                        DealNotifier.processChanges(context, deals, myUid)
+                    }
+                } catch (_: Exception) {
+                    // Silently ignore polling errors
+                }
+                delay(10000)
             }
-            delay(10000)
         }
     }
 
@@ -117,26 +146,8 @@ fun MainScreen(
 
     val hapticManager = remember { com.kush.swych.core.util.HapticManager(context) }
 
-    Scaffold(
-        bottomBar = {
-            SwychBottomBar(
-                selectedIndex = selectedTabIndex,
-                hasPendingDeals = hasPendingDeals,
-                onTabSelected = { index ->
-                    if (selectedTabIndex != index) {
-                        hapticManager.triggerFeedback()
-                        selectedTabIndex = index
-                        if (index == 1 && browseCategory.isNotEmpty()) {
-                            browseCategory = ""
-                        }
-                        if (index != 4) {
-                            expandContactDev = false
-                        }
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
+    // Bottom bar floats over the tabs; each tab adds its own bottom padding for it
+    Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -185,10 +196,29 @@ fun MainScreen(
                 }
             }
         }
+
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            SwychBottomBar(
+                selectedIndex = selectedTabIndex,
+                hasPendingDeals = hasPendingDeals,
+                onTabSelected = { index ->
+                    if (selectedTabIndex != index) {
+                        hapticManager.triggerFeedback()
+                        selectedTabIndex = index
+                        if (index == 1 && browseCategory.isNotEmpty()) {
+                            browseCategory = ""
+                        }
+                        if (index != 4) {
+                            expandContactDev = false
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 
-// Bottom Navigation Bar ????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+// Bottom Navigation Bar
 
 @Composable
 private fun SwychBottomBar(
