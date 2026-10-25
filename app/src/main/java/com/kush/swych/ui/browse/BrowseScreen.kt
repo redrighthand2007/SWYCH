@@ -127,7 +127,7 @@ fun BrowseContent(
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                 .padding(4.dp)
         ) {
-            val cats = listOf("All") + Category.values().map { it.name }
+            val cats = listOf("All") + Category.entries.map { it.name }
             LazyRow(
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -149,7 +149,7 @@ fun BrowseContent(
                         contentAlignment = Alignment.Center
                     ) {
                         val color by animateColorAsState(targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
-                        val displayCat = if (catName == "All") "All" else Category.valueOf(catName).displayName
+                        val displayCat = if (catName == "All") "All" else Category.fromName(catName)?.displayName ?: catName
                         Text(
                             text = displayCat,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),

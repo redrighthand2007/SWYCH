@@ -290,7 +290,7 @@ fun ProfileScreen(
                     isExpanded = isContactDevExpanded,
                     onExpandedChange = { isContactDevExpanded = it }
                 ) {
-                    Text("Email: support@swych.app", style = MaterialTheme.typography.bodyMedium)
+                    Text("Email: whiterighthand2007@gmail.com", style = MaterialTheme.typography.bodyMedium)
                 }
                 ExpandableProfileOption(
                     icon = Icons.Default.Feedback, 

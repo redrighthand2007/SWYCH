@@ -165,7 +165,6 @@ fun MainScreen(
             ) { targetIndex ->
                 when (targetIndex) {
                     0 -> HomeContent(
-                        navController = navController,
                         onCategoryClick = { category ->
                             browseCategory = category
                             selectedTabIndex = 1
