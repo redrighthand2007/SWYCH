@@ -1,5 +1,7 @@
 package com.kush.swych
 
+import com.kush.swych.core.model.Category
+import com.kush.swych.core.model.CategoryGroup
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.model.DealStatus
 import com.kush.swych.core.util.userMessage
