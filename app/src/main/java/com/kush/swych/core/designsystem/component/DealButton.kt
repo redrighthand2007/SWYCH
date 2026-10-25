@@ -66,34 +66,3 @@ fun DealButton(
         }
     }
 }
-
-@Composable
-fun DealOutlinedButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
-) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val hapticManager = androidx.compose.runtime.remember { com.kush.swych.core.util.HapticManager(context) }
-    
-    OutlinedButton(
-        onClick = {
-            hapticManager.triggerFeedback()
-            onClick()
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp),
-        enabled = enabled,
-        shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.primary
-        )
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge
-        )
-    }
-}

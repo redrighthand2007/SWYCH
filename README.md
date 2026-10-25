@@ -4,127 +4,149 @@
 
 # Swych (Swap n' Switch)
 
-The campus marketplace that actually works. Buy. Sell. Deal. On Campus.
+A campus marketplace for VIT students: list what you don't need, find what you do,
+and hand it over on campus.
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white&labelColor=7F52FF)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white&labelColor=7F52FF)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white&labelColor=4285F4)](https://developer.android.com/jetpack/compose)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white&labelColor=3ECF8E)](https://supabase.com/)
 [![API Level](https://img.shields.io/badge/Min_SDK-26%20(Android_8.0)-4C1?logo=android&logoColor=white&labelColor=4c1)](https://developer.android.com/studio/releases/platforms)
 
 </div>
 
-## 📸 Preview / Demo
-
-> *Demo / Screenshots Coming Soon!*
-
 ## ✨ Features
 
-- **Campus-Specific Browsing**: Filter items by category, location (Hostel/Campus), and sort by newest or price.
-- **Instant Listing**: Take a photo and post an item for sale in seconds.
-- **Deal Negotiation**: Make offers directly on items instead of sliding into messy DMs.
-- **Deal Management Dashboards**: Track the status of your offers and active listings as Pending, Sold, or Rejected.
-- **Integrated Contacting**: Once a deal is struck, instantly reveal the buyer/seller phone number to connect.
-- **User Profiles**: Track users by name, hostel block, and reputation dots (Deals Made / Deals Expired).
-- **Edge-to-Edge Design**: Beautiful UI with OLED dark mode support and floating, pill-shaped navigation bars.
+- **Browse by category**: 24 student categories, filtered by campus or your hostel block, sorted by newest or price.
+- **List in seconds**: take a photo (or pick one from the gallery), set a price, done. Photos are resized before upload.
+- **Offers, not DMs**: offer the listed price with one tap, or make your own offer from the item page.
+- **Safe hand-overs**: an accepted deal reserves the item; both sides confirm with **Done** after meeting up.
+- **Phone numbers stay private**: the other person's number is only revealed once a deal is accepted.
+- **Reputation**: green dots for completed deals, red dots for deals you cancelled.
+- **Notifications**: new offers, accepted/rejected offers and deal updates, even when the app is closed.
+- **Your data, your call**: edit or remove listings, and delete your account from Profile.
+- **Light / dark / system theme** and haptic feedback, both switchable in Profile.
 
-## 🎯 Why This Project?
+## 🔄 How a deal works
 
-Existing campus trading happens in chaotic, fragmented WhatsApp or Telegram groups where listings get buried, negotiations are disorganized, and buyers frequently "ghost" on meetups.
+```text
+Buyer offers ──► PENDING ──► seller Accepts ──► ACCEPTED ──► both tap Done ──► COMPLETED
+                    │                              │   (item reserved)          (item sold)
+                    ├─ seller Rejects ─► REJECTED  ├─ either side Cancels ─► CANCELLED (item back on sale)
+                    └─ buyer Withdraws (removed)   └─ nobody confirms in 3 days ─► EXPIRED (item back on sale)
+```
 
-**Swych solves this by providing:**
-- A structured, visual marketplace.
-- A streamlined "First-Come-First-Serve" locking mechanism.
-- Accountability through profiles tracking completed vs expired deals.
+- Accepting one offer automatically rejects the other offers on that item.
+- A buyer can have only one live offer per item; offers on reserved or sold items are refused.
+- Every status change runs in a Supabase database function, in one transaction, so a deal can't end up half-updated.
+- Expired deals are closed by an hourly scheduled job.
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Android (100% Kotlin, Jetpack Compose, Material 3, Coil)
-- **Backend:** Supabase (Auth, PostgREST API)
-- **Database:** PostgreSQL (Supabase DB with Row Level Security)
-- **Storage:** Cloudinary / Supabase Storage (for fast, optimized image hosting)
+- **App:** Kotlin, Jetpack Compose, Material 3, Navigation Compose (type-safe routes), Coil, WorkManager
+- **Backend:** Supabase — Auth, PostgREST, Storage, `pg_cron`
+- **Database:** PostgreSQL with Row Level Security; deal logic in `SECURITY DEFINER` functions
 
 ## 📁 Project Structure
 
 ```text
 SWYCH/
 ├── app/src/main/java/com/kush/swych/
-│   ├── core/                  # Core logic, network, and data models
-│   │   ├── data/              # Repositories (Auth, Deals, Items)
-│   │   ├── designsystem/      # Theme, Colors, Typography, Common UI Components
-│   │   ├── model/             # Data models (User, Item, Deal)
-│   │   └── network/           # Supabase client config
-│   └── ui/                    # UI screens and navigation
-│       ├── auth/              # Login and Sign-up screens
+│   ├── core/
+│   │   ├── data/              # Repositories: auth, items, deals
+│   │   ├── designsystem/      # Theme, colors, typography, shared components
+│   │   ├── model/             # User, Item, Deal, Category + status constants
+│   │   ├── network/           # Supabase client
+│   │   ├── notifications/     # Deal notifications and background check
+│   │   └── util/              # Settings, errors, images, haptics
+│   └── ui/
+│       ├── auth/              # Welcome, sign-up, login
+│       ├── home/              # Category grid
 │       ├── browse/            # Marketplace feed
-│       ├── deals/             # User's offers and listings management
-│       ├── postitem/          # Item creation flow
-│       └── profile/           # User dashboard
-└── README.md
+│       ├── itemdetail/        # Item page, offers, edit/remove own listing
+│       ├── postitem/          # New listing
+│       ├── deals/             # Offers and My Products
+│       ├── profile/           # Profile, settings, logout, delete account
+│       ├── main/              # Tabs and bottom bar
+│       └── navigation/        # Routes and session-based navigation
+├── supabase/migrations/       # Database schema, functions and access rules
+└── docs/                      # Logo assets and privacy policy
 ```
 
-## ⚙️ Installation
+## ⚙️ Getting Started
 
-1. **Clone the repository:**
+1. **Clone**
    ```bash
-   git clone https://github.com/redrighthand2007/CacheDeal-App.git
-   cd SWYCH
+   git clone https://github.com/redrighthand2007/SWYCH.git
    ```
-2. **Open the project:**
-   Open the folder in **Android Studio** (Koala or newer recommended).
-3. **Sync Gradle:**
-   Allow Android Studio to sync the Gradle files and download all required dependencies.
+2. **Open** the folder in Android Studio and let Gradle sync.
+3. **Run** on an emulator or device with Android 8.0 (API 26) or newer.
 
-## 🚀 Usage
+The app points at the project's Supabase backend out of the box. Sign-up only accepts
+`@vitstudent.ac.in` email addresses.
 
-1. Build and run the app on an Android Emulator or physical device (API 26+).
-2. Create an account.
-3. Browse the marketplace or post an item to start trading!
+## 🔧 Using your own Supabase project
 
-## 🔧 Configuration
+1. Create a [Supabase](https://supabase.com/) project with the `users`, `items` and `deals` tables
+   and a public storage bucket named `items`.
+2. Apply the SQL files in [`supabase/migrations/`](supabase/migrations) in order. They add the deal
+   functions, constraints, sign-up trigger, access rules and the hourly expiry job.
+3. Put your project URL and publishable key in
+   [`core/network/SupabaseManager.kt`](app/src/main/java/com/kush/swych/core/network/SupabaseManager.kt).
+4. In Supabase → Authentication → Settings, turn on **Leaked password protection**.
 
-To run your own backend, you must configure Supabase:
+## 📦 Release build
 
-1. Create a [Supabase](https://supabase.com/) project.
-2. In your Android Studio project, locate your Supabase initialization (inside `core/network/SupabaseManager.kt`).
-3. Replace the placeholder Supabase URL and Anon Key with your actual project credentials.
-4. Run the necessary SQL migrations and Row-Level Security policies to create and secure the `users`, `items`, and `deals` tables.
+The release build is shrunk with R8. To sign it with your own key, create `keystore.properties`
+in the project root (it is git-ignored):
 
-## 📊 Results / Performance
+```properties
+storeFile=../swych-release.jks
+storePassword=...
+keyAlias=swych
+keyPassword=...
+```
 
-> *Performance metrics and benchmarks coming soon.*
+Without that file the release build is signed with the debug key, which is fine for testing but
+not for the Play Store. Then run:
 
-## 🧠 How It Works
+```bash
+./gradlew bundleRelease
+```
 
-- **Architecture**: The app follows the **MVVM (Model-View-ViewModel)** architecture and uses Jetpack Compose for declarative UI. State is managed via `StateFlow` and Coroutines for asynchronous operations.
-- **Deal Flow Logic**: Swych uses a **First-Come-First-Serve** system. When a buyer submits an offer, the deal status locks to **PENDING**. The seller can then either **Accept** (marks as SOLD, hides from feed, reveals contact) or **Reject** (cancels deal, item returns to active pool).
+Before publishing, host the [privacy policy](docs/PRIVACY_POLICY.md) at a public URL and add it to
+the Play Console listing.
+
+## 🧪 Tests
+
+```bash
+./gradlew testDebugUnitTest lintDebug
+```
 
 ## 🗺️ Roadmap
 
-- [x] Basic Authentication (Sign up / Login)
-- [x] Post items with images
-- [x] Browse marketplace and filter
-- [x] Make offers and manage deals
-- [x] User Reputation System (Completed vs Cancelled)
-- [x] Backend Security (Row-Level Security Policies)
-- [x] Dynamic and Restricted Categories UI
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-Feel free to check the [issues page](https://github.com/redrighthand2007/CacheDeal-App/issues) if you want to contribute.
+- [x] Sign-up / login (email or phone)
+- [x] Listings with photos, edit and remove
+- [x] Offers, accept/reject, hand-over confirmation, expiry
+- [x] Reputation (completed vs cancelled)
+- [x] Row Level Security and server-side deal logic
+- [x] Notifications (background check)
+- [x] Account deletion
+- [ ] Instant push notifications (Firebase Cloud Messaging)
+- [ ] In-app chat
+- [ ] Free / donate listings and a "Wanted" board
+- [ ] Report and block, admin moderation
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [`LICENSE`](LICENSE).
 
 ## 👨‍💻 Author
 
-**Kush**
-- GitHub: [@redrighthand2007](https://github.com/redrighthand2007)
+**Kush** · GitHub: [@redrighthand2007](https://github.com/redrighthand2007)
 
 ## 🙌 Acknowledgements
 
 - [Jetpack Compose](https://developer.android.com/jetpack/compose) for modern Android UI
-- [Supabase](https://supabase.com/) for a seamless open-source Firebase alternative
+- [Supabase](https://supabase.com/) for auth, database and storage
 - [Icons8](https://icons8.com/) for category iconography
-- [Shields.io](https://shields.io/) for the clean repository badges
+- [Shields.io](https://shields.io/) for the repository badges

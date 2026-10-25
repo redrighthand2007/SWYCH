@@ -22,6 +22,3 @@
 # WorkManager creates its Room database by reflection; without this the release
 # build crashes on launch (NoSuchMethodException: WorkDatabase_Impl.<init>).
 -keep class * extends androidx.room.RoomDatabase { <init>(); }
-
-# Cloudinary SDK (Fresco is excluded in build.gradle.kts)
--dontwarn com.facebook.**
