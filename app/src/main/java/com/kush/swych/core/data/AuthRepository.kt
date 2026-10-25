@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import com.kush.swych.core.model.User
 import com.kush.swych.core.network.SupabaseManager
+import com.kush.swych.core.notifications.DealNotifier
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
@@ -98,6 +99,12 @@ class AuthRepository(private val context: Context) {
         return users
     }
 
+    /** Permanently deletes the account, its listings and deals, then signs out locally. */
+    suspend fun deleteAccount(): Result<Unit> = runCatching {
+        db.rpc("delete_my_account")
+        logout()
+    }
+
     suspend fun logout() {
         try {
             auth.signOut()
@@ -106,6 +113,8 @@ class AuthRepository(private val context: Context) {
         }
         // Older versions kept the signed-in user here
         context.getSharedPreferences("auth", Context.MODE_PRIVATE).edit { clear() }
+        // Next account on this phone starts with a clean slate, without old deal alerts
+        DealNotifier.clear(context)
         cachedUsers = null
         ItemRepository.cachedItems = null
     }

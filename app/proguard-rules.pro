@@ -1,21 +1,27 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep line numbers so release crash reports point at real source lines.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# kotlinx.serialization: keep @Serializable models and their generated serializers
+# (Supabase rows and navigation routes are decoded by name).
+-keepattributes *Annotation*, InnerClasses
+-keepclassmembers @kotlinx.serialization.Serializable class com.kush.swych.** {
+    *** Companion;
+    *** INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class com.kush.swych.**$$serializer { *; }
+-keep @kotlinx.serialization.Serializable class com.kush.swych.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Ktor / Supabase pull in optional JVM-only classes that don't exist on Android.
+-dontwarn org.slf4j.**
+-dontwarn java.lang.management.**
+-dontwarn io.ktor.util.debug.**
+-dontwarn javax.naming.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# WorkManager creates its Room database by reflection; without this the release
+# build crashes on launch (NoSuchMethodException: WorkDatabase_Impl.<init>).
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+
+# Cloudinary SDK (Fresco is excluded in build.gradle.kts)
+-dontwarn com.facebook.**

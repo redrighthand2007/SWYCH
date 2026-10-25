@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.kush.swych.core.designsystem.theme.SwychTheme
+import com.kush.swych.core.notifications.DealCheckWorker
+import com.kush.swych.core.notifications.DealNotifier
 import com.kush.swych.ui.navigation.AppNavHost
 
 import androidx.compose.runtime.collectAsState
@@ -19,7 +21,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         SettingsManager.init(applicationContext)
-        
+        DealNotifier.createChannel(applicationContext)
+        DealCheckWorker.schedule(applicationContext)
 
         enableEdgeToEdge()
         setContent {

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -19,9 +21,31 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing key lives outside git, in keystore.properties at the project root:
+    //   storeFile=../swych-release.jks
+    //   storePassword=...
+    //   keyAlias=swych
+    //   keyPassword=...
+    val keystorePropsFile = rootProject.file("keystore.properties")
+    val releaseSigning = if (keystorePropsFile.exists()) {
+        val props = Properties().apply { keystorePropsFile.inputStream().use { load(it) } }
+        signingConfigs.create("release") {
+            storeFile = file(props.getProperty("storeFile"))
+            storePassword = props.getProperty("storePassword")
+            keyAlias = props.getProperty("keyAlias")
+            keyPassword = props.getProperty("keyPassword")
+        }
+    } else {
+        // No release key on this machine: sign with the debug key so the release
+        // build can still be installed and tested. Play Store uploads need the real key.
+        signingConfigs.getByName("debug")
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = releaseSigning
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -76,6 +100,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.exifinterface)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
