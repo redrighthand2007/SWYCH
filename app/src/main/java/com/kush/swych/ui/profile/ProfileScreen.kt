@@ -1,5 +1,6 @@
 package com.kush.swych.ui.profile
 
+import androidx.compose.foundation.BorderStroke
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -187,7 +188,11 @@ fun ProfileScreen(
             }
 
             // Help and info
-            Column(modifier = Modifier.padding(vertical = 6.dp)) {
+            Column(
+                modifier = Modifier.padding(vertical = 6.dp),
+                // Gap so opened sections don't run into each other
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 ExpandableProfileOption(
                     icon = Icons.Default.Code,
                     text = "Contact Developer",
@@ -227,27 +232,29 @@ fun ProfileScreen(
             }
 
             // Account actions
-            Row(
+            // Kept low-key on purpose: neither should draw the eye
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
+                OutlinedButton(
                     onClick = { showLogoutDialog = true },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    ),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     contentPadding = PaddingValues(vertical = 12.dp)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Log Out", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text("Log Out", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 }
                 TextButton(onClick = { showDeleteDialog = true }, enabled = !isDeleting) {
-                    Text("Delete account", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        "Delete account",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
@@ -384,9 +391,12 @@ fun ExpandableProfileOption(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp, start = 40.dp)
+                    .padding(top = 10.dp, start = 40.dp, bottom = 4.dp)
             ) {
-                content()
+                // Readable text colour in both light and dark mode
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+                    content()
+                }
             }
         }
     }
