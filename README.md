@@ -211,6 +211,7 @@ address get the verified **V** badge (see
    | `20261025000000_launch_readiness.sql` | Hourly expiry job (`pg_cron`), photo upload rules, account deletion |
    | `20261115000000_college_email_only.sql` | Old college-only email rule (removed again by the next file) |
    | `20261116000000_any_email_vit_badge.sql` | Any email can sign up; `vit_verified` badge and pending VIT verifications |
+   | `20261117000000_cleanup_deleted_users.sql` | Deleting a user in the dashboard also removes their profile, listings and deals |
 3. **Copy your keys** from **Project Settings → API Keys**: the project URL and the
    **publishable** key go into `local.properties`. The publishable key is meant to ship inside the
    app; the data is protected by Row Level Security, not by keeping that key secret.
