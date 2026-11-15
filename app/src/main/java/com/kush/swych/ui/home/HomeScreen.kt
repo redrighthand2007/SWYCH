@@ -1,5 +1,12 @@
 package com.kush.swych.ui.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,6 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,10 +27,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kush.swych.core.model.Category
 import com.kush.swych.core.model.CategoryGroup
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeContent(
@@ -51,15 +65,7 @@ fun HomeContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = "Swych",
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = (-1.5).sp,
-                            fontSize = 64.sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    HeaderTicker()
                     Spacer(modifier = Modifier.height(8.dp))
                     Surface(
                         shape = RoundedCornerShape(100),
@@ -165,6 +171,60 @@ fun CategoryBox(
                 text = category.displayName,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * The app name, then how a deal works, one step at a time, looping back to the name.
+ * Starts again from "Swych" every time the Home tab is opened.
+ */
+private val tickerSteps = listOf(
+    "Swych",
+    "Find it on campus",
+    "Make your offer",
+    "Lock the deal",
+    "Meet at a public spot",
+    "Swap & done"
+)
+
+private const val NAME_HOLD_MILLIS = 2600L
+private const val STEP_HOLD_MILLIS = 2000L
+
+@Composable
+private fun HeaderTicker() {
+    var index by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(if (index == 0) NAME_HOLD_MILLIS else STEP_HOLD_MILLIS)
+            index = (index + 1) % tickerSteps.size
+        }
+    }
+
+    // Fixed height so the cards below don't jump as the text size changes
+    Box(modifier = Modifier.height(84.dp), contentAlignment = Alignment.Center) {
+        AnimatedContent(
+            targetState = index,
+            transitionSpec = {
+                (slideInVertically(tween(450)) { it / 2 } + fadeIn(tween(450))) togetherWith
+                    (slideOutVertically(tween(350)) { -it / 2 } + fadeOut(tween(350)))
+            },
+            label = "header_ticker"
+        ) { step ->
+            val isName = step == 0
+            Text(
+                text = tickerSteps[step],
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontWeight = if (isName) FontWeight.Black else FontWeight.ExtraBold,
+                    letterSpacing = if (isName) (-1.5).sp else (-0.5).sp,
+                    fontSize = if (isName) 64.sp else 28.sp
+                ),
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
     }
