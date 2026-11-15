@@ -54,7 +54,7 @@ fun AuthScreen(navController: NavController) {
             enter = fadeIn(animationSpec = tween(durationMillis = 800))
         ) {
             Text(
-                text = "Swipe n' Switch",
+                text = "Swych",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.ExtraBold
                 ),

@@ -1,7 +1,9 @@
 package com.kush.swych.core.util
 
+import android.app.UiModeManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +16,7 @@ object SettingsManager {
     private const val KEY_NOTIFICATIONS = "deal_notifications"
 
     private lateinit var prefs: SharedPreferences
+    private lateinit var appContext: Context
 
     private val _themeMode = MutableStateFlow(0) // Default to System
     val themeMode: StateFlow<Int> = _themeMode.asStateFlow()
@@ -25,8 +28,10 @@ object SettingsManager {
     val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled.asStateFlow()
 
     fun init(context: Context) {
+        appContext = context.applicationContext
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         _themeMode.value = prefs.getInt(KEY_THEME, 0)
+        applyToSystem(_themeMode.value)
         _hapticEnabled.value = prefs.getBoolean(KEY_HAPTIC, true)
         _notificationsEnabled.value = prefs.getBoolean(KEY_NOTIFICATIONS, true)
     }
@@ -39,6 +44,21 @@ object SettingsManager {
     fun setThemeMode(mode: Int) {
         prefs.edit { putInt(KEY_THEME, mode) }
         _themeMode.value = mode
+        applyToSystem(mode)
+    }
+
+    /**
+     * Tells Android which theme the app uses, so the launch screen shown before the app
+     * draws matches it (otherwise a dark-mode app opens with a white flash on a light phone).
+     */
+    private fun applyToSystem(mode: Int) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        val night = when (mode) {
+            1 -> UiModeManager.MODE_NIGHT_NO
+            2 -> UiModeManager.MODE_NIGHT_YES
+            else -> UiModeManager.MODE_NIGHT_AUTO
+        }
+        appContext.getSystemService(UiModeManager::class.java)?.setApplicationNightMode(night)
     }
 
     fun setHapticEnabled(enabled: Boolean) {
