@@ -158,6 +158,7 @@ SWYCH/
 │       ├── main/              # Tabs and bottom bar
 │       └── navigation/        # Routes and session-based navigation
 ├── app/src/test/              # Unit tests (ViewModels with fake repositories)
+├── baselineprofile/           # Records the startup Baseline Profile and measures cold start
 ├── supabase/migrations/       # Database schema, functions and access rules
 ├── supabase/functions/        # Edge Functions for the VIT badge email
 └── docs/                      # Logo, screenshots, privacy policy
@@ -279,6 +280,23 @@ the Play Console listing.
 ./gradlew testDebugUnitTest   # unit tests: ViewModels, deal states, categories, errors
 ./gradlew lintDebug           # Android lint
 ./gradlew assembleRelease     # shrunk release build (catches R8 issues the debug build hides)
+```
+
+## ⚡ Startup performance
+
+The app ships a [Baseline Profile](https://developer.android.com/topic/performance/baselineprofiles/overview):
+a list of the code used at launch, which Android compiles ahead of time at install, so even the first
+launch after installing the APK is fast. To re-record it after big changes, connect a phone (Android 13+)
+or emulator and run:
+
+```bash
+./gradlew :app:generateBaselineProfile
+```
+
+To compare cold-start time with and without it:
+
+```bash
+./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest
 ```
 
 ## 🗺️ Roadmap

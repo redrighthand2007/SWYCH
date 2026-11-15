@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Swych"
 include(":app")
+include(":baselineprofile")
  

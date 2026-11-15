@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -79,6 +80,10 @@ android {
 }
 
 dependencies {
+    // Installs the startup Baseline Profile on phones that got the APK outside the Play Store
+    implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(project(":baselineprofile"))
+
     implementation(platform(libs.androidx.compose.bom))
 
     // Supabase (database, auth, photo storage)
