@@ -18,6 +18,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Supabase project settings come from local.properties (git-ignored), not source code:
+        //   supabase.url=https://<project>.supabase.co
+        //   supabase.key=<publishable key>
+        val localProps = Properties().apply {
+            rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+        }
+        buildConfigField("String", "SUPABASE_URL", "\"${localProps.getProperty("supabase.url", "")}\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"${localProps.getProperty("supabase.key", "")}\"")
     }
 
     // Release signing key lives outside git, in keystore.properties at the project root:
@@ -58,6 +67,12 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    // Lets JVM unit tests call code that logs through android.util.Log
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
 }
 

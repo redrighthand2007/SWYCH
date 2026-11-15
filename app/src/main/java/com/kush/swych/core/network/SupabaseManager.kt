@@ -1,5 +1,6 @@
 package com.kush.swych.core.network
 
+import com.kush.swych.BuildConfig
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
@@ -8,13 +9,15 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 
 object SupabaseManager {
-    private const val SUPABASE_URL = "https://brmngeqpfudsdpgjyimm.supabase.co"
-    private const val SUPABASE_KEY = "sb_publishable_YM9MrcZObK_rYFLFFb5I5A_mu__BKxN"
-
     val client: SupabaseClient by lazy {
+        // Set in local.properties (see README); the publishable key is safe in the app
+        // because every table is protected by row level security.
+        check(BuildConfig.SUPABASE_URL.isNotBlank() && BuildConfig.SUPABASE_KEY.isNotBlank()) {
+            "Supabase is not configured: add supabase.url and supabase.key to local.properties"
+        }
         createSupabaseClient(
-            supabaseUrl = SUPABASE_URL,
-            supabaseKey = SUPABASE_KEY
+            supabaseUrl = BuildConfig.SUPABASE_URL,
+            supabaseKey = BuildConfig.SUPABASE_KEY
         ) {
             install(Auth)
             install(Postgrest)

@@ -90,3 +90,6 @@ fabric.properties
 
 # Firebase
 google-services.json
+
+# Editor workspaces
+*.code-workspace

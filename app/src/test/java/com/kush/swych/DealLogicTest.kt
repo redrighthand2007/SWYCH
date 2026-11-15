@@ -71,4 +71,16 @@ class DealLogicTest {
         assertEquals("No account found with this phone number.", Exception("No account found with this phone number.").userMessage())
         assertEquals("Something went wrong. Please try again.", RuntimeException().userMessage())
     }
+
+    @Test
+    fun rawDatabaseErrorsAreNeverShown() {
+        assertEquals(
+            "Something went wrong. Please try again.",
+            Exception("null value in column \"title\" of relation \"items\" violates not-null constraint").userMessage()
+        )
+        assertEquals(
+            "Something went wrong. Please try again.",
+            IllegalStateException("Unexpected JSON token at offset 12").userMessage()
+        )
+    }
 }
