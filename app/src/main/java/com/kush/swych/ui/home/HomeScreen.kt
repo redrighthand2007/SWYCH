@@ -39,104 +39,106 @@ fun HomeContent(
     onCategoryClick: (String) -> Unit,
     onNavigateToProfile: () -> Unit = {}
 ) {
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(bottom = 120.dp)
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // Upper Half: Trendy branding (scrolls away) - FULL SCREEN WIDTH
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primaryContainer,
-                                MaterialTheme.colorScheme.background
-                            )
+        // Pinned header: stays in place while the categories scroll under it
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HEADER_HEIGHT)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.background
                         )
-                    ),
-                contentAlignment = Alignment.Center
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                HeaderTicker()
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(100),
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    HeaderTicker()
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Surface(
-                        shape = RoundedCornerShape(100),
-                        color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ) {
-                        Text(
-                            text = "Swap n' Switch",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            ),
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
+                    Text(
+                        text = "Swap n' Switch",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                 }
             }
         }
 
-        // Category groups, straight from the Category list so Home always matches Browse and Post
-        CategoryGroup.entries.forEach { group ->
-            val categories = Category.entries.filter { it.group == group }
-            if (categories.isEmpty()) return@forEach
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = 120.dp)
+        ) {
+            // Category groups, straight from the Category list so Home always matches Browse and Post
+            CategoryGroup.entries.forEach { group ->
+                val categories = Category.entries.filter { it.group == group }
+                if (categories.isEmpty()) return@forEach
 
-            item(key = "group_${group.name}") {
-                Text(
-                    text = group.title,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            categories.chunked(2).forEach { rowItems ->
-                item(key = "row_${rowItems.first().name}") {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        rowItems.forEach { category ->
-                            Box(modifier = Modifier.weight(1f)) {
-                                CategoryBox(
-                                    category = category,
-                                    onClick = { onCategoryClick(category.name) }
-                                )
+                item(key = "group_${group.name}") {
+                    Text(
+                        text = group.title,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                categories.chunked(2).forEach { rowItems ->
+                    item(key = "row_${rowItems.first().name}") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            rowItems.forEach { category ->
+                                Box(modifier = Modifier.weight(1f)) {
+                                    CategoryBox(
+                                        category = category,
+                                        onClick = { onCategoryClick(category.name) }
+                                    )
+                                }
+                            }
+                            if (rowItems.size < 2) {
+                                Spacer(modifier = Modifier.weight(1f))
                             }
                         }
-                        if (rowItems.size < 2) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
                     }
                 }
             }
-        }
 
-        // Footer link
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Suggest more needy categories",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { onNavigateToProfile() }
-                )
+            // Footer link
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Suggest more needy categories",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { onNavigateToProfile() }
+                    )
+                }
             }
         }
     }
@@ -178,7 +180,7 @@ fun CategoryBox(
 
 /**
  * The app name, then how a deal works, one step at a time, looping back to the name.
- * Starts again from "Swych" every time the Home tab is opened.
+ * "Swych" stays up about twice as long as each step. Starts again from "Swych" every time the Home tab is opened.
  */
 private val tickerSteps = listOf(
     "Swych",
@@ -189,8 +191,9 @@ private val tickerSteps = listOf(
     "Swap & done"
 )
 
-private const val NAME_HOLD_MILLIS = 2600L
+private const val NAME_HOLD_MILLIS = 4000L
 private const val STEP_HOLD_MILLIS = 2000L
+private val HEADER_HEIGHT = 200.dp
 
 @Composable
 private fun HeaderTicker() {
