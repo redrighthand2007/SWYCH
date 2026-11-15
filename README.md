@@ -7,7 +7,6 @@
 A campus marketplace for VIT students: list what you don't need, find what you do,
 and hand it over on campus.
 
-[![Android CI](https://github.com/redrighthand2007/SWYCH/actions/workflows/android.yml/badge.svg)](https://github.com/redrighthand2007/SWYCH/actions/workflows/android.yml)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white&labelColor=7F52FF)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white&labelColor=4285F4)](https://developer.android.com/jetpack/compose)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white&labelColor=3ECF8E)](https://supabase.com/)
@@ -105,7 +104,7 @@ flowchart LR
 - **Release hardening**: R8 shrinking with keep rules (found and fixed a release-only crash in
   WorkManager's database and stripped resources loaded by name), image downscaling and EXIF
   rotation before upload, friendly error mapping that never shows raw database errors.
-- **CI** on every push: unit tests, Android lint and a debug build via GitHub Actions.
+- **Unit tests** for the deal states, category list and error mapping, plus a clean Android lint run.
 
 ## 🛠️ Tech Stack
 
@@ -137,7 +136,6 @@ SWYCH/
 │       └── navigation/        # Routes and session-based navigation
 ├── app/src/test/              # Unit tests
 ├── supabase/migrations/       # Database schema, functions and access rules
-├── .github/workflows/         # CI: tests, lint, build
 └── docs/                      # Logo, screenshots and privacy policy
 ```
 
