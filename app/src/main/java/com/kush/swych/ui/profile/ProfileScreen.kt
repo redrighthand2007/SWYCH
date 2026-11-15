@@ -70,179 +70,185 @@ fun ProfileScreen(
         isFeedbackExpanded = false
     }
 
-    // Sized to fit one screen; it only scrolls if a long section (like FAQs) is opened
-    Column(
+    // Like the Post screen, the groups spread over the full height with Log Out just above
+    // the nav bar. It only scrolls if a long section (like FAQs) is opened.
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .verticalScroll(scrollState)
-            // Bottom padding keeps the last row clear of the floating nav bar
-            .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 112.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Profile card
-        val profile = user
-        if (profile != null) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .heightIn(min = maxHeight)
+                // Same margins as the Post screen; bottom padding clears the floating nav bar
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 132.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Profile card
+            val profile = user
+            if (profile != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    elevation = CardDefaults.cardElevation(0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                            Box(
+                                modifier = Modifier
+                                    .size(52.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = profile.name.take(1).uppercase(),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = profile.name,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = "Block: ${profile.block}  ·  ${profile.phone}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                        )
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                            ReputationCount(color = Color(0xFF4CAF50), label = "Successful deals", count = profile.greenDots)
+                            ReputationCount(color = Color(0xFFF44336), label = "Cancelled", count = profile.redDots)
+                        }
+                    }
+                }
+            } else if (isLoading) {
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                    Text("Profile not found or incomplete. Try logging out.", color = MaterialTheme.colorScheme.error)
+                }
+            }
+
+            // Settings
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = profile.name.take(1).uppercase(),
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Black,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(14.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = profile.name,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1
-                            )
-                            Text(
-                                text = "Block: ${profile.block}  ·  ${profile.phone}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
-                            )
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    SettingRow(icon = Icons.Default.Palette, label = "Theme") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            listOf("System", "Light", "Dark").forEachIndexed { mode, label ->
+                                FilterChip(
+                                    selected = themeMode == mode,
+                                    onClick = { SettingsManager.setThemeMode(mode) },
+                                    label = { Text(label, fontSize = 12.sp) }
+                                )
+                            }
                         }
                     }
+                    SettingRow(
+                        icon = Icons.Default.Notifications,
+                        label = "Deal Notifications",
+                        onClick = { SettingsManager.setNotificationsEnabled(!notificationsEnabled) }
+                    ) {
+                        Switch(checked = notificationsEnabled, onCheckedChange = { SettingsManager.setNotificationsEnabled(it) })
+                    }
+                    SettingRow(
+                        icon = Icons.Default.Vibration,
+                        label = "Haptic Feedback",
+                        onClick = { SettingsManager.setHapticEnabled(!hapticEnabled) }
+                    ) {
+                        Switch(checked = hapticEnabled, onCheckedChange = { SettingsManager.setHapticEnabled(it) })
+                    }
+                }
+            }
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 12.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+            // Help and info
+            Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                ExpandableProfileOption(
+                    icon = Icons.Default.Code,
+                    text = "Contact Developer",
+                    isExpanded = isContactDevExpanded,
+                    onExpandedChange = { isContactDevExpanded = it }
+                ) {
+                    Text("Email: whiterighthand2007@gmail.com", style = MaterialTheme.typography.bodyMedium)
+                }
+                ExpandableProfileOption(
+                    icon = Icons.Default.Feedback,
+                    text = "Feedback",
+                    isExpanded = isFeedbackExpanded,
+                    onExpandedChange = { isFeedbackExpanded = it }
+                ) {
+                    Text("We'd love to hear your thoughts! Drop us a review.", style = MaterialTheme.typography.bodyMedium)
+                }
+                ExpandableProfileOption(icon = Icons.AutoMirrored.Filled.HelpOutline, text = "FAQs") {
+                    Text(
+                        "Q: How do I buy something?\n" +
+                            "A: Tap Deal on an item (or make your own offer on its page). The seller sees it in their Deals tab.\n\n" +
+                            "Q: What happens when my offer is accepted?\n" +
+                            "A: The item is reserved for you and a Call button appears. Meet up, exchange the item, then both of you tap Done.\n\n" +
+                            "Q: What if we can't meet?\n" +
+                            "A: Either side can Cancel the deal and the item goes back on sale. Cancelling adds a red dot to your profile. Deals nobody confirms expire after 3 days.\n\n" +
+                            "Q: What do the dots mean?\n" +
+                            "A: Green = completed deals, red = deals you cancelled.",
+                        style = MaterialTheme.typography.bodyMedium
                     )
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                        ReputationCount(color = Color(0xFF4CAF50), label = "Successful deals", count = profile.greenDots)
-                        ReputationCount(color = Color(0xFFF44336), label = "Cancelled", count = profile.redDots)
-                    }
+                }
+                ExpandableProfileOption(icon = Icons.Default.Gavel, text = "Legal Info") {
+                    Text(
+                        "Your phone number is only shared with the other person once a deal is accepted. " +
+                            "You can delete your account and all your data at any time below.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
-        } else if (isLoading) {
-            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                Text("Profile not found or incomplete. Try logging out.", color = MaterialTheme.colorScheme.error)
-            }
-        }
 
-        // Settings
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-            elevation = CardDefaults.cardElevation(0.dp)
-        ) {
-            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                SettingRow(icon = Icons.Default.Palette, label = "Theme") {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        listOf("System", "Light", "Dark").forEachIndexed { mode, label ->
-                            FilterChip(
-                                selected = themeMode == mode,
-                                onClick = { SettingsManager.setThemeMode(mode) },
-                                label = { Text(label, fontSize = 12.sp) }
-                            )
-                        }
-                    }
-                }
-                SettingRow(
-                    icon = Icons.Default.Notifications,
-                    label = "Deal Notifications",
-                    onClick = { SettingsManager.setNotificationsEnabled(!notificationsEnabled) }
+            // Account actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { showLogoutDialog = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    ),
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(vertical = 12.dp)
                 ) {
-                    Switch(checked = notificationsEnabled, onCheckedChange = { SettingsManager.setNotificationsEnabled(it) })
+                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Log Out", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
-                SettingRow(
-                    icon = Icons.Default.Vibration,
-                    label = "Haptic Feedback",
-                    onClick = { SettingsManager.setHapticEnabled(!hapticEnabled) }
-                ) {
-                    Switch(checked = hapticEnabled, onCheckedChange = { SettingsManager.setHapticEnabled(it) })
+                TextButton(onClick = { showDeleteDialog = true }, enabled = !isDeleting) {
+                    Text("Delete account", color = MaterialTheme.colorScheme.error)
                 }
-            }
-        }
-
-        // Help and info
-        Column {
-            ExpandableProfileOption(
-                icon = Icons.Default.Code,
-                text = "Contact Developer",
-                isExpanded = isContactDevExpanded,
-                onExpandedChange = { isContactDevExpanded = it }
-            ) {
-                Text("Email: whiterighthand2007@gmail.com", style = MaterialTheme.typography.bodyMedium)
-            }
-            ExpandableProfileOption(
-                icon = Icons.Default.Feedback,
-                text = "Feedback",
-                isExpanded = isFeedbackExpanded,
-                onExpandedChange = { isFeedbackExpanded = it }
-            ) {
-                Text("We'd love to hear your thoughts! Drop us a review.", style = MaterialTheme.typography.bodyMedium)
-            }
-            ExpandableProfileOption(icon = Icons.AutoMirrored.Filled.HelpOutline, text = "FAQs") {
-                Text(
-                    "Q: How do I buy something?\n" +
-                        "A: Tap Deal on an item (or make your own offer on its page). The seller sees it in their Deals tab.\n\n" +
-                        "Q: What happens when my offer is accepted?\n" +
-                        "A: The item is reserved for you and a Call button appears. Meet up, exchange the item, then both of you tap Done.\n\n" +
-                        "Q: What if we can't meet?\n" +
-                        "A: Either side can Cancel the deal and the item goes back on sale. Cancelling adds a red dot to your profile. Deals nobody confirms expire after 3 days.\n\n" +
-                        "Q: What do the dots mean?\n" +
-                        "A: Green = completed deals, red = deals you cancelled.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            ExpandableProfileOption(icon = Icons.Default.Gavel, text = "Legal Info") {
-                Text(
-                    "Your phone number is only shared with the other person once a deal is accepted. " +
-                        "You can delete your account and all your data at any time below.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-
-        // Account actions
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = { showLogoutDialog = true },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(vertical = 12.dp)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Log Out", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-            TextButton(onClick = { showDeleteDialog = true }, enabled = !isDeleting) {
-                Text("Delete account", color = MaterialTheme.colorScheme.error)
             }
         }
     }
