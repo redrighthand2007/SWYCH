@@ -76,7 +76,7 @@ fun HomeContent(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Text(
-                        text = "Swap n' Switch",
+                        text = "Swych",
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -186,11 +186,11 @@ fun CategoryBox(
 }
 
 /**
- * The app name, then how a deal works, one step at a time, looping back to the name.
- * "Swych" stays up about twice as long as each step. Starts again from "Swych" every time the Home tab is opened.
+ * The tagline, then how a deal works, one step at a time, looping back to the name.
+ * The tagline stays up about twice as long as each step. Starts again from it every time the Home tab is opened.
  */
 private val tickerSteps = listOf(
-    "Swych",
+    "Swap n' Switch",
     "Find it on campus",
     "Make your offer",
     "Lock the deal",
@@ -244,7 +244,7 @@ private fun HeaderTicker() {
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontWeight = if (isName) FontWeight.Black else FontWeight.ExtraBold,
                     letterSpacing = if (isName) (-1.5).sp else (-0.5).sp,
-                    fontSize = if (isName) 64.sp else 28.sp
+                    fontSize = if (isName) 44.sp else 28.sp
                 ),
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
