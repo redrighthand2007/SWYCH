@@ -11,7 +11,7 @@ and hand it over on campus.
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white&labelColor=4285F4)](https://developer.android.com/jetpack/compose)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white&labelColor=3ECF8E)](https://supabase.com/)
 [![API Level](https://img.shields.io/badge/Min_SDK-26%20(Android_8.0)-4C1?logo=android&logoColor=white&labelColor=4c1)](https://developer.android.com/studio/releases/platforms)
-[![License: MIT](https://img.shields.io/badge/License-MIT-EA580C)](LICENSE)
+[![License: All rights reserved](https://img.shields.io/badge/License-All%20rights%20reserved-EA580C)](LICENSE)
 
 **[⬇️ Download the APK](https://github.com/redrighthand2007/SWYCH/releases/latest)** · [Screenshots](#-screenshots) · [How a deal works](#-how-a-deal-works) · [Architecture](#%EF%B8%8F-architecture)
 
@@ -206,6 +206,7 @@ Sign-up only accepts `@vitstudent.ac.in` email addresses (see
    | `20261001000000_initial_schema.sql` | `users`, `items`, `deals` tables, the `items` photo bucket, RLS switched on |
    | `20261021000000_deal_workflow.sql` | Deal statuses and constraints, deal functions, sign-up trigger, access rules |
    | `20261025000000_launch_readiness.sql` | Hourly expiry job (`pg_cron`), photo upload rules, account deletion |
+   | `20261115000000_college_email_only.sql` | Only `@vitstudent.ac.in` emails can sign up or switch to an email |
 3. **Copy your keys** from **Project Settings → API Keys**: the project URL and the
    **publishable** key go into `local.properties`. The publishable key is meant to ship inside the
    app; the data is protected by Row Level Security, not by keeping that key secret.
@@ -281,7 +282,8 @@ the Play Console listing.
 
 ## 📄 License
 
-Distributed under the MIT License. See [`LICENSE`](LICENSE).
+© 2026 Kush Aghera. All rights reserved. The source is public so it can be viewed and evaluated;
+copying, redistributing or reusing it requires written permission. See [`LICENSE`](LICENSE).
 
 ## 👨‍💻 Author
 
