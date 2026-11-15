@@ -7,7 +7,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -39,8 +42,12 @@ fun AppNavHost(sessionViewModel: SessionViewModel = hiltViewModel()) {
     // signed in while every request is being rejected for a missing session.
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
 
-    if (sessionState == SessionState.Loading) {
-        // Saved session is still loading from storage
+    // Only wait for the saved session the first time. Supabase briefly reports "loading" again
+    // when the app returns from the camera or background; dropping the NavHost then would throw
+    // away the whole screen stack and land the user back on Home.
+    var sessionKnown by rememberSaveable { mutableStateOf(false) }
+    if (sessionState != SessionState.Loading) sessionKnown = true
+    if (!sessionKnown) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
         return
     }

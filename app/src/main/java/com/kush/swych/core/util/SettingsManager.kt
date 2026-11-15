@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 object SettingsManager {
     private const val PREFS_NAME = "swych_settings"
     private const val KEY_THEME = "theme_mode" // 0 = System, 1 = Light, 2 = Dark
+    private const val KEY_THEME_APPLIED = "theme_mode_applied"
     private const val KEY_HAPTIC = "haptic_feedback"
     private const val KEY_NOTIFICATIONS = "deal_notifications"
 
@@ -53,6 +54,9 @@ object SettingsManager {
      */
     private fun applyToSystem(mode: Int) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        // Telling Android restarts the screen, so only do it when the choice actually changed
+        if (prefs.getInt(KEY_THEME_APPLIED, -1) == mode) return
+        prefs.edit { putInt(KEY_THEME_APPLIED, mode) }
         val night = when (mode) {
             1 -> UiModeManager.MODE_NIGHT_NO
             2 -> UiModeManager.MODE_NIGHT_YES

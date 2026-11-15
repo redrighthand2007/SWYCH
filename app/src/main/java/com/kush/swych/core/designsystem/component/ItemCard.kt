@@ -142,7 +142,7 @@ fun ItemCard(
                                 )
                                 if (sellerVerified) {
                                     Spacer(Modifier.width(3.dp))
-                                    VitBadge(size = 12.dp)
+                                    VitBadge(size = 16.dp)
                                 }
                             }
                         }
