@@ -11,6 +11,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.status.SessionStatus
+import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.rpc
@@ -80,14 +81,23 @@ class SupabaseAuthRepository @Inject constructor(
         email: String,
         password: String
     ): Result<SignUpOutcome> = runCatching {
-        auth.signUpWith(Email) {
-            this.email = email
-            this.password = password
-            data = buildJsonObject {
-                put("name", name)
-                put("block", block)
-                put("phone", phone)
+        try {
+            auth.signUpWith(Email) {
+                this.email = email
+                this.password = password
+                data = buildJsonObject {
+                    put("name", name)
+                    put("block", block)
+                    put("phone", phone)
+                }
             }
+        } catch (e: RestException) {
+            // A taken email comes back as "User already registered". A server error here means
+            // the profile insert failed, which in practice is the phone number already in use.
+            if (e.statusCode >= 500) {
+                throw Exception("This phone number is already registered. Log in, or use a different number.")
+            }
+            throw e
         }
         cachedUsers = null
         // Sign-up only returns a session when email confirmation is off; otherwise the
