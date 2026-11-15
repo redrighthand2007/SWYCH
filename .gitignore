@@ -35,7 +35,7 @@ build/
 bin/
 gen/
 out/
-release/
+/release/
 
 # ——— Local Configuration ———
 local.properties
