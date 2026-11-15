@@ -47,7 +47,7 @@ From picking a category to closing a deal, in light and dark mode:
 - **Phone numbers stay private**: the other person's number is only shared while a deal is accepted, and hidden again once it's done.
 - **Buy and Sell in one place**: your offers and your listings, sortable by latest or by product.
 - **Golden V badge**: sign up with any email; VIT students verify their `@vitstudent.ac.in` address from Profile (one email link) and get a gold **V** next to their name on listings and deals.
-- **Reputation**: green dots for completed deals, red dots for deals you cancelled.
+- **Upvotes and downvotes**: thumbs up or down on any listing to rate its seller, one vote per listing; totals show on cards and profiles, next to completed and cancelled deal counts.
 - **Notifications**: new offers, accepted/rejected offers and deal updates, also when the app is closed (checked about every 15 minutes).
 - **Your data, your call**: edit or remove listings, and delete your account from Profile.
 - **Light / dark / system theme** and haptic feedback, both switchable in Profile.
@@ -216,6 +216,7 @@ address get the verified **V** badge (see
    | `20261117000000_cleanup_deleted_users.sql` | Deleting a user in the dashboard also removes their profile, listings and deals |
    | `20261118000000_three_hour_deals.sql` | Accepted deals expire after 3 hours (checked every 10 min); numbers shared only while a deal is accepted |
    | `20261119000000_phone_login_and_speed.sql` | Phone login moves to an Edge Function; indexes and faster access rules |
+   | `20261120000000_votes.sql` | Upvotes / downvotes per listing, seller totals, one shared account clean-up |
 3. **Copy your keys** from **Project Settings → API Keys**: the project URL and the
    **publishable** key go into `local.properties`. The publishable key is meant to ship inside the
    app; the data is protected by Row Level Security, not by keeping that key secret.
@@ -308,7 +309,7 @@ To compare cold-start time with and without it:
 - [x] Sign-up / login (email or phone)
 - [x] Listings with photos, edit and remove
 - [x] Offers, accept/reject, hand-over confirmation, expiry
-- [x] Reputation (completed vs cancelled)
+- [x] Reputation: upvotes / downvotes, completed vs cancelled deals
 - [x] Row Level Security and server-side deal logic
 - [x] Notifications (background check)
 - [x] Account deletion

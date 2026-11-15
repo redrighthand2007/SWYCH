@@ -70,6 +70,14 @@ class FakeItemRepository(var items: List<Item> = emptyList()) : ItemRepository {
     override suspend fun getMyItems() = Result.success(items.filter { it.sellerId == "me" })
     override suspend fun updateItem(itemId: String, title: String, description: String, price: Double) = Result.success(Unit)
     override suspend fun deleteItem(itemId: String) = Result.success(Unit)
+
+    val votes = mutableMapOf<String, Int>()
+    var voteResult: Result<Unit> = Result.success(Unit)
+    override suspend fun getMyVotes() = Result.success(votes.toMap())
+    override suspend fun vote(itemId: String, value: Int): Result<Unit> {
+        if (voteResult.isSuccess) { if (value == 0) votes.remove(itemId) else votes[itemId] = value }
+        return voteResult
+    }
     override fun clearCache() = Unit
 }
 

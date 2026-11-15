@@ -5,12 +5,18 @@ import com.kush.swych.core.model.Item
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.postgrest.rpc
 import io.github.jan.supabase.storage.storage
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 @Singleton
 class SupabaseItemRepository @Inject constructor(
@@ -44,7 +50,8 @@ class SupabaseItemRepository @Inject constructor(
             val path = photoUri.toUri().path
             if (path != null) {
                 val file = File(path)
-                val name = "${sellerId}_${file.name}"
+                // Random name, so photo links can't be guessed from a user id and time
+                val name = "${sellerId}_${UUID.randomUUID()}.jpg"
                 bucket.upload(name, file.readBytes()) { upsert = true }
                 uploadedName = name
                 photoUrl = bucket.publicUrl(name)
@@ -85,6 +92,20 @@ class SupabaseItemRepository @Inject constructor(
         db["items"].select { filter { eq("id", itemId) } }.decodeSingle<Item>()
     }
 
+    override suspend fun getMyVotes(): Result<Map<String, Int>> = runCatching {
+        // Row level security only returns the user's own votes
+        db["votes"].select(Columns.list("item_id", "value")).decodeList<MyVote>()
+            .associate { it.itemId to it.value }
+    }
+
+    override suspend fun vote(itemId: String, value: Int): Result<Unit> = runCatching {
+        db.rpc("vote_item", buildJsonObject {
+            put("p_item_id", itemId)
+            put("p_value", value)
+        })
+        Unit
+    }
+
     override suspend fun getMyItems(): Result<List<Item>> = runCatching {
         val sellerId = currentUid ?: throw Exception("Not logged in")
         db["items"].select {
@@ -117,3 +138,9 @@ class SupabaseItemRepository @Inject constructor(
         cachedItems = null
     }
 }
+
+@Serializable
+private data class MyVote(
+    @SerialName("item_id") val itemId: String,
+    val value: Int
+)

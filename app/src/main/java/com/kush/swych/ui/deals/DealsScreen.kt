@@ -191,7 +191,10 @@ fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltVi
                                                     ) { act { viewModel.cancelDeal(entry.id) } }
                                                 },
                                                 onDismiss = { act { viewModel.dismissDeal(entry.id) } },
-                                                onCall = { act { viewModel.callOtherSide(entry) } }
+                                                onCall = { act { viewModel.callOtherSide(entry) } },
+                                                myVote = viewModel.myVotes[entry.itemId] ?: 0,
+                                                // Votes go to whoever listed the item, so only on the Buy side
+                                                onVote = if (entry.buyerId == currentUid) { tapped -> viewModel.vote(entry, tapped) } else null
                                             )
                                         } else if (entry is Item) {
                                             val me = users[currentUid]
@@ -200,8 +203,8 @@ fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltVi
                                                 sellerName = me?.name ?: "You",
                                                 sellerVerified = me?.vitVerified == true,
                                                 sellerBlock = me?.block ?: "",
-                                                dealsMade = me?.greenDots ?: 0,
-                                                dealsExpired = me?.redDots ?: 0,
+                                                upvotes = me?.upvotes ?: 0,
+                                                downvotes = me?.downvotes ?: 0,
                                                 isOwnItem = true,
                                                 onClick = { navController.navigate(ItemDetailRoute(entry.id)) },
                                                 onDealClick = {},
@@ -304,7 +307,9 @@ private fun DealCard(
     onConfirmHandover: () -> Unit,
     onCancelDeal: () -> Unit,
     onDismiss: () -> Unit,
-    onCall: () -> Unit
+    onCall: () -> Unit,
+    myVote: Int,
+    onVote: ((Int) -> Unit)?
 ) {
     val isBuyer = deal.buyerId == currentUid
     val iConfirmed = if (isBuyer) deal.buyerConfirmed else deal.sellerConfirmed
@@ -323,8 +328,10 @@ private fun DealCard(
         sellerName = otherUser?.name ?: "Unknown",
         sellerVerified = otherUser?.vitVerified == true,
         sellerBlock = otherUser?.block ?: "",
-        dealsMade = otherUser?.greenDots ?: 0,
-        dealsExpired = otherUser?.redDots ?: 0,
+        upvotes = otherUser?.upvotes ?: 0,
+        downvotes = otherUser?.downvotes ?: 0,
+        myVote = myVote,
+        onVote = onVote,
         isOwnItem = !isBuyer,
         onClick = onOpenItem,
         onDealClick = {},

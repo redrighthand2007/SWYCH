@@ -46,6 +46,12 @@ interface ItemRepository {
     suspend fun getMyItems(): Result<List<Item>>
     suspend fun updateItem(itemId: String, title: String, description: String, price: Double): Result<Unit>
     suspend fun deleteItem(itemId: String): Result<Unit>
+
+    /** Item id -> 1 (up) or -1 (down) for every listing the user has voted on. */
+    suspend fun getMyVotes(): Result<Map<String, Int>>
+
+    /** 1 = upvote, -1 = downvote, 0 = take the vote back. One vote per person per listing. */
+    suspend fun vote(itemId: String, value: Int): Result<Unit>
     fun clearCache()
 }
 

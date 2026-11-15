@@ -51,7 +51,7 @@ class SupabaseAuthRepository @Inject constructor(
 
     private companion object {
         // Phone and email are only readable through get_my_profile / get_deal_contact.
-        val PUBLIC_USER_COLUMNS = Columns.list("uid", "name", "block", "green_dots", "red_dots", "vit_verified")
+        val PUBLIC_USER_COLUMNS = Columns.list("uid", "name", "block", "green_dots", "red_dots", "upvotes", "downvotes", "vit_verified")
     }
 
     private val auth get() = client.auth

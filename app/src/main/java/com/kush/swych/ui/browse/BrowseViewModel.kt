@@ -11,7 +11,9 @@ import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.model.ItemStatus
 import com.kush.swych.core.model.User
+import com.kush.swych.core.util.nextVote
 import com.kush.swych.core.util.userMessage
+import com.kush.swych.core.util.withVoteChange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -61,6 +63,11 @@ class BrowseViewModel @Inject constructor(
     var location by mutableStateOf(LocationFilter.CAMPUS)
         private set
 
+    /** Item id -> this user's vote (1 or -1). */
+    var myVotes by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+    private var votingIds = emptySet<String>()
+
     /** Item waiting for the "send offer?" confirmation. */
     var pendingOffer by mutableStateOf<Item?>(null)
 
@@ -95,14 +102,38 @@ class BrowseViewModel @Inject constructor(
                 appliedItemIds = myDeals.filter { it.buyerId == uid && it.isLive }.map { it.itemId }.toSet()
             }
 
+            itemRepository.getMyVotes().onSuccess { myVotes = it }
+
             val result = itemRepository.getAllItems(forceRefresh = forceRefresh)
             fetchError = result.exceptionOrNull()?.userMessage()
             items = result.getOrNull() ?: items ?: emptyList()
 
             // Refetches users when a seller is missing, e.g. someone who just signed up
-            users = authRepository.getUsers(items.orEmpty().map { it.sellerId }.toSet())
+            // Always fresh, so vote totals from other students show up
+            users = authRepository.getUsers(items.orEmpty().map { it.sellerId }.toSet(), forceRefresh = true)
             isRefreshing = false
         }
+    }
+
+    /** Shows the vote straight away, and undoes it if the server refuses. */
+    fun vote(item: Item, tapped: Int) {
+        if (item.sellerId == myUid || item.id in votingIds) return
+        val old = myVotes[item.id] ?: 0
+        val new = nextVote(old, tapped)
+        applyVote(item, old, new)
+        votingIds = votingIds + item.id
+        viewModelScope.launch {
+            itemRepository.vote(item.id, new).onFailure {
+                applyVote(item, new, old)
+                message = it.userMessage()
+            }
+            votingIds = votingIds - item.id
+        }
+    }
+
+    private fun applyVote(item: Item, old: Int, new: Int) {
+        myVotes = if (new == 0) myVotes - item.id else myVotes + (item.id to new)
+        users[item.sellerId]?.let { users = users + (item.sellerId to it.withVoteChange(old, new)) }
     }
 
     fun sendOffer(item: Item) {

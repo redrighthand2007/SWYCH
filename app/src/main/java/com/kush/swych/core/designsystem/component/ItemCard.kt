@@ -6,7 +6,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -46,8 +51,13 @@ fun ItemCard(
     sellerBlock: String,
     /** Shows the golden V next to the name. */
     sellerVerified: Boolean = false,
-    dealsMade: Int = 0,
-    dealsExpired: Int = 0,
+    /** Seller's vote totals across all their listings. */
+    upvotes: Int = 0,
+    downvotes: Int = 0,
+    /** This user's vote on this listing: 1, -1 or 0. */
+    myVote: Int = 0,
+    /** Called with 1 (up) or -1 (down); null shows the totals without buttons. */
+    onVote: ((Int) -> Unit)? = null,
     isOwnItem: Boolean,
     onClick: () -> Unit,
     onDealClick: () -> Unit,
@@ -127,7 +137,7 @@ fun ItemCard(
                         }
                     }
 
-                    // Row 2: Name, Block, Dots
+                    // Row 2: Name, Block, Votes
                     val firstName = sellerName.split(" ").firstOrNull() ?: "User"
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         InfoPill(modifier = Modifier.weight(1f)) {
@@ -146,7 +156,7 @@ fun ItemCard(
                                 }
                             }
                         }
-                        InfoPill(modifier = Modifier.weight(1f)) {
+                        InfoPill(modifier = Modifier.weight(0.8f)) {
                             Text(
                                 text = sellerBlock.takeIf { it.isNotBlank() } ?: "N/A",
                                 style = MaterialTheme.typography.labelSmall,
@@ -155,16 +165,31 @@ fun ItemCard(
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        InfoPill(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                                Box(modifier = Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFF4CAF50)))
-                                Spacer(Modifier.width(2.dp))
-                                Text("$dealsMade", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, fontSize = 9.sp)
-                                Spacer(Modifier.width(4.dp))
-                                Box(modifier = Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFFF44336)))
-                                Spacer(Modifier.width(2.dp))
-                                Text("$dealsExpired", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, fontSize = 9.sp)
-                            }
+                        Row(
+                            modifier = Modifier
+                                .weight(1.4f)
+                                .height(28.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(50))
+                                .padding(horizontal = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            VoteButton(
+                                icon = Icons.Filled.ThumbUp,
+                                label = "Upvote",
+                                count = upvotes,
+                                color = UpvoteGreen,
+                                selected = myVote == 1,
+                                onClick = onVote?.let { vote -> { vote(1) } }
+                            )
+                            VoteButton(
+                                icon = Icons.Filled.ThumbDown,
+                                label = "Downvote",
+                                count = downvotes,
+                                color = DownvoteRed,
+                                selected = myVote == -1,
+                                onClick = onVote?.let { vote -> { vote(-1) } }
+                            )
                         }
                     }
 
@@ -220,5 +245,41 @@ fun ItemCard(
                 dropdownContent()
             }
         }
+    }
+}
+
+private val UpvoteGreen = Color(0xFF2E9E48)
+private val DownvoteRed = Color(0xFFE53935)
+
+/** Thumb and count; tappable when [onClick] is set. The picked one gets a tinted background. */
+@Composable
+private fun VoteButton(
+    icon: ImageVector,
+    label: String,
+    count: Int,
+    color: Color,
+    selected: Boolean,
+    onClick: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) color.copy(alpha = 0.2f) else Color.Transparent)
+            .then(
+                if (onClick != null) Modifier.clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
+                else Modifier
+            )
+            .padding(horizontal = 6.dp, vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(3.dp))
+        Text(
+            "$count",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            fontSize = 10.sp,
+            color = if (selected) color else MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

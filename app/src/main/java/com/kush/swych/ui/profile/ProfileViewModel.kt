@@ -31,7 +31,7 @@ class ProfileViewModel @Inject constructor(
     /** One-off message for a toast; the screen clears it after showing. */
     var message by mutableStateOf<String?>(null)
 
-    // Reputation counts (green/red dots) are kept up to date by the deal functions in Supabase
+    // Vote totals and deal counts are kept up to date by functions in Supabase
     fun load() {
         viewModelScope.launch {
             authRepository.getCurrentUserProfile().onSuccess { user = it }

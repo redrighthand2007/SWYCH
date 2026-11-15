@@ -12,7 +12,9 @@ import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.model.User
+import com.kush.swych.core.util.nextVote
 import com.kush.swych.core.util.userMessage
+import com.kush.swych.core.util.withVoteChange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -50,6 +52,11 @@ class DealsViewModel @Inject constructor(
     /** One-off message for a snackbar; the screen clears it after showing. */
     var message by mutableStateOf<String?>(null)
 
+    /** Item id -> this user's vote (1 or -1). */
+    var myVotes by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+    private var votingIds = emptySet<String>()
+
     /** Phone number to open in the dialer; the screen clears it after opening. */
     var numberToDial by mutableStateOf<String?>(null)
 
@@ -63,7 +70,12 @@ class DealsViewModel @Inject constructor(
                 .onSuccess { deals = it; loadError = null }
                 .onFailure { loadError = it.userMessage() }
             itemRepository.getMyItems().onSuccess { myItems = it }
-            users = authRepository.getUsers(deals.orEmpty().flatMap { listOf(it.buyerId, it.sellerId) }.toSet())
+            itemRepository.getMyVotes().onSuccess { myVotes = it }
+            // Always fresh, so vote totals from other students show up
+            users = authRepository.getUsers(
+                deals.orEmpty().flatMap { listOf(it.buyerId, it.sellerId) }.toSet(),
+                forceRefresh = true
+            )
             isRefreshing = false
         }
     }
@@ -75,6 +87,27 @@ class DealsViewModel @Inject constructor(
     fun cancelDeal(id: String) = runAction(id, "Deal cancelled.") { dealRepository.cancelDeal(id) }
     fun dismissDeal(id: String) = runAction(id, null) { dealRepository.dismissDeal(id) }
     fun removeListing(id: String) = runAction(id, "Listing removed.") { itemRepository.deleteItem(id) }
+
+    /** Votes on the seller of [deal]'s listing (Buy tab). Undone if the server refuses. */
+    fun vote(deal: Deal, tapped: Int) {
+        if (deal.sellerId == currentUid || deal.itemId in votingIds) return
+        val old = myVotes[deal.itemId] ?: 0
+        val new = nextVote(old, tapped)
+        applyVote(deal, old, new)
+        votingIds = votingIds + deal.itemId
+        viewModelScope.launch {
+            itemRepository.vote(deal.itemId, new).onFailure {
+                applyVote(deal, new, old)
+                message = it.userMessage()
+            }
+            votingIds = votingIds - deal.itemId
+        }
+    }
+
+    private fun applyVote(deal: Deal, old: Int, new: Int) {
+        myVotes = if (new == 0) myVotes - deal.itemId else myVotes + (deal.itemId to new)
+        users[deal.sellerId]?.let { users = users + (deal.sellerId to it.withVoteChange(old, new)) }
+    }
 
     fun callOtherSide(deal: Deal) {
         viewModelScope.launch {

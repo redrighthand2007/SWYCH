@@ -19,7 +19,8 @@ with each other. This policy explains what information the app collects and how 
 | Password | Stored by our authentication provider in hashed form; we never see it |
 | Item listings (title, description, price, category, photo) | Shown to other signed-in students |
 | Offers and deals (prices, status, confirmations) | Visible only to the two students in the deal |
-| Reputation counts (completed and cancelled deals) | Shown on your profile and listings |
+| Reputation counts (completed and cancelled deals) | Shown on your profile |
+| Votes (thumbs up / down on listings) | Each student sees only their own votes; everyone sees a seller's totals on their listings and profile |
 | App settings (theme, haptics, notifications) | Stored only on your device |
 | Deal notification state | The app checks your deals in the background (about every 15 minutes) and remembers on your device which updates it has already shown you. You can turn this off in Profile → Deal Notifications. |
 

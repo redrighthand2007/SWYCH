@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -161,9 +163,15 @@ fun ProfileScreen(
                         }
 
                         Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                            ReputationCount(color = Color(0xFF4CAF50), label = "Successful deals", count = profile.greenDots)
-                            ReputationCount(color = Color(0xFFF44336), label = "Cancelled", count = profile.redDots)
+                            ReputationCount(icon = Icons.Filled.ThumbUp, color = Color(0xFF2E9E48), label = "Upvotes", count = profile.upvotes)
+                            ReputationCount(icon = Icons.Filled.ThumbDown, color = Color(0xFFE53935), label = "Downvotes", count = profile.downvotes)
                         }
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = "${profile.greenDots} deals completed · ${profile.redDots} cancelled",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             } else if (isLoading) {
@@ -241,9 +249,9 @@ fun ProfileScreen(
                             "Q: What happens when my offer is accepted?\n" +
                             "A: The item is reserved for you and a Call button appears. Meet up, exchange the item, then both of you tap Done.\n\n" +
                             "Q: What if we can't meet?\n" +
-                            "A: Either side can Cancel the deal and the item goes back on sale. Cancelling adds a red dot to your profile. Deals nobody confirms expire after 3 hours.\n\n" +
-                            "Q: What do the dots mean?\n" +
-                            "A: Green = completed deals, red = deals you cancelled.",
+                            "A: Either side can Cancel the deal and the item goes back on sale. Cancelling is counted on your profile. Deals nobody confirms expire after 3 hours.\n\n" +
+                            "Q: What are the thumbs on listings?\n" +
+                            "A: Votes for the seller. Tap thumbs up or down on anyone's listing; tap again to take it back. You get one vote per listing, so a new listing can be voted on again. Your profile shows your totals.",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -390,9 +398,9 @@ private fun SettingRow(
 }
 
 @Composable
-private fun ReputationCount(color: Color, label: String, count: Int) {
+private fun ReputationCount(icon: ImageVector, color: Color, label: String, count: Int) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.size(9.dp).clip(CircleShape).background(color))
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = "$count $label",

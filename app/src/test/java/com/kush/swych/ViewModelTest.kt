@@ -76,6 +76,38 @@ class ViewModelTest {
         assertNull(vm.pendingOffer)
     }
 
+    @Test
+    fun votingTogglesAndUpdatesSellerTotals() {
+        val target = item("open", seller = "bob", price = 50.0)
+        val items = FakeItemRepository(listOf(target))
+        val auth = FakeAuthRepository().apply { users = mapOf("bob" to User(uid = "bob", upvotes = 2)) }
+        val vm = BrowseViewModel(auth, items, FakeDealRepository())
+        vm.load()
+
+        vm.vote(target, 1)
+        assertEquals(1, vm.myVotes["open"])
+        assertEquals(3, vm.users["bob"]?.upvotes)
+
+        // Switching to a downvote moves the vote; tapping it again takes it back
+        vm.vote(target, -1)
+        assertEquals(2, vm.users["bob"]?.upvotes)
+        assertEquals(1, vm.users["bob"]?.downvotes)
+        vm.vote(target, -1)
+        assertNull(vm.myVotes["open"])
+        assertEquals(0, vm.users["bob"]?.downvotes)
+        assertTrue(items.votes.isEmpty())
+    }
+
+    @Test
+    fun cannotVoteOnOwnListing() {
+        val mine = item("mine", seller = "me", price = 10.0)
+        val items = FakeItemRepository(listOf(mine))
+        val vm = BrowseViewModel(FakeAuthRepository(), items, FakeDealRepository())
+        vm.vote(mine, 1)
+        assertTrue(vm.myVotes.isEmpty())
+        assertTrue(items.votes.isEmpty())
+    }
+
     // --- Post ---------------------------------------------------------------------------
 
     @Test
