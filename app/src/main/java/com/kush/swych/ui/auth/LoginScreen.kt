@@ -100,7 +100,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
                         email = it
                         if (errorMessage != null) errorMessage = null
                     },
-                    label = { Text("VIT Email or Phone Number") },
+                    label = { Text("Email or Phone Number") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Email,

@@ -181,7 +181,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email (@vitstudent.ac.in)") },
+                    label = { Text("Email") },
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth(),
@@ -189,8 +189,10 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
                     supportingText = if (showError && email.isBlank()) {
                         { Text("Required field") }
                     } else if (showError && !isEmailValid) {
-                        { Text("Must be a @vitstudent.ac.in address") }
-                    } else null
+                        { Text("Enter a valid email address") }
+                    } else {
+                        { Text("Use your VIT email to get the verified V badge right away") }
+                    }
                 )
             }
 

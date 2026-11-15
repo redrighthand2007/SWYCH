@@ -19,6 +19,7 @@ import com.kush.swych.ui.browse.LocationFilter
 import com.kush.swych.ui.browse.SortOption
 import com.kush.swych.ui.deals.DealsViewModel
 import com.kush.swych.ui.postitem.PostItemViewModel
+import com.kush.swych.ui.profile.ProfileViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -130,13 +131,13 @@ class ViewModelTest {
     }
 
     @Test
-    fun signUpValidatesCollegeEmailPhoneAndPassword() {
+    fun signUpAcceptsAnyValidEmailAndChecksPhone() {
         val auth = FakeAuthRepository()
         val vm = SignUpViewModel(auth)
         vm.name = "Kush"
         vm.hostelBlock = "MH-R"
         vm.onPhoneChange("98ab7654321999")
-        vm.email = "kush@gmail.com"
+        vm.email = "kush@gmail"
         vm.onPasswordChange("abc123")
         vm.confirmPassword = "abc123"
 
@@ -145,7 +146,7 @@ class ViewModelTest {
         assertFalse(vm.isEmailValid)
         assertEquals(0, auth.registerCalls)
 
-        vm.email = " Kush@VITstudent.ac.in "
+        vm.email = " Kush@Gmail.com "
         vm.register()
         assertEquals(1, auth.registerCalls)
     }
@@ -165,6 +166,22 @@ class ViewModelTest {
 
         assertEquals("asha@vitstudent.ac.in", vm.confirmationSentTo)
         assertNull(vm.errorMessage)
+    }
+
+    // --- VIT verification -----------------------------------------------------------------
+
+    @Test
+    fun vitVerificationOnlySendsToVitEmails() {
+        val auth = FakeAuthRepository()
+        val vm = ProfileViewModel(auth)
+
+        vm.requestVitVerification("someone@gmail.com")
+        assertEquals("Enter your @vitstudent.ac.in email.", vm.message)
+        assertTrue(auth.vitRequests.isEmpty())
+
+        vm.requestVitVerification(" Asha.R2024@VITstudent.ac.in ")
+        assertEquals(listOf("asha.r2024@vitstudent.ac.in"), auth.vitRequests)
+        assertEquals("asha.r2024@vitstudent.ac.in", vm.vitLinkSentTo)
     }
 
     // --- Deals --------------------------------------------------------------------------

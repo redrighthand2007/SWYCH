@@ -75,7 +75,8 @@ class SignUpViewModel @Inject constructor(
     val isNameValid get() = name.isNotBlank()
     val isBlockValid get() = hostelBlock.isNotBlank()
     val isPhoneValid get() = phone.length == 10
-    val isEmailValid get() = cleanEmail.endsWith(COLLEGE_DOMAIN) && cleanEmail.matches(EMAIL_REGEX)
+    // Any email can sign up; VIT emails also get the verified badge straight away
+    val isEmailValid get() = cleanEmail.matches(EMAIL_REGEX)
     val passwordHasLetterAndNumber get() = password.any { it.isLetter() } && password.any { it.isDigit() }
     val isPasswordValid get() = password.length in 6..72 && passwordHasLetterAndNumber
     val isConfirmValid get() = password == confirmPassword
@@ -104,7 +105,6 @@ class SignUpViewModel @Inject constructor(
     }
 
     companion object {
-        const val COLLEGE_DOMAIN = "@vitstudent.ac.in"
         private val EMAIL_REGEX = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
     }
 }

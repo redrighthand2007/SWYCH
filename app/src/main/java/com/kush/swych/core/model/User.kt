@@ -13,5 +13,11 @@ data class User(
     @SerialName("green_dots")
     val greenDots: Int = 0,
     @SerialName("red_dots")
-    val redDots: Int = 0
+    val redDots: Int = 0,
+    /** Confirmed a @vitstudent.ac.in email; shown as the golden V badge. */
+    @SerialName("vit_verified")
+    val vitVerified: Boolean = false,
+    /** The confirmed VIT email; only filled in on the user's own profile. */
+    @SerialName("vit_email")
+    val vitEmail: String? = null
 )

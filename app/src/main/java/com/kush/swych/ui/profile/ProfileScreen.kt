@@ -1,18 +1,20 @@
 package com.kush.swych.ui.profile
 
-import androidx.compose.foundation.BorderStroke
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Gavel
@@ -31,9 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.kush.swych.core.designsystem.component.VitBadge
 import com.kush.swych.core.util.SettingsManager
 
 @Composable
@@ -47,7 +52,11 @@ fun ProfileScreen(
     val isDeleting = viewModel.isDeleting
     val scrollState = androidx.compose.foundation.rememberScrollState()
 
-    LaunchedEffect(Unit) { viewModel.load() }
+    // Reload whenever the app comes back to the front, e.g. after tapping the VIT link in email
+    LifecycleResumeEffect(Unit) {
+        viewModel.load()
+        onPauseOrDispose { }
+    }
     LaunchedEffect(viewModel.message) {
         viewModel.message?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -57,6 +66,7 @@ fun ProfileScreen(
 
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var showVerifyDialog by rememberSaveable { mutableStateOf(false) }
 
     val hapticEnabled by SettingsManager.hapticEnabled.collectAsState()
     val themeMode by SettingsManager.themeMode.collectAsState()
@@ -114,13 +124,20 @@ fun ProfileScreen(
                             }
                             Spacer(modifier = Modifier.width(14.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = profile.name,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = profile.name,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                    if (profile.vitVerified) {
+                                        Spacer(Modifier.width(6.dp))
+                                        VitBadge(size = 22.dp)
+                                    }
+                                }
                                 Text(
                                     text = "Block: ${profile.block}  ·  ${profile.phone}",
                                     style = MaterialTheme.typography.bodyMedium,
@@ -134,6 +151,14 @@ fun ProfileScreen(
                             modifier = Modifier.padding(vertical = 12.dp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
                         )
+
+                        if (!profile.vitVerified) {
+                            VerifyVitRow(
+                                sentTo = viewModel.vitLinkSentTo,
+                                onClick = { showVerifyDialog = true }
+                            )
+                            Spacer(Modifier.height(10.dp))
+                        }
 
                         Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
                             ReputationCount(color = Color(0xFF4CAF50), label = "Successful deals", count = profile.greenDots)
@@ -279,6 +304,41 @@ fun ProfileScreen(
         )
     }
 
+    if (showVerifyDialog) {
+        var vitEmail by rememberSaveable { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { showVerifyDialog = false },
+            title = { Text("Verify you're a VIT student") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        "We'll send a link to your VIT email. Open it to get the golden V next to your name. " +
+                            "You'll keep logging in with your current email.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    OutlinedTextField(
+                        value = vitEmail,
+                        onValueChange = { vitEmail = it.trim() },
+                        label = { Text("VIT email") },
+                        placeholder = { Text("name@vitstudent.ac.in") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = vitEmail.isNotBlank() && !viewModel.isSendingVitLink,
+                    onClick = {
+                        showVerifyDialog = false
+                        viewModel.requestVitVerification(vitEmail)
+                    }
+                ) { Text("Send link") }
+            },
+            dismissButton = { TextButton(onClick = { showVerifyDialog = false }) { Text("Cancel") } }
+        )
+    }
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -399,5 +459,38 @@ fun ExpandableProfileOption(
                 }
             }
         }
+    }
+}
+
+/** Prompt shown on the profile card until the account is VIT-verified. */
+@Composable
+private fun VerifyVitRow(sentTo: String?, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        VitBadge(size = 20.dp)
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                if (sentTo == null) "Verify VIT student" else "Check $sentTo",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
+            )
+            Text(
+                if (sentTo == null) "Get the golden V next to your name" else "Open the link we sent, then come back",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

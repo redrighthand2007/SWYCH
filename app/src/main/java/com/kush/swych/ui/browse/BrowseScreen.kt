@@ -256,6 +256,7 @@ fun BrowseContent(navController: NavController, viewModel: BrowseViewModel) {
                             ItemCard(
                                 item = item,
                                 sellerName = sellerName,
+                                sellerVerified = users[item.sellerId]?.vitVerified == true,
                                 sellerBlock = sellerBlock,
                                 dealsMade = seller?.greenDots ?: 0,
                                 dealsExpired = seller?.redDots ?: 0,

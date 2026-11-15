@@ -45,6 +45,7 @@ From picking a category to closing a deal, in light and dark mode:
 - **Offers, not DMs**: offer the listed price with one tap, or make your own offer from the item page.
 - **Safe hand-overs**: an accepted deal reserves the item; both sides confirm with **Done** after meeting up.
 - **Phone numbers stay private**: the other person's number is only revealed once a deal is accepted.
+- **Golden V badge**: sign up with any email; VIT students verify their `@vitstudent.ac.in` address from Profile (one email link) and get a gold **V** next to their name on listings and deals.
 - **Reputation**: green dots for completed deals, red dots for deals you cancelled.
 - **Notifications**: new offers, accepted/rejected offers and deal updates, also when the app is closed (checked about every 15 minutes).
 - **Your data, your call**: edit or remove listings, and delete your account from Profile.
@@ -158,6 +159,7 @@ SWYCH/
 │       └── navigation/        # Routes and session-based navigation
 ├── app/src/test/              # Unit tests (ViewModels with fake repositories)
 ├── supabase/migrations/       # Database schema, functions and access rules
+├── supabase/functions/        # Edge Functions for the VIT badge email
 └── docs/                      # Logo, screenshots, privacy policy
 ```
 
@@ -187,7 +189,8 @@ SWYCH/
    ```
 4. **Open** the folder in Android Studio, let Gradle sync, and press **Run ▶**.
 
-Sign-up only accepts `@vitstudent.ac.in` email addresses (see
+Any email can sign up. Students who sign up with (or later verify) a `@vitstudent.ac.in`
+address get the verified **V** badge (see
 [Adapting it to another college](#-adapting-it-to-another-college)).
 
 ## 🔧 Supabase setup
@@ -206,7 +209,8 @@ Sign-up only accepts `@vitstudent.ac.in` email addresses (see
    | `20261001000000_initial_schema.sql` | `users`, `items`, `deals` tables, the `items` photo bucket, RLS switched on |
    | `20261021000000_deal_workflow.sql` | Deal statuses and constraints, deal functions, sign-up trigger, access rules |
    | `20261025000000_launch_readiness.sql` | Hourly expiry job (`pg_cron`), photo upload rules, account deletion |
-   | `20261115000000_college_email_only.sql` | Only `@vitstudent.ac.in` emails can sign up or switch to an email |
+   | `20261115000000_college_email_only.sql` | Old college-only email rule (removed again by the next file) |
+   | `20261116000000_any_email_vit_badge.sql` | Any email can sign up; `vit_verified` badge and pending VIT verifications |
 3. **Copy your keys** from **Project Settings → API Keys**: the project URL and the
    **publishable** key go into `local.properties`. The publishable key is meant to ship inside the
    app; the data is protected by Row Level Security, not by keeping that key secret.
@@ -215,7 +219,15 @@ Sign-up only accepts `@vitstudent.ac.in` email addresses (see
    - Email provider: **enabled**
    - *Confirm email*: optional. When on, new users must click the link before logging in, which
      stops sign-ups with someone else's college address.
-   - *Leaked password protection*: recommended **on**.
+   - *Leaked password protection*: Pro plan only; leave off on the free plan.
+5. **VIT badge emails** (optional): deploy the two Edge Functions and give them a Gmail sender
+   (an [app password](https://myaccount.google.com/apppasswords), never your real password):
+   ```bash
+   supabase functions deploy request-vit-verification
+   supabase functions deploy confirm-vit-email --no-verify-jwt
+   supabase secrets set SMTP_USER=<gmail address> SMTP_PASS=<gmail app password>
+   ```
+   Without the secrets everything else works; Profile just says verification isn't available yet.
 
 ### Troubleshooting
 
@@ -228,8 +240,10 @@ Sign-up only accepts `@vitstudent.ac.in` email addresses (see
 
 ## 🎓 Adapting it to another college
 
-- **Email domain**: change `@vitstudent.ac.in` in
-  [`SignUpScreen.kt`](app/src/main/java/com/kush/swych/ui/auth/SignUpScreen.kt).
+- **Verified email domain**: change `@vitstudent.ac.in` in
+  [`ProfileViewModel.kt`](app/src/main/java/com/kush/swych/ui/profile/ProfileViewModel.kt),
+  [`request-vit-verification`](supabase/functions/request-vit-verification/index.ts) and the
+  `handle_new_user` trigger in the latest migration.
 - **Hostel blocks**: edit `HOSTEL_BLOCKS` in
   [`Constants.kt`](app/src/main/java/com/kush/swych/core/util/Constants.kt).
 - **Categories**: add or remove entries in
@@ -275,6 +289,7 @@ the Play Console listing.
 - [x] Row Level Security and server-side deal logic
 - [x] Notifications (background check)
 - [x] Account deletion
+- [x] Any-email sign-up with a verified VIT badge
 - [ ] Instant push notifications (Firebase Cloud Messaging)
 - [ ] In-app chat
 - [ ] Free / donate listings and a "Wanted" board

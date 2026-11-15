@@ -30,6 +30,9 @@ interface AuthRepository {
     /** Public profiles by id; refetches when someone new (e.g. a user who just signed up) is missing. */
     suspend fun getUsers(ids: Collection<String>, forceRefresh: Boolean = false): Map<String, User>
 
+    /** Emails a one-time link to [vitEmail]; opening it adds the VIT badge to this account. */
+    suspend fun requestVitVerification(vitEmail: String): Result<Unit>
+
     suspend fun logout()
     suspend fun deleteAccount(): Result<Unit>
 }

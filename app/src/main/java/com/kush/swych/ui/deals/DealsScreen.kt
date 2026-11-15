@@ -195,6 +195,7 @@ fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltVi
                                             ItemCard(
                                                 item = entry,
                                                 sellerName = me?.name ?: "You",
+                                                sellerVerified = me?.vitVerified == true,
                                                 sellerBlock = me?.block ?: "",
                                                 dealsMade = me?.greenDots ?: 0,
                                                 dealsExpired = me?.redDots ?: 0,
@@ -281,6 +282,7 @@ private fun DealCard(
             photoUrl = deal.itemPhotoUrl
         ),
         sellerName = otherUser?.name ?: "Unknown",
+        sellerVerified = otherUser?.vitVerified == true,
         sellerBlock = otherUser?.block ?: "",
         dealsMade = otherUser?.greenDots ?: 0,
         dealsExpired = otherUser?.redDots ?: 0,

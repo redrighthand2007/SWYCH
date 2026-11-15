@@ -48,6 +48,11 @@ class FakeAuthRepository(
     }
     override suspend fun getCurrentUserProfile() = Result.success(profile)
     override suspend fun getUsers(ids: Collection<String>, forceRefresh: Boolean) = users
+    var vitRequests = mutableListOf<String>()
+    override suspend fun requestVitVerification(vitEmail: String): Result<Unit> {
+        vitRequests += vitEmail
+        return Result.success(Unit)
+    }
     override suspend fun logout() = Unit
     override suspend fun deleteAccount() = Result.success(Unit)
 }

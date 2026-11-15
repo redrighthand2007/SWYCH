@@ -39,6 +39,30 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /** Sending the VIT verification email. */
+    var isSendingVitLink by mutableStateOf(false)
+        private set
+
+    /** VIT email the latest verification link went to, for the "check your inbox" note. */
+    var vitLinkSentTo by mutableStateOf<String?>(null)
+        private set
+
+    fun requestVitVerification(vitEmail: String) {
+        val email = vitEmail.trim().lowercase()
+        if (!email.endsWith(VIT_DOMAIN) || !email.matches(EMAIL_REGEX)) {
+            message = "Enter your $VIT_DOMAIN email."
+            return
+        }
+        if (isSendingVitLink) return
+        isSendingVitLink = true
+        viewModelScope.launch {
+            authRepository.requestVitVerification(email)
+                .onSuccess { vitLinkSentTo = email }
+                .onFailure { message = it.userMessage() }
+            isSendingVitLink = false
+        }
+    }
+
     fun logout() {
         viewModelScope.launch { authRepository.logout() }
     }
@@ -54,3 +78,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 }
+
+private const val VIT_DOMAIN = "@vitstudent.ac.in"
+private val EMAIL_REGEX = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()

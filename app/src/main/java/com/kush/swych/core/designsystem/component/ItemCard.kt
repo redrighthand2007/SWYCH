@@ -44,6 +44,8 @@ fun ItemCard(
     item: Item,
     sellerName: String = "",
     sellerBlock: String,
+    /** Shows the golden V next to the name. */
+    sellerVerified: Boolean = false,
     dealsMade: Int = 0,
     dealsExpired: Int = 0,
     isOwnItem: Boolean,
@@ -129,13 +131,20 @@ fun ItemCard(
                     val firstName = sellerName.split(" ").firstOrNull() ?: "User"
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         InfoPill(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = firstName,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = firstName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                if (sellerVerified) {
+                                    Spacer(Modifier.width(3.dp))
+                                    VitBadge(size = 12.dp)
+                                }
+                            }
                         }
                         InfoPill(modifier = Modifier.weight(1f)) {
                             Text(
