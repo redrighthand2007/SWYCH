@@ -1,6 +1,7 @@
 package com.kush.swych
 
 import android.content.ContextWrapper
+import com.kush.swych.core.data.SignUpOutcome
 import com.kush.swych.core.model.Category
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.model.DealStatus
@@ -147,6 +148,23 @@ class ViewModelTest {
         vm.email = " Kush@VITstudent.ac.in "
         vm.register()
         assertEquals(1, auth.registerCalls)
+    }
+
+    @Test
+    fun signUpAsksToCheckInboxWhenConfirmationIsOn() {
+        val auth = FakeAuthRepository().apply { signUpOutcome = SignUpOutcome.ConfirmEmail }
+        val vm = SignUpViewModel(auth)
+        vm.name = "Asha"
+        vm.hostelBlock = "MH-A"
+        vm.onPhoneChange("9876543210")
+        vm.email = "Asha@VITstudent.ac.in"
+        vm.onPasswordChange("abc123")
+        vm.confirmPassword = "abc123"
+
+        vm.register()
+
+        assertEquals("asha@vitstudent.ac.in", vm.confirmationSentTo)
+        assertNull(vm.errorMessage)
     }
 
     // --- Deals --------------------------------------------------------------------------

@@ -64,7 +64,7 @@ class SupabaseAuthRepository @Inject constructor(
         phone: String,
         email: String,
         password: String
-    ): Result<Unit> = runCatching {
+    ): Result<SignUpOutcome> = runCatching {
         auth.signUpWith(Email) {
             this.email = email
             this.password = password
@@ -74,14 +74,10 @@ class SupabaseAuthRepository @Inject constructor(
                 put("phone", phone)
             }
         }
-        // Sign-up only returns a session when email confirmation is off
-        if (auth.currentSessionOrNull() == null) {
-            auth.signInWith(Email) {
-                this.email = email
-                this.password = password
-            }
-        }
         cachedUsers = null
+        // Sign-up only returns a session when email confirmation is off; otherwise the
+        // student has to open the link in their inbox before they can log in
+        if (auth.currentSessionOrNull() != null) SignUpOutcome.SignedIn else SignUpOutcome.ConfirmEmail
     }
 
     override suspend fun getCurrentUserProfile(): Result<User> = runCatching {

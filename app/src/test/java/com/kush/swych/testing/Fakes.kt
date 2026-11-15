@@ -4,19 +4,22 @@ import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.data.DealRepository
 import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.data.SessionState
+import com.kush.swych.core.data.SignUpOutcome
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.model.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.Dispatchers
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 /** Runs viewModelScope coroutines immediately on the test thread. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(private val dispatcher: TestDispatcher = UnconfinedTestDispatcher()) : TestWatcher() {
     override fun starting(description: Description) = Dispatchers.setMain(dispatcher)
     override fun finished(description: Description) = Dispatchers.resetMain()
@@ -33,9 +36,11 @@ class FakeAuthRepository(
     var registerCalls = 0
 
     override suspend fun awaitInitialized() = Unit
-    override suspend fun registerUser(name: String, block: String, phone: String, email: String, password: String): Result<Unit> {
+    var signUpOutcome = SignUpOutcome.SignedIn
+
+    override suspend fun registerUser(name: String, block: String, phone: String, email: String, password: String): Result<SignUpOutcome> {
         registerCalls++
-        return Result.success(Unit)
+        return Result.success(signUpOutcome)
     }
     override suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> {
         loginCalls++

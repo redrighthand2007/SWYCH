@@ -185,7 +185,7 @@ private val tickerSteps = listOf(
     "Find it on campus",
     "Make your offer",
     "Lock the deal",
-    "Meet at a public spot",
+    "Meet at a common spot",
     "Swap & done"
 )
 

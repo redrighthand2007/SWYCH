@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kush.swych.core.data.AuthRepository
+import com.kush.swych.core.data.SignUpOutcome
 import com.kush.swych.core.util.userMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -65,6 +66,10 @@ class SignUpViewModel @Inject constructor(
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    /** Set when the account was created but the email link must be opened before logging in. */
+    var confirmationSentTo by mutableStateOf<String?>(null)
+        private set
+
     private val cleanEmail get() = email.trim().lowercase()
 
     val isNameValid get() = name.isNotBlank()
@@ -92,6 +97,7 @@ class SignUpViewModel @Inject constructor(
         errorMessage = null
         viewModelScope.launch {
             authRepository.registerUser(name.trim(), hostelBlock, phone, cleanEmail, password)
+                .onSuccess { if (it == SignUpOutcome.ConfirmEmail) confirmationSentTo = cleanEmail }
                 .onFailure { errorMessage = it.userMessage() }
             isLoading = false
         }

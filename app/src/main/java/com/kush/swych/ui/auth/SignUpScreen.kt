@@ -3,7 +3,6 @@ package com.kush.swych.ui.auth
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import com.kush.swych.core.designsystem.theme.SCREEN_FADE_MILLIS
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MarkEmailRead
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
@@ -21,14 +21,19 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.kush.swych.core.designsystem.component.DealButton
+import com.kush.swych.core.designsystem.theme.SCREEN_FADE_MILLIS
 import com.kush.swych.core.util.Constants
+import com.kush.swych.ui.navigation.AuthRoute
+import com.kush.swych.ui.navigation.LoginRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +74,18 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
             )
         }
     ) { paddingValues ->
+        val sentTo = viewModel.confirmationSentTo
+        if (sentTo != null) {
+            CheckYourInbox(
+                email = sentTo,
+                onGoToLogin = {
+                    navController.navigate(LoginRoute) { popUpTo(AuthRoute) }
+                },
+                modifier = Modifier.padding(paddingValues)
+            )
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -261,5 +278,41 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+}
+
+/** Shown after sign-up when the student has to confirm their email before logging in. */
+@Composable
+private fun CheckYourInbox(email: String, onGoToLogin: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.MarkEmailRead,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(72.dp)
+        )
+        Spacer(Modifier.height(20.dp))
+        Text(
+            "Check your inbox",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "We sent a confirmation link to\n$email\n\nOpen it to activate your account, then log in. " +
+                "It can take a minute; check Spam if you don't see it.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(28.dp))
+        DealButton(text = "Go to Login", onClick = onGoToLogin)
     }
 }

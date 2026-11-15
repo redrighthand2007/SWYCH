@@ -8,6 +8,14 @@ import kotlinx.coroutines.flow.StateFlow
 /** Whether a user is signed in, from the app's point of view. */
 enum class SessionState { Loading, SignedIn, SignedOut }
 
+/** What happens after a successful sign-up. */
+enum class SignUpOutcome {
+    /** Signed in straight away (email confirmation is off). */
+    SignedIn,
+    /** Account created; the student must open the link in their email, then log in. */
+    ConfirmEmail
+}
+
 interface AuthRepository {
     val sessionState: StateFlow<SessionState>
     val currentUserUid: String?
@@ -15,7 +23,7 @@ interface AuthRepository {
     /** Waits until a saved session (if any) has been loaded from storage. */
     suspend fun awaitInitialized()
 
-    suspend fun registerUser(name: String, block: String, phone: String, email: String, password: String): Result<Unit>
+    suspend fun registerUser(name: String, block: String, phone: String, email: String, password: String): Result<SignUpOutcome>
     suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit>
     suspend fun getCurrentUserProfile(): Result<User>
 
