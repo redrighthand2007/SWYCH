@@ -3,7 +3,7 @@ package com.kush.swych.ui.auth
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
+import com.kush.swych.core.designsystem.theme.SCREEN_FADE_MILLIS
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -82,10 +82,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 300, delayMillis = 0)
-                ) + fadeIn(tween(300))
+                enter = fadeIn(tween(durationMillis = SCREEN_FADE_MILLIS, delayMillis = 0))
             ) {
                 OutlinedTextField(
                     value = name,
@@ -102,10 +99,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 300, delayMillis = 50)
-                ) + fadeIn(tween(300))
+                enter = fadeIn(tween(durationMillis = SCREEN_FADE_MILLIS, delayMillis = 50))
             ) {
                 ExposedDropdownMenuBox(
                     expanded = expanded,
@@ -145,10 +139,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 300, delayMillis = 100)
-                ) + fadeIn(tween(300))
+                enter = fadeIn(tween(durationMillis = SCREEN_FADE_MILLIS, delayMillis = 100))
             ) {
                 OutlinedTextField(
                     value = phone,
@@ -167,10 +158,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 300, delayMillis = 150)
-                ) + fadeIn(tween(300))
+                enter = fadeIn(tween(durationMillis = SCREEN_FADE_MILLIS, delayMillis = 150))
             ) {
                 val isEmailValid = viewModel.isEmailValid
                 OutlinedTextField(
@@ -191,10 +179,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 300, delayMillis = 200)
-                ) + fadeIn(tween(300))
+                enter = fadeIn(tween(durationMillis = SCREEN_FADE_MILLIS, delayMillis = 200))
             ) {
                 val hasLetterAndNumber = viewModel.passwordHasLetterAndNumber
                 val isPasswordValid = viewModel.isPasswordValid
@@ -226,10 +211,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 300, delayMillis = 250)
-                ) + fadeIn(tween(300))
+                enter = fadeIn(tween(durationMillis = SCREEN_FADE_MILLIS, delayMillis = 250))
             ) {
                 OutlinedTextField(
                     value = confirmPassword,
@@ -256,10 +238,7 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 300, delayMillis = 300)
-                ) + fadeIn(tween(300))
+                enter = fadeIn(tween(durationMillis = SCREEN_FADE_MILLIS, delayMillis = 300))
             ) {
                 Column {
                     DealButton(

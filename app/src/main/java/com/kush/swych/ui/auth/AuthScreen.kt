@@ -3,7 +3,6 @@ package com.kush.swych.ui.auth
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -69,11 +68,7 @@ fun AuthScreen(navController: NavController) {
         // Options at ~25% from bottom
         AnimatedVisibility(
             visible = isVisible,
-            enter = fadeIn(animationSpec = tween(durationMillis = 800, delayMillis = 200)) +
-                    slideInVertically(
-                        animationSpec = tween(durationMillis = 800, delayMillis = 200),
-                        initialOffsetY = { it / 2 }
-                    )
+            enter = fadeIn(animationSpec = tween(durationMillis = 800, delayMillis = 200))
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
