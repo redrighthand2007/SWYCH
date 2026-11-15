@@ -92,9 +92,10 @@ class SupabaseAuthRepository @Inject constructor(
                 }
             }
         } catch (e: RestException) {
-            // A taken email comes back as "User already registered". A server error here means
-            // the profile insert failed, which in practice is the phone number already in use.
-            if (e.statusCode >= 500) {
+            // A taken email comes back as its own error. A server error that isn't about sending
+            // the email means the profile insert failed: in practice, the phone number is taken.
+            val text = e.message.orEmpty().lowercase()
+            if (e.statusCode >= 500 && "email" !in text) {
                 throw Exception("This phone number is already registered. Log in, or use a different number.")
             }
             throw e

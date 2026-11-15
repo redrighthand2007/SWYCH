@@ -44,7 +44,7 @@ class DealLogicTest {
             Exception("duplicate key value violates unique constraint \"deals_one_live_offer\"").userMessage()
         )
         assertEquals(
-            "This phone number or email is already registered.",
+            "This phone number is already registered. Log in, or use a different number.",
             Exception("duplicate key value violates unique constraint \"users_phone_unique\"").userMessage()
         )
         assertEquals(
@@ -54,6 +54,10 @@ class DealLogicTest {
         assertEquals(
             "Wrong email/phone or password.",
             Exception("Invalid login credentials").userMessage()
+        )
+        assertEquals(
+            "We couldn't send the confirmation email. Please try again in a few minutes.",
+            Exception("Error sending confirmation email").userMessage()
         )
     }
 
@@ -69,17 +73,17 @@ class DealLogicTest {
     @Test
     fun otherErrorsKeepTheirMessage() {
         assertEquals("No account found with this phone number.", Exception("No account found with this phone number.").userMessage())
-        assertEquals("Something went wrong. Please try again.", RuntimeException().userMessage())
+        assertEquals("Something went wrong on our side. Please try again in a minute.", RuntimeException().userMessage())
     }
 
     @Test
     fun rawDatabaseErrorsAreNeverShown() {
         assertEquals(
-            "Something went wrong. Please try again.",
+            "Something went wrong on our side. Please try again in a minute.",
             Exception("null value in column \"title\" of relation \"items\" violates not-null constraint").userMessage()
         )
         assertEquals(
-            "Something went wrong. Please try again.",
+            "Something went wrong on our side. Please try again in a minute.",
             IllegalStateException("Unexpected JSON token at offset 12").userMessage()
         )
     }
