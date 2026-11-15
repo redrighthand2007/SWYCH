@@ -19,12 +19,24 @@ and hand it over on campus.
 
 ## 📸 Screenshots
 
-<p align="center">
-  <img src="docs/screenshots/home.png" alt="Home: categories" width="200" />
-  <img src="docs/screenshots/home_dark.png" alt="Home in dark mode" width="200" />
-  <img src="docs/screenshots/post.png" alt="Post a listing" width="200" />
-  <img src="docs/screenshots/settings.png" alt="Profile settings" width="200" />
-</p>
+From picking a category to closing a deal, in light and dark mode:
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="docs/screenshots/1_home_light.png" alt="Home: category grid, light theme" width="160" /></td>
+    <td align="center"><img src="docs/screenshots/2_browse_dark.png" alt="Browse: category, campus/hostel and sort filters, dark theme" width="160" /></td>
+    <td align="center"><img src="docs/screenshots/3_post_light.png" alt="Post a listing with a photo, light theme" width="160" /></td>
+    <td align="center"><img src="docs/screenshots/4_deals_dark.png" alt="Deals: completed sales with Call buttons, dark theme" width="160" /></td>
+    <td align="center"><img src="docs/screenshots/5_profile_light.png" alt="Profile: reputation, theme, notifications and settings, light theme" width="160" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Home</b><br/><sub>Pick a category · Light</sub></td>
+    <td align="center"><b>Browse</b><br/><sub>Filter and sort · Dark</sub></td>
+    <td align="center"><b>Post</b><br/><sub>List in seconds · Light</sub></td>
+    <td align="center"><b>Deals</b><br/><sub>Offers and sales · Dark</sub></td>
+    <td align="center"><b>Profile</b><br/><sub>Reputation and settings · Light</sub></td>
+  </tr>
+</table>
 
 ## ✨ Features
 
