@@ -3,36 +3,62 @@ package com.kush.swych.core.data
 import android.content.Context
 import androidx.core.content.edit
 import com.kush.swych.core.model.User
-import com.kush.swych.core.network.SupabaseManager
 import com.kush.swych.core.notifications.DealNotifier
 import com.kush.swych.core.util.decodeNullableString
+import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.rpc
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-class AuthRepository(private val context: Context) {
+@Singleton
+class SupabaseAuthRepository @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+    private val client: SupabaseClient,
+    private val itemRepository: ItemRepository
+) : AuthRepository {
 
-    companion object {
-        @Volatile
-        var cachedUsers: List<User>? = null
-
+    private companion object {
         // Phone and email are only readable through get_my_profile / get_deal_contact.
-        private val PUBLIC_USER_COLUMNS = Columns.list("uid", "name", "block", "green_dots", "red_dots")
+        val PUBLIC_USER_COLUMNS = Columns.list("uid", "name", "block", "green_dots", "red_dots")
     }
 
-    private val auth get() = SupabaseManager.client.auth
-    private val db get() = SupabaseManager.client.postgrest
+    private val auth get() = client.auth
+    private val db get() = client.postgrest
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    @Volatile
+    private var cachedUsers: List<User>? = null
+
+    override val sessionState: StateFlow<SessionState> = auth.sessionStatus
+        .map { it.toSessionState() }
+        .stateIn(scope, SharingStarted.Eagerly, auth.sessionStatus.value.toSessionState())
+
+    override val currentUserUid: String?
+        get() = auth.currentUserOrNull()?.id
+
+    override suspend fun awaitInitialized() = auth.awaitInitialization()
 
     /**
      * Creates the auth account. The profile row is created by the on_auth_user_created
      * trigger from the metadata below, in the same transaction, so a failed profile
      * (for example a duplicate phone number) also fails the sign-up.
      */
-    suspend fun registerUser(
+    override suspend fun registerUser(
         name: String,
         block: String,
         phone: String,
@@ -58,12 +84,12 @@ class AuthRepository(private val context: Context) {
         cachedUsers = null
     }
 
-    suspend fun getCurrentUserProfile(): Result<User> = runCatching {
+    override suspend fun getCurrentUserProfile(): Result<User> = runCatching {
         db.rpc("get_my_profile").decodeList<User>().firstOrNull()
             ?: throw Exception("Profile not found. Please log out and sign up again.")
     }
 
-    suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> = runCatching {
+    override suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> = runCatching {
         val input = phoneOrEmail.trim()
         val email = if (input.contains("@")) {
             input.lowercase()
@@ -79,33 +105,29 @@ class AuthRepository(private val context: Context) {
         cachedUsers = null
     }
 
-    val currentUserUid: String?
-        get() = SupabaseManager.currentUid
-
-    suspend fun getAllUsers(forceRefresh: Boolean = false): Result<List<User>> {
-        val cached = cachedUsers
-        if (!forceRefresh && cached != null) return Result.success(cached)
-        return runCatching {
-            db["users"].select(PUBLIC_USER_COLUMNS).decodeList<User>().also { cachedUsers = it }
-        }
-    }
-
-    /** Users by id, refetching when someone new (e.g. a user who just signed up) is missing. */
-    suspend fun getUsers(ids: Collection<String>): Map<String, User> {
-        var users = getAllUsers().getOrNull().orEmpty().associateBy { it.uid }
+    override suspend fun getUsers(ids: Collection<String>, forceRefresh: Boolean): Map<String, User> {
+        var users = fetchUsers(forceRefresh).associateBy { it.uid }
         if (ids.any { it !in users }) {
-            users = getAllUsers(forceRefresh = true).getOrNull()?.associateBy { it.uid } ?: users
+            users = fetchUsers(forceRefresh = true).associateBy { it.uid }.ifEmpty { users }
         }
         return users
     }
 
+    private suspend fun fetchUsers(forceRefresh: Boolean): List<User> {
+        val cached = cachedUsers
+        if (!forceRefresh && cached != null) return cached
+        return runCatching { db["users"].select(PUBLIC_USER_COLUMNS).decodeList<User>() }
+            .onSuccess { cachedUsers = it }
+            .getOrElse { cached.orEmpty() }
+    }
+
     /** Permanently deletes the account, its listings and deals, then signs out locally. */
-    suspend fun deleteAccount(): Result<Unit> = runCatching {
+    override suspend fun deleteAccount(): Result<Unit> = runCatching {
         db.rpc("delete_my_account")
         logout()
     }
 
-    suspend fun logout() {
+    override suspend fun logout() {
         try {
             auth.signOut()
         } catch (_: Exception) {
@@ -116,6 +138,14 @@ class AuthRepository(private val context: Context) {
         // Next account on this phone starts with a clean slate, without old deal alerts
         DealNotifier.clear(context)
         cachedUsers = null
-        ItemRepository.cachedItems = null
+        itemRepository.clearCache()
+    }
+
+    private fun SessionStatus.toSessionState() = when (this) {
+        is SessionStatus.Initializing -> SessionState.Loading
+        is SessionStatus.Authenticated -> SessionState.SignedIn
+        // A failed refresh (e.g. offline) keeps the saved session; the user stays signed in
+        is SessionStatus.RefreshFailure -> SessionState.SignedIn
+        is SessionStatus.NotAuthenticated -> SessionState.SignedOut
     }
 }

@@ -38,8 +38,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,15 +47,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
-import com.kush.swych.core.data.DealRepository
-import com.kush.swych.core.notifications.DealNotifier
-import com.kush.swych.core.util.SettingsManager
+import com.kush.swych.core.util.HapticManager
 import com.kush.swych.ui.browse.BrowseContent
+import com.kush.swych.ui.browse.BrowseViewModel
+import com.kush.swych.ui.deals.DealsScreen
 import com.kush.swych.ui.home.HomeContent
+import com.kush.swych.ui.postitem.PostItemScreen
 import com.kush.swych.ui.profile.ProfileScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -74,18 +74,13 @@ private val navTabs = listOf(
 
 @Composable
 fun MainScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: MainViewModel = hiltViewModel(),
+    // Scoped to the main screen, so Browse keeps its items and filters across tab switches
+    browseViewModel: BrowseViewModel = hiltViewModel()
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    var browseCategory by remember { mutableStateOf("") }
-    var hasPendingDeals by remember { mutableStateOf(false) }
-    var expandContactDev by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
-    val dealRepo = remember { DealRepository(context) }
-
-    var browseSortName by remember { mutableStateOf("RECENT") }
-    var browseLocationName by remember { mutableStateOf("CAMPUS") }
+    val selectedTabIndex = viewModel.selectedTab
 
     // Ask once for notification permission (Android 13+) so deal updates can be shown
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -102,95 +97,61 @@ fun MainScreen(
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while (isActive) {
-                try {
-                    val result = dealRepo.getMyDeals(expireStale = false)
-                    // Only offers waiting on you as the seller, not your own outgoing ones
-                    val myUid = com.kush.swych.core.network.SupabaseManager.currentUid
-                    val deals = result.getOrNull()
-                    hasPendingDeals = deals?.any {
-                        it.sellerId == myUid && it.status == com.kush.swych.core.model.DealStatus.PENDING
-                    } == true
-                    if (deals != null && myUid != null && SettingsManager.notificationsEnabled.value) {
-                        DealNotifier.processChanges(context, deals, myUid)
-                    }
-                } catch (_: Exception) {
-                    // Silently ignore polling errors
-                }
-                delay(10000)
+                viewModel.checkDeals()
+                delay(10_000)
             }
         }
     }
 
-    BackHandler(enabled = selectedTabIndex != 0) {
-        selectedTabIndex = 0
-        expandContactDev = false
+    BackHandler(enabled = selectedTabIndex != MainViewModel.TAB_HOME) {
+        viewModel.selectTab(MainViewModel.TAB_HOME)
     }
 
-    val hapticManager = remember { com.kush.swych.core.util.HapticManager(context) }
+    val hapticManager = remember { HapticManager(context) }
 
     // Bottom bar floats over the tabs; each tab adds its own bottom padding for it
     Box(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            AnimatedContent(
-                targetState = selectedTabIndex,
-                transitionSpec = {
-                    (slideInHorizontally(
-                        animationSpec = tween(300),
-                        initialOffsetX = { fullWidth -> if (targetState > initialState) fullWidth else -fullWidth }
-                    ) + fadeIn(animationSpec = tween(300))) togetherWith (slideOutHorizontally(
-                        animationSpec = tween(300),
-                        targetOffsetX = { fullWidth -> if (targetState > initialState) -fullWidth else fullWidth }
-                    ) + fadeOut(animationSpec = tween(300)))
-                },
-                label = "tab_transition"
-            ) { targetIndex ->
-                when (targetIndex) {
-                    0 -> HomeContent(
-                        onCategoryClick = { category ->
-                            browseCategory = category
-                            selectedTabIndex = 1
-                        },
-                        onNavigateToProfile = {
-                            expandContactDev = true
-                            selectedTabIndex = 4
-                        }
-                    )
-                    1 -> BrowseContent(
-                        navController = navController,
-                        category = browseCategory,
-                        onCategoryChange = { browseCategory = it },
-                        sortName = browseSortName,
-                        onSortChange = { browseSortName = it },
-                        locationName = browseLocationName,
-                        onLocationChange = { browseLocationName = it }
-                    )
-                    2 -> com.kush.swych.ui.postitem.PostItemScreen()
-                    3 -> com.kush.swych.ui.deals.DealsScreen(navController = navController)
-                    4 -> ProfileScreen(
-                        navController = navController,
-                        expandContactDev = expandContactDev
-                    )
-                }
+        AnimatedContent(
+            targetState = selectedTabIndex,
+            transitionSpec = {
+                (slideInHorizontally(
+                    animationSpec = tween(300),
+                    initialOffsetX = { fullWidth -> if (targetState > initialState) fullWidth else -fullWidth }
+                ) + fadeIn(animationSpec = tween(300))) togetherWith (slideOutHorizontally(
+                    animationSpec = tween(300),
+                    targetOffsetX = { fullWidth -> if (targetState > initialState) -fullWidth else fullWidth }
+                ) + fadeOut(animationSpec = tween(300)))
+            },
+            label = "tab_transition",
+            modifier = Modifier.fillMaxSize()
+        ) { targetIndex ->
+            when (targetIndex) {
+                MainViewModel.TAB_HOME -> HomeContent(
+                    onCategoryClick = { category ->
+                        browseViewModel.selectCategory(category)
+                        viewModel.selectTab(MainViewModel.TAB_BROWSE)
+                    },
+                    onNavigateToProfile = {
+                        viewModel.selectTab(MainViewModel.TAB_PROFILE, expandContact = true)
+                    }
+                )
+                MainViewModel.TAB_BROWSE -> BrowseContent(navController = navController, viewModel = browseViewModel)
+                MainViewModel.TAB_POST -> PostItemScreen()
+                MainViewModel.TAB_DEALS -> DealsScreen(navController = navController)
+                MainViewModel.TAB_PROFILE -> ProfileScreen(expandContactDev = viewModel.expandContactDev)
             }
         }
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             SwychBottomBar(
                 selectedIndex = selectedTabIndex,
-                hasPendingDeals = hasPendingDeals,
+                hasPendingDeals = viewModel.hasPendingOffers,
                 onTabSelected = { index ->
                     if (selectedTabIndex != index) {
                         hapticManager.triggerFeedback()
-                        selectedTabIndex = index
-                        if (index == 1 && browseCategory.isNotEmpty()) {
-                            browseCategory = ""
-                        }
-                        if (index != 4) {
-                            expandContactDev = false
-                        }
+                        // Opening Browse from the tab bar shows everything, not the last category
+                        if (index == MainViewModel.TAB_BROWSE) browseViewModel.selectCategory("")
+                        viewModel.selectTab(index)
                     }
                 }
             )

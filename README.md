@@ -54,10 +54,11 @@ Buyer offers ──► PENDING ──► seller Accepts ──► ACCEPTED ─�
 ```mermaid
 flowchart LR
     subgraph App["Android app (Kotlin + Jetpack Compose)"]
-        UI["Screens<br/>Home · Browse · Item · Post · Deals · Profile"]
-        Repo["Repositories<br/>Auth · Item · Deal"]
+        UI["Compose screens<br/>Home · Browse · Item · Post · Deals · Profile"]
+        VM["ViewModels<br/>screen state + actions"]
+        Repo["Repositories (interfaces)<br/>Auth · Item · Deal"]
         Worker["WorkManager<br/>deal notifications"]
-        UI --> Repo
+        UI --> VM --> Repo
         Worker --> Repo
     end
 
@@ -85,6 +86,10 @@ flowchart LR
 - **Row Level Security everywhere.** Users only see their own deals; phone numbers and emails
   aren't readable at all except through a function that reveals the other side's number once a
   deal is accepted.
+- **MVVM with Hilt.** Each screen has a `@HiltViewModel` holding its state and actions;
+  Hilt injects the repositories, which are interfaces backed by Supabase implementations.
+  ViewModels scoped to the main screen keep Browse results, filters and a half-written listing
+  when switching tabs or rotating the phone.
 - **Session-driven navigation.** The logged-in state comes from the Supabase session itself, so
   an expired session sends the user back to login instead of failing silently.
 
@@ -104,11 +109,12 @@ flowchart LR
 - **Release hardening**: R8 shrinking with keep rules (found and fixed a release-only crash in
   WorkManager's database and stripped resources loaded by name), image downscaling and EXIF
   rotation before upload, friendly error mapping that never shows raw database errors.
-- **Unit tests** for the deal states, category list and error mapping, plus a clean Android lint run.
+- **Unit tests** for every key ViewModel (login, sign-up, browse filters, posting, deal actions)
+  using fake repositories, plus deal states, categories and error mapping; clean Android lint.
 
 ## 🛠️ Tech Stack
 
-- **App:** Kotlin, Jetpack Compose, Material 3, Navigation Compose (type-safe routes), Coil, WorkManager
+- **App:** Kotlin, Jetpack Compose, Material 3, MVVM, Hilt, Navigation Compose (type-safe routes), Coil, WorkManager
 - **Backend:** Supabase — Auth, PostgREST, Storage, `pg_cron`
 - **Database:** PostgreSQL with Row Level Security; deal logic in `SECURITY DEFINER` functions
 
@@ -118,7 +124,8 @@ flowchart LR
 SWYCH/
 ├── app/src/main/java/com/kush/swych/
 │   ├── core/
-│   │   ├── data/              # Repositories: auth, items, deals
+│   │   ├── data/              # Repository interfaces + Supabase implementations
+│   │   ├── di/                # Hilt modules (Supabase client, repositories)
 │   │   ├── designsystem/      # Theme, colors, typography, shared components
 │   │   ├── model/             # User, Item, Deal, Category + status constants
 │   │   ├── network/           # Supabase client
@@ -134,7 +141,7 @@ SWYCH/
 │       ├── profile/           # Profile, settings, logout, delete account
 │       ├── main/              # Tabs and bottom bar
 │       └── navigation/        # Routes and session-based navigation
-├── app/src/test/              # Unit tests
+├── app/src/test/              # Unit tests (ViewModels with fake repositories)
 ├── supabase/migrations/       # Database schema, functions and access rules
 └── docs/                      # Logo, screenshots, privacy policy, learning notes
 ```
@@ -238,7 +245,7 @@ the Play Console listing.
 ## 🧪 Tests
 
 ```bash
-./gradlew testDebugUnitTest   # unit tests: deal states, categories, error messages
+./gradlew testDebugUnitTest   # unit tests: ViewModels, deal states, categories, errors
 ./gradlew lintDebug           # Android lint
 ./gradlew assembleRelease     # shrunk release build (catches R8 issues the debug build hides)
 ```

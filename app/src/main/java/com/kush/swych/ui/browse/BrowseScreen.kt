@@ -26,91 +26,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.kush.swych.core.data.AuthRepository
-import com.kush.swych.core.data.DealRepository
-import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.ItemCard
 import com.kush.swych.core.designsystem.component.shimmerEffect
 import com.kush.swych.core.model.Category
-import com.kush.swych.core.model.Item
-import com.kush.swych.core.model.ItemStatus
-import com.kush.swych.core.model.User
-import com.kush.swych.core.network.SupabaseManager
-import com.kush.swych.core.util.userMessage
 import com.kush.swych.ui.navigation.ItemDetailRoute
-import kotlinx.coroutines.launch
-
-private enum class SortOption(val label: String) {
-    RECENT("Recents"),
-    LOW_TO_HIGH("Low -> High")
-}
-
-private enum class LocationFilter(val label: String) {
-    CAMPUS("Campus"),
-    HOSTEL("Hostel")
-}
 
 @Composable
-fun BrowseContent(
-    navController: NavController,
-    category: String,
-    onCategoryChange: (String) -> Unit,
-    sortName: String,
-    onSortChange: (String) -> Unit,
-    locationName: String,
-    onLocationChange: (String) -> Unit
-) {
+fun BrowseContent(navController: NavController, viewModel: BrowseViewModel) {
     val context = LocalContext.current
-    val itemRepo = remember { ItemRepository(context) }
-    val authRepo = remember { AuthRepository(context) }
-    val dealRepo = remember { DealRepository(context) }
+    val items = viewModel.items
+    val users = viewModel.users
+    val myUid = viewModel.myUid
+    val appliedItemIds = viewModel.appliedItemIds
+    val sendingOfferIds = viewModel.sendingOfferIds
+    val category = viewModel.category
+    val selectedSort = viewModel.sort
+    val locationFilter = viewModel.location
 
-    var items by remember { mutableStateOf<List<Item>?>(ItemRepository.cachedItems) }
-    var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
-    // Item awaiting the "send offer?" confirmation, and offers currently being sent
-    var pendingOffer by remember { mutableStateOf<Item?>(null) }
-    var sendingOfferIds by remember { mutableStateOf<Set<String>>(emptySet()) }
-    val myUid = SupabaseManager.currentUid
-    var currentUser by remember { mutableStateOf<User?>(null) }
-    var appliedItemIds by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var fetchError by remember { mutableStateOf<String?>(null) }
-    var isRefreshing by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    // Refresh in the background each time the tab is shown; cached items stay on screen
+    LaunchedEffect(Unit) { viewModel.load() }
 
-    val selectedSort = try { SortOption.valueOf(sortName) } catch (_: Exception) { SortOption.RECENT }
-    val locationFilter = try { LocationFilter.valueOf(locationName) } catch (_: Exception) { LocationFilter.CAMPUS }
-
-    // Centralized data loading function
-    fun loadAllData(forceRefresh: Boolean = false) {
-        scope.launch {
-            try {
-                val currentUserResult = authRepo.getCurrentUserProfile()
-                if (currentUserResult.isSuccess) {
-                    currentUser = currentUserResult.getOrNull()
-                }
-
-                dealRepo.getMyDeals().onSuccess { myDeals ->
-                    appliedItemIds = myDeals.filter { it.buyerId == myUid && it.isLive }.map { it.itemId }.toSet()
-                }
-
-                val result = itemRepo.getAllItems(forceRefresh = forceRefresh)
-                fetchError = result.exceptionOrNull()?.userMessage()
-                items = result.getOrNull() ?: items ?: emptyList()
-
-                // Refetches users when a seller is missing, e.g. someone who just signed up
-                users = authRepo.getUsers(items.orEmpty().map { it.sellerId }.toSet())
-            } finally {
-                isRefreshing = false
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (items == null || items?.isEmpty() == true) {
-            loadAllData()
-        } else {
-            // Still load fresh data in background but don't show loading state
-            loadAllData()
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.message = null
         }
     }
 
@@ -143,7 +82,7 @@ fun BrowseContent(
                             .clickable(
                                 interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                                 indication = null
-                            ) { onCategoryChange(catName) }
+                            ) { viewModel.selectCategory(if (catName == "All") "" else catName) }
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -176,7 +115,7 @@ fun BrowseContent(
                     .padding(4.dp)
             ) {
                 val tabWidth = maxWidth / 2
-                val selectedIndex = LocationFilter.values().indexOf(locationFilter)
+                val selectedIndex = LocationFilter.entries.indexOf(locationFilter)
                 val indicatorOffset by animateDpAsState(
                     targetValue = if (selectedIndex == 0) 0.dp else tabWidth,
                     animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
@@ -191,7 +130,7 @@ fun BrowseContent(
                         .background(MaterialTheme.colorScheme.primary)
                 )
                 Row(modifier = Modifier.fillMaxSize()) {
-                    LocationFilter.values().forEachIndexed { index, filter ->
+                    LocationFilter.entries.forEachIndexed { index, filter ->
                         val isSelected = selectedIndex == index
                         Box(
                             modifier = Modifier
@@ -201,7 +140,7 @@ fun BrowseContent(
                                 .clickable(
                                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                                     indication = null
-                                ) { onLocationChange(filter.name) },
+                                ) { viewModel.selectLocation(filter) },
                             contentAlignment = Alignment.Center
                         ) {
                             val color by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
@@ -221,7 +160,7 @@ fun BrowseContent(
                     .padding(4.dp)
             ) {
                 val tabWidth = maxWidth / 2
-                val selectedIndex = SortOption.values().indexOf(selectedSort)
+                val selectedIndex = SortOption.entries.indexOf(selectedSort)
                 val indicatorOffset by animateDpAsState(
                     targetValue = if (selectedIndex == 0) 0.dp else tabWidth,
                     animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
@@ -236,7 +175,7 @@ fun BrowseContent(
                         .background(MaterialTheme.colorScheme.primary)
                 )
                 Row(modifier = Modifier.fillMaxSize()) {
-                    SortOption.values().forEachIndexed { index, filter ->
+                    SortOption.entries.forEachIndexed { index, filter ->
                         val isSelected = selectedIndex == index
                         Box(
                             modifier = Modifier
@@ -246,7 +185,7 @@ fun BrowseContent(
                                 .clickable(
                                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                                     indication = null
-                                ) { onSortChange(filter.name) },
+                                ) { viewModel.selectSort(filter) },
                             contentAlignment = Alignment.Center
                         ) {
                             val color by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
@@ -262,11 +201,8 @@ fun BrowseContent(
         // Grid with Pull-to-Refresh
         @OptIn(ExperimentalMaterial3Api::class)
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                isRefreshing = true
-                loadAllData(forceRefresh = true)
-            },
+            isRefreshing = viewModel.isRefreshing,
+            onRefresh = { viewModel.load(forceRefresh = true) },
             modifier = Modifier.fillMaxSize()
         ) {
             val currentItems = items
@@ -284,23 +220,7 @@ fun BrowseContent(
                     }
                 }
             } else {
-                val selectedCat = if (category.isBlank()) "All" else category
-                var filteredItems = (if (selectedCat == "All") currentItems else currentItems.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status == ItemStatus.OPEN && it.sellerId != myUid }
-
-                // Location filtering
-                if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {
-                    filteredItems = filteredItems.filter { item ->
-                        val itemSellerBlock = users[item.sellerId]?.block ?: ""
-                        itemSellerBlock == currentUser?.block
-                    }
-                }
-
-                // Sorting
-                filteredItems = when (selectedSort) {
-                    SortOption.RECENT -> filteredItems // already newest first
-                    SortOption.LOW_TO_HIGH -> filteredItems.sortedBy { it.price }
-                }
-
+                val filteredItems = viewModel.visibleItems
                 if (filteredItems.isEmpty()) {
                     androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.fillMaxSize()) {
                         item {
@@ -309,7 +229,7 @@ fun BrowseContent(
                                     Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
                                     Spacer(Modifier.height(8.dp))
                                     Text(
-                                        text = fetchError ?: "No items found.",
+                                        text = viewModel.fetchError ?: "No items found.",
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -342,7 +262,7 @@ fun BrowseContent(
                                 isOwnItem = item.sellerId == myUid,
                                 isApplied = item.id in appliedItemIds || item.id in sendingOfferIds,
                                 onClick = { navController.navigate(ItemDetailRoute(item.id)) },
-                                onDealClick = { pendingOffer = item }
+                                onDealClick = { viewModel.pendingOffer = item }
                             )
                         }
                     }
@@ -351,32 +271,15 @@ fun BrowseContent(
         }
     }
 
-    pendingOffer?.let { item ->
+    viewModel.pendingOffer?.let { item ->
         AlertDialog(
-            onDismissRequest = { pendingOffer = null },
+            onDismissRequest = { viewModel.pendingOffer = null },
             title = { Text("Send offer?") },
             text = { Text("Offer ₹%.0f for %s? The seller will see your offer and can accept or reject it.".format(item.price, item.title)) },
             confirmButton = {
-                TextButton(onClick = {
-                    pendingOffer = null
-                    if (item.id in sendingOfferIds) return@TextButton
-                    sendingOfferIds = sendingOfferIds + item.id
-                    scope.launch {
-                        val result = dealRepo.createDeal(
-                            itemId = item.id,
-                            itemTitle = item.title,
-                            itemPhotoUrl = item.photoUrl ?: "",
-                            sellerId = item.sellerId,
-                            agreedPrice = item.price
-                        )
-                        result.onSuccess { appliedItemIds = appliedItemIds + item.id }
-                            .onFailure { Toast.makeText(context, it.userMessage(), Toast.LENGTH_LONG).show() }
-                        sendingOfferIds = sendingOfferIds - item.id
-                        loadAllData(forceRefresh = true)
-                    }
-                }) { Text("Send offer") }
+                TextButton(onClick = { viewModel.sendOffer(item) }) { Text("Send offer") }
             },
-            dismissButton = { TextButton(onClick = { pendingOffer = null }) { Text("Cancel") } }
+            dismissButton = { TextButton(onClick = { viewModel.pendingOffer = null }) { Text("Cancel") } }
         )
     }
 }

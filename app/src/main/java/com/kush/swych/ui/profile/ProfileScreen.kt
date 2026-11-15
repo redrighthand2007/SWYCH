@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,34 +32,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.kush.swych.core.data.AuthRepository
-import com.kush.swych.core.model.User
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.kush.swych.core.util.SettingsManager
-import com.kush.swych.core.util.userMessage
-import com.kush.swych.ui.navigation.AuthRoute
-import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
-    navController: NavController,
-    expandContactDev: Boolean = false
+    expandContactDev: Boolean = false,
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val authRepo = remember { AuthRepository(context) }
-    var user by remember { mutableStateOf<User?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var scrollState = androidx.compose.foundation.rememberScrollState()
+    val user = viewModel.user
+    val isLoading = viewModel.isLoading
+    val isDeleting = viewModel.isDeleting
+    val scrollState = androidx.compose.foundation.rememberScrollState()
 
-    LaunchedEffect(Unit) {
-        // Reputation counts (green/red dots) are kept up to date by the deal functions in Supabase
-        user = authRepo.getCurrentUserProfile().getOrNull()
-        isLoading = false
+    LaunchedEffect(Unit) { viewModel.load() }
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.message = null
+        }
     }
-    val scope = rememberCoroutineScope()
-    var showLogoutDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var isDeleting by remember { mutableStateOf(false) }
+
+    var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     val hapticEnabled by SettingsManager.hapticEnabled.collectAsState()
     val themeMode by SettingsManager.themeMode.collectAsState()
@@ -354,12 +351,7 @@ fun ProfileScreen(
                     TextButton(
                         onClick = {
                             showLogoutDialog = false
-                            scope.launch {
-                                authRepo.logout()
-                                navController.navigate(AuthRoute) {
-                                    popUpTo(0) { inclusive = true }
-                                }
-                            }
+                            viewModel.logout()
                         }
                     ) { Text("Log Out", color = MaterialTheme.colorScheme.error) }
                 },
@@ -378,19 +370,7 @@ fun ProfileScreen(
                     TextButton(
                         onClick = {
                             showDeleteDialog = false
-                            isDeleting = true
-                            scope.launch {
-                                authRepo.deleteAccount()
-                                    .onSuccess {
-                                        navController.navigate(AuthRoute) {
-                                            popUpTo(0) { inclusive = true }
-                                        }
-                                    }
-                                    .onFailure { e ->
-                                        isDeleting = false
-                                        Toast.makeText(context, e.userMessage(), Toast.LENGTH_LONG).show()
-                                    }
-                            }
+                            viewModel.deleteAccount()
                         }
                     ) { Text("Delete", color = MaterialTheme.colorScheme.error) }
                 },

@@ -1,40 +1,49 @@
 package com.kush.swych.core.data
 
-import android.content.Context
 import androidx.core.net.toUri
 import com.kush.swych.core.model.Item
-import com.kush.swych.core.network.SupabaseManager
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.storage.storage
+import java.io.File
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ItemRepository(@Suppress("unused") private val context: Context) {
+@Singleton
+class SupabaseItemRepository @Inject constructor(
+    private val client: SupabaseClient
+) : ItemRepository {
 
-    companion object {
-        @Volatile
-        var cachedItems: List<Item>? = null
+    private val db get() = client.postgrest
+    private val currentUid: String? get() = client.auth.currentUserOrNull()?.id
+
+    @Volatile
+    private var cachedItems: List<Item>? = null
+
+    override fun clearCache() {
+        cachedItems = null
     }
 
-    private val db get() = SupabaseManager.client.postgrest
-
-    suspend fun postItem(
+    override suspend fun postItem(
         title: String,
         description: String,
         price: Double,
         category: String,
         photoUri: String
     ): Result<Unit> = runCatching {
-        val sellerId = SupabaseManager.currentUid ?: throw Exception("Not logged in")
+        val sellerId = currentUid ?: throw Exception("Not logged in")
 
         // Upload to Supabase Storage
-        val bucket = SupabaseManager.client.storage["items"]
+        val bucket = client.storage["items"]
         var photoUrl = photoUri
         var uploadedName: String? = null
         if (photoUri.startsWith("file://")) {
             val path = photoUri.toUri().path
             if (path != null) {
-                val file = java.io.File(path)
+                val file = File(path)
                 val name = "${sellerId}_${file.name}"
                 bucket.upload(name, file.readBytes()) { upsert = true }
                 uploadedName = name
@@ -61,8 +70,7 @@ class ItemRepository(@Suppress("unused") private val context: Context) {
         cachedItems = null
     }
 
-    /** Newest first. */
-    suspend fun getAllItems(forceRefresh: Boolean = false): Result<List<Item>> {
+    override suspend fun getAllItems(forceRefresh: Boolean): Result<List<Item>> {
         val cached = cachedItems
         if (!forceRefresh && cached != null) return Result.success(cached)
         return runCatching {
@@ -73,12 +81,12 @@ class ItemRepository(@Suppress("unused") private val context: Context) {
     }
 
     /** Always fetched fresh, so the status shown before making an offer is current. */
-    suspend fun getItemById(itemId: String): Result<Item> = runCatching {
+    override suspend fun getItemById(itemId: String): Result<Item> = runCatching {
         db["items"].select { filter { eq("id", itemId) } }.decodeSingle<Item>()
     }
 
-    suspend fun getMyItems(): Result<List<Item>> = runCatching {
-        val sellerId = SupabaseManager.currentUid ?: throw Exception("Not logged in")
+    override suspend fun getMyItems(): Result<List<Item>> = runCatching {
+        val sellerId = currentUid ?: throw Exception("Not logged in")
         db["items"].select {
             filter { eq("seller_id", sellerId) }
             order("created_at", Order.DESCENDING)
@@ -86,7 +94,7 @@ class ItemRepository(@Suppress("unused") private val context: Context) {
     }
 
     /** Edits an open listing. Fails once an offer has been accepted. */
-    suspend fun updateItem(itemId: String, title: String, description: String, price: Double): Result<Unit> = runCatching {
+    override suspend fun updateItem(itemId: String, title: String, description: String, price: Double): Result<Unit> = runCatching {
         val updated = db["items"].update({
             set("title", title)
             set("description", description)
@@ -100,7 +108,7 @@ class ItemRepository(@Suppress("unused") private val context: Context) {
     }
 
     /** Removes an open listing; its pending offers are removed with it. */
-    suspend fun deleteItem(itemId: String): Result<Unit> = runCatching {
+    override suspend fun deleteItem(itemId: String): Result<Unit> = runCatching {
         val deleted = db["items"].delete {
             select()
             filter { eq("id", itemId) }

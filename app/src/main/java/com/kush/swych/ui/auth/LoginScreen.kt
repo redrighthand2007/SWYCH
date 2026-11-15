@@ -29,8 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,49 +42,27 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.designsystem.component.DealButton
-import com.kush.swych.core.util.userMessage
-import com.kush.swych.ui.navigation.MainRoute
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltViewModel()) {
+    var email by viewModel::email
+    var password by viewModel::password
+    var errorMessage by viewModel::errorMessage
+    val isLoading = viewModel.isLoading
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
-    val scope = rememberCoroutineScope()
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val authRepo = remember(context) { AuthRepository(context) }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // On success the nav host sees the new session and opens the main screen
     val performLogin = {
         keyboardController?.hide()
-        if (email.isBlank() || password.isBlank()) {
-            errorMessage = "Please enter both email and password."
-        } else {
-            isLoading = true
-            errorMessage = null
-            scope.launch {
-                val result = authRepo.loginUser(email.trim(), password)
-                isLoading = false
-                if (result.isSuccess) {
-                    navController.navigate(MainRoute) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                } else {
-                    errorMessage = result.exceptionOrNull()?.userMessage()
-                        ?: "Login failed. Please check your credentials."
-                }
-            }
-        }
+        viewModel.login()
     }
 
     Scaffold(

@@ -18,42 +18,36 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.designsystem.component.DealButton
 import com.kush.swych.core.util.Constants
-import com.kush.swych.core.util.userMessage
-import com.kush.swych.ui.navigation.MainRoute
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navController: NavController) {
-    var name by remember { mutableStateOf("") }
-    var hostelBlock by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hiltViewModel()) {
+    var name by viewModel::name
+    var hostelBlock by viewModel::hostelBlock
+    var email by viewModel::email
+    var confirmPassword by viewModel::confirmPassword
+    val phone = viewModel.phone
+    val password = viewModel.password
+    val showError = viewModel.showErrors
+    val isLoading = viewModel.isLoading
+    val errorMessage = viewModel.errorMessage
 
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
-
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
-    var showError by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val scrollState = rememberScrollState()
-    val scope = rememberCoroutineScope()
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val authRepo = remember(context) { AuthRepository(context) }
 
     var isVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -158,14 +152,14 @@ fun SignUpScreen(navController: NavController) {
             ) {
                 OutlinedTextField(
                     value = phone,
-                    onValueChange = { phone = it.filter { c -> c.isDigit() }.take(10) },
+                    onValueChange = viewModel::onPhoneChange,
                     label = { Text("Phone Number") },
                     prefix = { Text("+91") },
                     leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
-                    isError = showError && phone.length != 10,
-                    supportingText = if (showError && phone.length != 10) {
+                    isError = showError && !viewModel.isPhoneValid,
+                    supportingText = if (showError && !viewModel.isPhoneValid) {
                         { Text("Must be exactly 10 digits") }
                     } else null
                 )
@@ -178,7 +172,7 @@ fun SignUpScreen(navController: NavController) {
                     animationSpec = tween(durationMillis = 300, delayMillis = 150)
                 ) + fadeIn(tween(300))
             ) {
-                val isEmailValid = email.trim().lowercase().endsWith("@vitstudent.ac.in")
+                val isEmailValid = viewModel.isEmailValid
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -202,12 +196,12 @@ fun SignUpScreen(navController: NavController) {
                     animationSpec = tween(durationMillis = 300, delayMillis = 200)
                 ) + fadeIn(tween(300))
             ) {
-                val hasLetterAndNumber = password.any { it.isLetter() } && password.any { it.isDigit() }
-                val isPasswordValid = password.length in 6..72 && hasLetterAndNumber
+                val hasLetterAndNumber = viewModel.passwordHasLetterAndNumber
+                val isPasswordValid = viewModel.isPasswordValid
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { if (it.length <= 72) password = it },
+                    onValueChange = viewModel::onPasswordChange,
                     label = { Text("Password") },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
@@ -270,35 +264,8 @@ fun SignUpScreen(navController: NavController) {
                 Column {
                     DealButton(
                         text = if (isLoading) "Creating Account..." else "Create Account",
-                        onClick = {
-                            if (isLoading) return@DealButton
-                            showError = true
-                            val isNameValid = name.isNotBlank()
-                            val isBlockValid = hostelBlock.isNotBlank()
-                            val isPhoneValid = phone.length == 10
-                            val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
-                            val cleanEmail = email.trim().lowercase()
-                            val isEmailValid = cleanEmail.endsWith("@vitstudent.ac.in") && cleanEmail.matches(emailRegex)
-                            val hasLetterAndNumber = password.any { it.isLetter() } && password.any { it.isDigit() }
-                            val isPasswordValid = password.length in 6..72 && hasLetterAndNumber
-                            val isConfirmValid = password == confirmPassword
-
-                            if (isNameValid && isBlockValid && isPhoneValid && isEmailValid && isPasswordValid && isConfirmValid) {
-                                isLoading = true
-                                errorMessage = null
-                                scope.launch {
-                                    val result = authRepo.registerUser(name.trim(), hostelBlock, phone, cleanEmail, password)
-                                    isLoading = false
-                                    if (result.isSuccess) {
-                                        navController.navigate(MainRoute) {
-                                            popUpTo(0) { inclusive = true }
-                                        }
-                                    } else {
-                                        errorMessage = result.exceptionOrNull()?.userMessage() ?: "Registration failed"
-                                    }
-                                }
-                            }
-                        },
+                        // On success the nav host sees the new session and opens the main screen
+                        onClick = viewModel::register,
                         modifier = Modifier.fillMaxWidth()
                     )
 

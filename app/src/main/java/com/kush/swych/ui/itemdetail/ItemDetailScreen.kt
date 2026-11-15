@@ -13,56 +13,48 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import com.kush.swych.core.data.DealRepository
-import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.shimmerEffect
 import com.kush.swych.core.model.Category
-import com.kush.swych.core.model.Item
 import com.kush.swych.core.model.ItemStatus
-import com.kush.swych.core.network.SupabaseManager
-import com.kush.swych.core.util.userMessage
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemDetailScreen(navController: NavController, itemId: String) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val itemRepo = remember { ItemRepository(context) }
-    val dealRepo = remember { DealRepository(context) }
+fun ItemDetailScreen(navController: NavController, viewModel: ItemDetailViewModel = hiltViewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var item by remember { mutableStateOf<Item?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var offerAmount by remember { mutableStateOf("") }
-    var isSubmittingOffer by remember { mutableStateOf(false) }
-    var offerSubmitted by remember { mutableStateOf(false) }
+    val item = viewModel.item
+    val isLoading = viewModel.isLoading
+    val offerAmount = viewModel.offerAmount
+    val isSubmittingOffer = viewModel.isSubmittingOffer
+    val offerSubmitted = viewModel.offerSubmitted
+    val isWorking = viewModel.isWorking
+    val currentUid = viewModel.currentUid
 
-    var showEditDialog by remember { mutableStateOf(false) }
-    var showRemoveDialog by remember { mutableStateOf(false) }
-    var isWorking by remember { mutableStateOf(false) }
+    var showEditDialog by rememberSaveable { mutableStateOf(false) }
+    var showRemoveDialog by rememberSaveable { mutableStateOf(false) }
 
-    val currentUid = SupabaseManager.currentUid
-
-    // Item is always fetched fresh; an existing live offer hides the offer form
-    LaunchedEffect(itemId) {
-        item = itemRepo.getItemById(itemId).getOrNull()
-        offerSubmitted = dealRepo.getMyDeals().getOrNull().orEmpty()
-            .any { d -> d.itemId == itemId && d.buyerId == currentUid && d.isLive }
-        isLoading = false
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.message = null
+        }
+    }
+    LaunchedEffect(viewModel.isRemoved) {
+        if (viewModel.isRemoved) navController.popBackStack()
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
@@ -251,7 +243,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                             } else {
                                 OutlinedTextField(
                                     value = offerAmount,
-                                    onValueChange = { v -> offerAmount = v.filter { c -> c.isDigit() || c == '.' } },
+                                    onValueChange = viewModel::onOfferAmountChange,
                                     label = { Text("Your Offer Price (₹)") },
                                     prefix = { Text("₹ ", fontWeight = FontWeight.Bold) },
                                     singleLine = true,
@@ -260,33 +252,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
                                 )
 
                                 Button(
-                                    onClick = {
-                                        val offerPrice = offerAmount.toDoubleOrNull()
-                                        if (offerPrice == null || offerPrice <= 0) {
-                                            scope.launch {
-                                                snackbarHostState.showSnackbar("Enter a valid offer amount")
-                                            }
-                                            return@Button
-                                        }
-                                        isSubmittingOffer = true
-                                        scope.launch {
-                                            val result = dealRepo.createDeal(
-                                                itemId = it.id,
-                                                sellerId = it.sellerId,
-                                                itemTitle = it.title,
-                                                itemPhotoUrl = it.photoUrl ?: "",
-                                                agreedPrice = offerPrice
-                                            )
-                                            isSubmittingOffer = false
-                                            if (result.isSuccess) {
-                                                offerSubmitted = true
-                                            } else {
-                                                snackbarHostState.showSnackbar(
-                                                    result.exceptionOrNull()?.userMessage() ?: "Failed to submit offer"
-                                                )
-                                            }
-                                        }
-                                    },
+                                    onClick = viewModel::submitOffer,
                                     enabled = !isSubmittingOffer,
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp)
@@ -385,16 +351,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
             confirmButton = {
                 TextButton(enabled = canSave, onClick = {
                     showEditDialog = false
-                    isWorking = true
-                    scope.launch {
-                        itemRepo.updateItem(current.id, editTitle.trim(), editDescription.trim(), newPrice ?: current.price)
-                            .onSuccess {
-                                item = itemRepo.getItemById(current.id).getOrNull() ?: item
-                                snackbarHostState.showSnackbar("Listing updated.")
-                            }
-                            .onFailure { e -> snackbarHostState.showSnackbar(e.userMessage()) }
-                        isWorking = false
-                    }
+                    viewModel.updateListing(editTitle.trim(), editDescription.trim(), newPrice ?: current.price)
                 }) { Text("Save") }
             },
             dismissButton = { TextButton(onClick = { showEditDialog = false }) { Text("Cancel") } }
@@ -409,13 +366,7 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
             confirmButton = {
                 TextButton(onClick = {
                     showRemoveDialog = false
-                    isWorking = true
-                    scope.launch {
-                        itemRepo.deleteItem(current.id)
-                            .onSuccess { navController.popBackStack() }
-                            .onFailure { e -> snackbarHostState.showSnackbar(e.userMessage()) }
-                        isWorking = false
-                    }
+                    viewModel.removeListing()
                 }) { Text("Remove", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { showRemoveDialog = false }) { Text("Cancel") } }

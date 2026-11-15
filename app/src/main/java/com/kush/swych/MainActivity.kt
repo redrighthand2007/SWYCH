@@ -13,7 +13,9 @@ import com.kush.swych.core.notifications.DealCheckWorker
 import com.kush.swych.core.notifications.DealNotifier
 import com.kush.swych.core.util.SettingsManager
 import com.kush.swych.ui.navigation.AppNavHost
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()

@@ -29,21 +29,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.kush.swych.core.data.AuthRepository
-import com.kush.swych.core.data.DealRepository
-import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.ItemCard
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.model.DealStatus
 import com.kush.swych.core.model.Item
 import com.kush.swych.core.model.ItemStatus
 import com.kush.swych.core.model.User
-import com.kush.swych.core.network.SupabaseManager
 import com.kush.swych.core.util.HapticManager
-import com.kush.swych.core.util.userMessage
 import com.kush.swych.ui.navigation.ItemDetailRoute
-import kotlinx.coroutines.launch
 
 private val SuccessGreen = Color(0xFF4CAF50)
 
@@ -56,68 +51,44 @@ private class PendingConfirmation(
 )
 
 @Composable
-fun DealsScreen(navController: NavController) {
+fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltViewModel()) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val dealRepo = remember { DealRepository(context) }
-    val itemRepo = remember { ItemRepository(context) }
-    val authRepo = remember { AuthRepository(context) }
     val hapticManager = remember { HapticManager(context) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var deals by remember { mutableStateOf<List<Deal>?>(null) }
-    var myItems by remember { mutableStateOf<List<Item>>(emptyList()) }
-    var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
-    var loadError by remember { mutableStateOf<String?>(null) }
-    var isRefreshing by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableIntStateOf(0) }
-    // Deals with a request in flight; their buttons are disabled so nothing is sent twice
-    var busyIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    val deals = viewModel.deals
+    val myItems = viewModel.myItems
+    val users = viewModel.users
+    val loadError = viewModel.loadError
+    val busyIds = viewModel.busyIds
+    val currentUid = viewModel.currentUid
+    var selectedTab by viewModel::selectedTab
     var confirmation by remember { mutableStateOf<PendingConfirmation?>(null) }
 
-    val currentUid = SupabaseManager.currentUid
-
-    // Always fetches fresh data, so an offer behind the red badge is visible right away
-    suspend fun load() {
-        val dealsResult = dealRepo.getMyDeals()
-        dealsResult.onSuccess { deals = it; loadError = null }
-            .onFailure { loadError = it.userMessage() }
-        itemRepo.getMyItems().onSuccess { myItems = it }
-        val loaded = deals.orEmpty()
-        users = authRepo.getUsers(loaded.flatMap { listOf(it.buyerId, it.sellerId) }.toSet())
-        isRefreshing = false
+    /** Haptic tick, then the action. */
+    fun act(action: () -> Unit) {
+        hapticManager.triggerFeedback()
+        action()
     }
 
-    fun runAction(id: String, successMessage: String?, action: suspend () -> Result<Unit>) {
-        if (id in busyIds) return
-        hapticManager.triggerFeedback()
-        busyIds = busyIds + id
-        scope.launch {
-            val result = action()
-            busyIds = busyIds - id
-            result.onSuccess { if (successMessage != null) snackbarHostState.showSnackbar(successMessage) }
-                .onFailure { snackbarHostState.showSnackbar(it.userMessage()) }
-            load()
+    // Fresh data every time the tab opens, so an offer behind the red badge shows up
+    LaunchedEffect(Unit) { viewModel.load() }
+
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.message = null
         }
     }
-
-    fun callOtherSide(deal: Deal) {
-        hapticManager.triggerFeedback()
-        scope.launch {
-            val phone = dealRepo.getContactPhone(deal.id).getOrNull()
-            if (phone.isNullOrBlank()) {
-                snackbarHostState.showSnackbar("Phone number isn't available for this deal.")
-                return@launch
-            }
-            try {
-                context.startActivity(Intent(Intent.ACTION_DIAL, "tel:$phone".toUri()))
-            } catch (_: Exception) {
-                snackbarHostState.showSnackbar("No dialer app found. Number: $phone")
-            }
+    LaunchedEffect(viewModel.numberToDial) {
+        val phone = viewModel.numberToDial ?: return@LaunchedEffect
+        viewModel.numberToDial = null
+        try {
+            context.startActivity(Intent(Intent.ACTION_DIAL, "tel:$phone".toUri()))
+        } catch (_: Exception) {
+            snackbarHostState.showSnackbar("No dialer app found. Number: $phone")
         }
     }
-
-    LaunchedEffect(Unit) { load() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -128,11 +99,8 @@ fun DealsScreen(navController: NavController) {
             Box(modifier = Modifier.fillMaxSize().weight(1f).padding(top = 8.dp)) {
                 @OptIn(ExperimentalMaterial3Api::class)
                 PullToRefreshBox(
-                    isRefreshing = isRefreshing,
-                    onRefresh = {
-                        isRefreshing = true
-                        scope.launch { load() }
-                    },
+                    isRefreshing = viewModel.isRefreshing,
+                    onRefresh = { viewModel.load(showRefreshing = true) },
                     modifier = Modifier.fillMaxSize()
                 ) {
                     val loadedDeals = deals
@@ -202,32 +170,32 @@ fun DealsScreen(navController: NavController) {
                                                         title = "Accept offer?",
                                                         text = "Accept ₹%.0f from %s for %s? Other offers on this item will be rejected.".format(entry.finalPrice, buyerName, entry.itemTitle),
                                                         confirmLabel = "Accept"
-                                                    ) { runAction(entry.id, "Offer accepted. Call the buyer to meet up.") { dealRepo.acceptDeal(entry.id) } }
+                                                    ) { act { viewModel.acceptDeal(entry.id) } }
                                                 },
-                                                onReject = { runAction(entry.id, "Offer rejected.") { dealRepo.rejectDeal(entry.id) } },
+                                                onReject = { act { viewModel.rejectDeal(entry.id) } },
                                                 onWithdraw = {
                                                     confirmation = PendingConfirmation(
                                                         title = "Withdraw offer?",
                                                         text = "Your offer for ${entry.itemTitle} will be removed.",
                                                         confirmLabel = "Withdraw"
-                                                    ) { runAction(entry.id, "Offer withdrawn.") { dealRepo.cancelDeal(entry.id) } }
+                                                    ) { act { viewModel.withdrawOffer(entry.id) } }
                                                 },
                                                 onConfirmHandover = {
                                                     confirmation = PendingConfirmation(
                                                         title = "Mark as done?",
                                                         text = "Only confirm once the item and payment have been exchanged. The deal completes when both of you confirm.",
                                                         confirmLabel = "Confirm"
-                                                    ) { runAction(entry.id, "Marked as done.") { dealRepo.confirmDeal(entry.id) } }
+                                                    ) { act { viewModel.confirmHandover(entry.id) } }
                                                 },
                                                 onCancelDeal = {
                                                     confirmation = PendingConfirmation(
                                                         title = "Cancel this deal?",
                                                         text = "The item goes back on sale and a cancelled deal is added to your profile.",
                                                         confirmLabel = "Cancel deal"
-                                                    ) { runAction(entry.id, "Deal cancelled.") { dealRepo.cancelDeal(entry.id) } }
+                                                    ) { act { viewModel.cancelDeal(entry.id) } }
                                                 },
-                                                onDismiss = { runAction(entry.id, null) { dealRepo.dismissDeal(entry.id) } },
-                                                onCall = { callOtherSide(entry) }
+                                                onDismiss = { act { viewModel.dismissDeal(entry.id) } },
+                                                onCall = { act { viewModel.callOtherSide(entry) } }
                                             )
                                         } else if (entry is Item) {
                                             val me = users[currentUid]
@@ -247,7 +215,7 @@ fun DealsScreen(navController: NavController) {
                                                             title = "Remove listing?",
                                                             text = "${entry.title} will be removed from Swych.",
                                                             confirmLabel = "Remove"
-                                                        ) { runAction(entry.id, "Listing removed.") { itemRepo.deleteItem(entry.id) } }
+                                                        ) { act { viewModel.removeListing(entry.id) } }
                                                     }
                                                 }
                                             )

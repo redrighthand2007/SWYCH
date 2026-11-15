@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,73 +25,60 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
-import com.kush.swych.core.data.ItemRepository
 import com.kush.swych.core.designsystem.component.DealButton
 import com.kush.swych.core.model.Category
 import com.kush.swych.core.util.ImageUtils
-import com.kush.swych.core.util.userMessage
 import java.io.File
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostItemScreen() {
+fun PostItemScreen(viewModel: PostItemViewModel = hiltViewModel()) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val itemRepo = remember { ItemRepository(context) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Form state
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    // Downscaled JPEG ready to upload, shown as the preview
-    var photoFile by remember { mutableStateOf<File?>(null) }
-    var isPreparingPhoto by remember { mutableStateOf(false) }
-    var isSubmitting by remember { mutableStateOf(false) }
+    var description by viewModel::description
+    val title = viewModel.title
+    val price = viewModel.price
+    val selectedCategory = viewModel.category
+    val photoFile = viewModel.photoFile
+    val isPreparingPhoto = viewModel.isPreparingPhoto
+    val isSubmitting = viewModel.isSubmitting
+    val titleError = viewModel.titleError
+    val priceError = viewModel.priceError
+    val categoryError = viewModel.categoryError
+    val imageError = viewModel.imageError
     var categoryExpanded by remember { mutableStateOf(false) }
 
-    // Validation errors
-    var titleError by remember { mutableStateOf(false) }
-    var priceError by remember { mutableStateOf(false) }
-    var categoryError by remember { mutableStateOf(false) }
-    var imageError by remember { mutableStateOf(false) }
-
-    fun usePhoto(source: Uri) {
-        isPreparingPhoto = true
-        scope.launch {
-            val prepared = ImageUtils.prepareForUpload(context, source)
-            isPreparingPhoto = false
-            if (prepared != null) {
-                photoFile = prepared
-                imageError = false
-            } else {
-                snackbarHostState.showSnackbar("Couldn't read that photo. Try another one.")
-            }
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.message = null
         }
     }
 
-    // Camera writes a full-size photo into a file we own
-    var cameraTarget by remember { mutableStateOf<Pair<File, Uri>?>(null) }
+    // Camera writes a full-size photo into a file we own. The path is saved so the
+    // photo still arrives if Android closes the app while the camera is open.
+    var cameraTargetPath by rememberSaveable { mutableStateOf<String?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
-        val target = cameraTarget
-        cameraTarget = null
-        if (saved && target != null) usePhoto(target.second) else target?.first?.delete()
+        val file = cameraTargetPath?.let { File(it) }
+        cameraTargetPath = null
+        if (file == null) return@rememberLauncherForActivityResult
+        if (saved) viewModel.usePhoto(Uri.fromFile(file)) else file.delete()
     }
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) usePhoto(uri)
+        if (uri != null) viewModel.usePhoto(uri)
     }
 
     fun openCamera() {
-        val target = ImageUtils.newCameraTarget(context)
-        cameraTarget = target
+        val (file, uri) = ImageUtils.newCameraTarget(context)
+        cameraTargetPath = file.absolutePath
         try {
-            cameraLauncher.launch(target.second)
+            cameraLauncher.launch(uri)
         } catch (_: ActivityNotFoundException) {
-            cameraTarget = null
-            scope.launch { snackbarHostState.showSnackbar("No camera app found. Choose a photo from your gallery instead.") }
+            cameraTargetPath = null
+            viewModel.message = "No camera app found. Choose a photo from your gallery instead."
         }
     }
 
@@ -98,7 +86,7 @@ fun PostItemScreen() {
         try {
             galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         } catch (_: ActivityNotFoundException) {
-            scope.launch { snackbarHostState.showSnackbar("No gallery app found.") }
+            viewModel.message = "No gallery app found."
         }
     }
 
@@ -182,10 +170,7 @@ fun PostItemScreen() {
             // Item Name
             OutlinedTextField(
                 value = title,
-                onValueChange = { newValue ->
-                    title = newValue.trimStart()
-                    titleError = false
-                },
+                onValueChange = viewModel::onTitleChange,
                 label = { Text("Item Name") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -218,8 +203,7 @@ fun PostItemScreen() {
                         DropdownMenuItem(
                             text = { Text(cat.displayName) },
                             onClick = {
-                                selectedCategory = cat
-                                categoryError = false
+                                viewModel.onCategoryChange(cat)
                                 categoryExpanded = false
                             }
                         )
@@ -230,7 +214,7 @@ fun PostItemScreen() {
             // Price
             OutlinedTextField(
                 value = price,
-                onValueChange = { price = it.filter { c -> c.isDigit() }.take(6); priceError = false },
+                onValueChange = viewModel::onPriceChange,
                 label = { Text("Price (₹)") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -256,40 +240,7 @@ fun PostItemScreen() {
 
             DealButton(
                 text = "List Item",
-                onClick = {
-                    val priceValue = price.toDoubleOrNull()
-                    val category = selectedCategory
-                    val photo = photoFile
-                    titleError = title.isBlank()
-                    priceError = priceValue == null || priceValue <= 0
-                    categoryError = category == null
-                    imageError = photo == null
-
-                    if (!titleError && !priceError && category != null && photo != null && priceValue != null) {
-                        isSubmitting = true
-                        scope.launch {
-                            val result = itemRepo.postItem(
-                                title = title.trim(),
-                                description = description.trim(),
-                                price = priceValue,
-                                category = category.name,
-                                photoUri = Uri.fromFile(photo).toString()
-                            )
-                            isSubmitting = false
-                            result.onSuccess {
-                                title = ""
-                                description = ""
-                                price = ""
-                                selectedCategory = null
-                                photoFile = null
-                                ImageUtils.clearCachedPhotos(context)
-                                snackbarHostState.showSnackbar("Item listed successfully!")
-                            }.onFailure { e ->
-                                snackbarHostState.showSnackbar(e.userMessage())
-                            }
-                        }
-                    }
-                },
+                onClick = viewModel::submit,
                 isLoading = isSubmitting,
                 enabled = !isPreparingPhoto,
                 modifier = Modifier.fillMaxWidth()

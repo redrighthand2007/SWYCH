@@ -6,31 +6,38 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import com.kush.swych.core.network.SupabaseManager
+import com.kush.swych.core.data.AuthRepository
+import com.kush.swych.core.data.SessionState
 import com.kush.swych.ui.auth.AuthScreen
 import com.kush.swych.ui.auth.LoginScreen
 import com.kush.swych.ui.auth.SignUpScreen
 import com.kush.swych.ui.itemdetail.ItemDetailScreen
 import com.kush.swych.ui.main.MainScreen
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.status.SessionStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class SessionViewModel @Inject constructor(authRepository: AuthRepository) : ViewModel() {
+    val sessionState = authRepository.sessionState
+}
 
 @Composable
-fun AppNavHost() {
+fun AppNavHost(sessionViewModel: SessionViewModel = hiltViewModel()) {
     // Logged-in state comes from the Supabase session, so the app never thinks it is
     // signed in while every request is being rejected for a missing session.
-    val sessionStatus by SupabaseManager.client.auth.sessionStatus.collectAsState()
+    val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
 
-    if (sessionStatus is SessionStatus.Initializing) {
+    if (sessionState == SessionState.Loading) {
         // Saved session is still loading from storage
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
         return
@@ -38,18 +45,19 @@ fun AppNavHost() {
 
     val navController = rememberNavController()
     val startDest: Any = remember {
-        if (sessionStatus is SessionStatus.Authenticated) MainRoute else AuthRoute
+        if (sessionState == SessionState.SignedIn) MainRoute else AuthRoute
     }
 
-    LaunchedEffect(sessionStatus) {
-        if (sessionStatus is SessionStatus.NotAuthenticated) {
-            val destination = navController.currentDestination
-            val inApp = destination?.hasRoute<MainRoute>() == true || destination?.hasRoute<ItemDetailRoute>() == true
-            if (inApp) {
-                navController.navigate(AuthRoute) {
-                    popUpTo(0) { inclusive = true }
-                }
-            }
+    // Login, sign-up, logout, account deletion and expired sessions all just change the
+    // session; this is the one place that decides which part of the app to show.
+    LaunchedEffect(sessionState) {
+        val destination = navController.currentDestination ?: return@LaunchedEffect
+        val inApp = destination.hasRoute<MainRoute>() || destination.hasRoute<ItemDetailRoute>()
+        when {
+            sessionState == SessionState.SignedOut && inApp ->
+                navController.navigate(AuthRoute) { popUpTo(0) { inclusive = true } }
+            sessionState == SessionState.SignedIn && !inApp ->
+                navController.navigate(MainRoute) { popUpTo(0) { inclusive = true } }
         }
     }
 
@@ -69,12 +77,8 @@ fun AppNavHost() {
         composable<MainRoute> {
             MainScreen(navController = navController)
         }
-        composable<ItemDetailRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<ItemDetailRoute>()
-            ItemDetailScreen(
-                itemId = route.itemId,
-                navController = navController
-            )
+        composable<ItemDetailRoute> {
+            ItemDetailScreen(navController = navController)
         }
     }
 }

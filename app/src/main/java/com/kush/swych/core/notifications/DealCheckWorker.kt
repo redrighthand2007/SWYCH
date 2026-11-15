@@ -8,23 +8,36 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.data.DealRepository
-import com.kush.swych.core.network.SupabaseManager
 import com.kush.swych.core.util.SettingsManager
-import io.github.jan.supabase.auth.auth
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import java.util.concurrent.TimeUnit
 
 /** Background check for deal changes; Android runs it about every 15 minutes. */
 class DealCheckWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
+    /** Lets the worker get its dependencies from Hilt without a custom WorkerFactory. */
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface Dependencies {
+        fun authRepository(): AuthRepository
+        fun dealRepository(): DealRepository
+    }
+
     override suspend fun doWork(): Result {
         SettingsManager.init(applicationContext)
         if (!SettingsManager.notificationsEnabled.value) return Result.success()
 
-        SupabaseManager.client.auth.awaitInitialization()
-        val uid = SupabaseManager.currentUid ?: return Result.success()
+        val deps = EntryPointAccessors.fromApplication(applicationContext, Dependencies::class.java)
+        val auth = deps.authRepository()
+        auth.awaitInitialized()
+        val uid = auth.currentUserUid ?: return Result.success()
 
-        val deals = DealRepository(applicationContext).getMyDeals().getOrElse { return Result.retry() }
+        val deals = deps.dealRepository().getMyDeals().getOrElse { return Result.retry() }
         DealNotifier.processChanges(applicationContext, deals, uid)
         return Result.success()
     }
@@ -38,10 +51,6 @@ class DealCheckWorker(context: Context, params: WorkerParameters) : CoroutineWor
                 .build()
             WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
-        }
-
-        fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
         }
     }
 }
