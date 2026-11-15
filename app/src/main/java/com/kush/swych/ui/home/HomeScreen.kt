@@ -23,6 +23,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -83,7 +88,9 @@ fun HomeContent(
         }
 
         LazyColumn(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .fadeTopEdge(),
             contentPadding = PaddingValues(bottom = 120.dp)
         ) {
             // Category groups, straight from the Category list so Home always matches Browse and Post
@@ -194,6 +201,21 @@ private val tickerSteps = listOf(
 private const val NAME_HOLD_MILLIS = 4000L
 private const val STEP_HOLD_MILLIS = 2000L
 private val HEADER_HEIGHT = 200.dp
+private val FADE_HEIGHT = 56.dp
+
+/** Cards fade out as they scroll up under the header instead of being cut off at a hard line. */
+private fun Modifier.fadeTopEdge(): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color.Transparent, Color.Black),
+                endY = FADE_HEIGHT.toPx()
+            ),
+            blendMode = BlendMode.DstIn
+        )
+    }
 
 @Composable
 private fun HeaderTicker() {
