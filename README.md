@@ -11,6 +11,9 @@ and hand it over on campus.
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white&labelColor=4285F4)](https://developer.android.com/jetpack/compose)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white&labelColor=3ECF8E)](https://supabase.com/)
 [![API Level](https://img.shields.io/badge/Min_SDK-26%20(Android_8.0)-4C1?logo=android&logoColor=white&labelColor=4c1)](https://developer.android.com/studio/releases/platforms)
+[![License: MIT](https://img.shields.io/badge/License-MIT-EA580C)](LICENSE)
+
+**[⬇️ Download the APK](https://github.com/redrighthand2007/SWYCH/releases/latest)** · [Screenshots](#-screenshots) · [How a deal works](#-how-a-deal-works) · [Architecture](#%EF%B8%8F-architecture)
 
 </div>
 
