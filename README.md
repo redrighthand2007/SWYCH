@@ -146,7 +146,7 @@ SWYCH/
 │       └── navigation/        # Routes and session-based navigation
 ├── app/src/test/              # Unit tests (ViewModels with fake repositories)
 ├── supabase/migrations/       # Database schema, functions and access rules
-└── docs/                      # Logo, screenshots, privacy policy, learning notes
+└── docs/                      # Logo, screenshots, privacy policy
 ```
 
 ## ⚙️ Getting Started
