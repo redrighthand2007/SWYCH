@@ -3,13 +3,13 @@ package com.kush.swych.core.data
 import android.content.Context
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.network.SupabaseManager
+import com.kush.swych.core.util.decodeNullableString
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.rpc
-import kotlinx.serialization.json.buildJsonObject
-import com.kush.swych.core.util.decodeNullableString
-import kotlinx.serialization.json.put
 import java.util.UUID
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /**
  * Offers and deals. Creating an offer is a plain insert (checked by row level security);

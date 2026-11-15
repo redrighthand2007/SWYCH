@@ -1,8 +1,7 @@
 package com.kush.swych.ui.profile
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,13 +11,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Vibration
@@ -36,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.model.User
-import android.widget.Toast
 import com.kush.swych.core.util.SettingsManager
 import com.kush.swych.core.util.userMessage
 import com.kush.swych.ui.navigation.AuthRoute
@@ -52,7 +49,7 @@ fun ProfileScreen(
     var user by remember { mutableStateOf<User?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var scrollState = androidx.compose.foundation.rememberScrollState()
-    
+
     LaunchedEffect(Unit) {
         // Reputation counts (green/red dots) are kept up to date by the deal functions in Supabase
         user = authRepo.getCurrentUserProfile().getOrNull()
@@ -63,13 +60,11 @@ fun ProfileScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
 
-
     val hapticEnabled by SettingsManager.hapticEnabled.collectAsState()
     val themeMode by SettingsManager.themeMode.collectAsState()
     val notificationsEnabled by SettingsManager.notificationsEnabled.collectAsState()
 
     var isCardExpanded by remember { mutableStateOf(false) }
-
 
     var isContactDevExpanded by remember { mutableStateOf(expandContactDev) }
     var isFeedbackExpanded by remember { mutableStateOf(false) }
@@ -95,7 +90,7 @@ fun ProfileScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            
+
             // Profile Card
             if (user != null) {
                 Card(
@@ -127,9 +122,9 @@ fun ProfileScreen(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
-                            
+
                             Spacer(modifier = Modifier.width(16.dp))
-                            
+
                             // Name & Block
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
@@ -154,7 +149,7 @@ fun ProfileScreen(
                         ) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
                             Spacer(modifier = Modifier.height(16.dp))
-                            
+
                             Text(
                                 text = "Phone Number: " + user!!.phone,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -162,7 +157,7 @@ fun ProfileScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            
+
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = "Successful Deals: " + user!!.greenDots,
@@ -178,9 +173,9 @@ fun ProfileScreen(
                                         .background(Color(0xFF4CAF50))
                                 )
                             }
-                            
+
                             Spacer(modifier = Modifier.height(12.dp))
-                            
+
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = "Cancelled Deals: " + user!!.redDots,
@@ -214,7 +209,6 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
 
                 // Theme
                 Row(
@@ -281,11 +275,11 @@ fun ProfileScreen(
                         onCheckedChange = { SettingsManager.setHapticEnabled(it) }
                     )
                 }
-                
+
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
 
                 ExpandableProfileOption(
-                    icon = Icons.Default.Code, 
+                    icon = Icons.Default.Code,
                     text = "Contact Developer",
                     isExpanded = isContactDevExpanded,
                     onExpandedChange = { isContactDevExpanded = it }
@@ -293,7 +287,7 @@ fun ProfileScreen(
                     Text("Email: whiterighthand2007@gmail.com", style = MaterialTheme.typography.bodyMedium)
                 }
                 ExpandableProfileOption(
-                    icon = Icons.Default.Feedback, 
+                    icon = Icons.Default.Feedback,
                     text = "Feedback",
                     isExpanded = isFeedbackExpanded,
                     onExpandedChange = { isFeedbackExpanded = it }
@@ -320,7 +314,7 @@ fun ProfileScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Logout Button
@@ -418,7 +412,7 @@ fun ExpandableProfileOption(
 ) {
     var internalExpanded by remember { mutableStateOf(false) }
     val expanded = if (onExpandedChange != null) isExpanded else internalExpanded
-    
+
     val toggle = {
         if (onExpandedChange != null) {
             onExpandedChange(!isExpanded)
@@ -447,11 +441,11 @@ fun ExpandableProfileOption(
             }
             Icon(
                 imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                contentDescription = null, 
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        
+
         androidx.compose.animation.AnimatedVisibility(visible = expanded) {
             Column(
                 modifier = Modifier
@@ -463,4 +457,3 @@ fun ExpandableProfileOption(
         }
     }
 }
-

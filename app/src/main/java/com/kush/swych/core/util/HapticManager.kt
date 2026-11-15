@@ -27,8 +27,8 @@ class HapticManager(private val context: Context) {
                     vibrator.vibrate(50)
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
+            // Vibration is optional; ignore devices that refuse it
         }
     }
 }

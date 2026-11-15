@@ -2,8 +2,8 @@ package com.kush.swych.ui.auth
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,11 +26,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kush.swych.core.data.AuthRepository
-import com.kush.swych.core.util.userMessage
 import com.kush.swych.core.designsystem.component.DealButton
 import com.kush.swych.core.util.Constants
-import kotlinx.coroutines.launch
+import com.kush.swych.core.util.userMessage
 import com.kush.swych.ui.navigation.MainRoute
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -204,7 +204,7 @@ fun SignUpScreen(navController: NavController) {
             ) {
                 val hasLetterAndNumber = password.any { it.isLetter() } && password.any { it.isDigit() }
                 val isPasswordValid = password.length in 6..72 && hasLetterAndNumber
-                
+
                 OutlinedTextField(
                     value = password,
                     onValueChange = { if (it.length <= 72) password = it },
@@ -301,7 +301,7 @@ fun SignUpScreen(navController: NavController) {
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
+
                     AnimatedVisibility(visible = errorMessage != null) {
                         Text(
                             text = errorMessage ?: "",
@@ -317,7 +317,3 @@ fun SignUpScreen(navController: NavController) {
         }
     }
 }
-
-
-
-

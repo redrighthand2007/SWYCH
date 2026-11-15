@@ -4,23 +4,22 @@ import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -65,7 +64,7 @@ fun BrowseContent(
     val itemRepo = remember { ItemRepository(context) }
     val authRepo = remember { AuthRepository(context) }
     val dealRepo = remember { DealRepository(context) }
-    
+
     var items by remember { mutableStateOf<List<Item>?>(ItemRepository.cachedItems) }
     var users by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
     // Item awaiting the "send offer?" confirmation, and offers currently being sent
@@ -77,7 +76,7 @@ fun BrowseContent(
     var fetchError by remember { mutableStateOf<String?>(null) }
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    
+
     val selectedSort = try { SortOption.valueOf(sortName) } catch (_: Exception) { SortOption.RECENT }
     val locationFilter = try { LocationFilter.valueOf(locationName) } catch (_: Exception) { LocationFilter.CAMPUS }
 
@@ -116,7 +115,7 @@ fun BrowseContent(
     }
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-        
+
         // --- 1. Categories pill ---
         Box(
             modifier = Modifier
@@ -135,7 +134,7 @@ fun BrowseContent(
             ) {
                 items(cats) { catName ->
                     val isSelected = if (catName == "All") category.isBlank() || category.equals("All", ignoreCase = true) else category.equals(catName, ignoreCase = true)
-                    
+
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
@@ -159,7 +158,7 @@ fun BrowseContent(
                 }
             }
         }
-        
+
         // --- 2. 50-50 Filters ---
         Row(
             modifier = Modifier
@@ -182,7 +181,7 @@ fun BrowseContent(
                     targetValue = if (selectedIndex == 0) 0.dp else tabWidth,
                     animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
                 )
-                
+
                 Box(
                     modifier = Modifier
                         .offset(x = indicatorOffset)
@@ -227,7 +226,7 @@ fun BrowseContent(
                     targetValue = if (selectedIndex == 0) 0.dp else tabWidth,
                     animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
                 )
-                
+
                 Box(
                     modifier = Modifier
                         .offset(x = indicatorOffset)
@@ -287,7 +286,7 @@ fun BrowseContent(
             } else {
                 val selectedCat = if (category.isBlank()) "All" else category
                 var filteredItems = (if (selectedCat == "All") currentItems else currentItems.filter { it.category.equals(selectedCat, ignoreCase = true) }).filter { it.status == ItemStatus.OPEN && it.sellerId != myUid }
-                
+
                 // Location filtering
                 if (locationFilter == LocationFilter.HOSTEL && currentUser != null) {
                     filteredItems = filteredItems.filter { item ->
@@ -333,7 +332,7 @@ fun BrowseContent(
                             val sellerBlock = users[item.sellerId]?.block ?: "Unknown"
                             val sellerName = users[item.sellerId]?.name ?: "Unknown"
                             val seller = users[item.sellerId]
-                            
+
                             ItemCard(
                                 item = item,
                                 sellerName = sellerName,
@@ -381,7 +380,3 @@ fun BrowseContent(
         )
     }
 }
-
-
-
-

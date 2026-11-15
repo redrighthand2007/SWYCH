@@ -1,7 +1,6 @@
 package com.kush.swych.ui.itemdetail
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -36,7 +35,6 @@ import com.kush.swych.core.model.ItemStatus
 import com.kush.swych.core.network.SupabaseManager
 import com.kush.swych.core.util.userMessage
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -424,10 +422,3 @@ fun ItemDetailScreen(navController: NavController, itemId: String) {
         )
     }
 }
-
-
-
-
-
-
-

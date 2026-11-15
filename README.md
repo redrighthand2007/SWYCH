@@ -31,7 +31,7 @@ and hand it over on campus.
 - **Safe hand-overs**: an accepted deal reserves the item; both sides confirm with **Done** after meeting up.
 - **Phone numbers stay private**: the other person's number is only revealed once a deal is accepted.
 - **Reputation**: green dots for completed deals, red dots for deals you cancelled.
-- **Notifications**: new offers, accepted/rejected offers and deal updates, even when the app is closed.
+- **Notifications**: new offers, accepted/rejected offers and deal updates, also when the app is closed (checked about every 15 minutes).
 - **Your data, your call**: edit or remove listings, and delete your account from Profile.
 - **Light / dark / system theme** and haptic feedback, both switchable in Profile.
 
@@ -136,37 +136,82 @@ SWYCH/
 │       └── navigation/        # Routes and session-based navigation
 ├── app/src/test/              # Unit tests
 ├── supabase/migrations/       # Database schema, functions and access rules
-└── docs/                      # Logo, screenshots and privacy policy
+└── docs/                      # Logo, screenshots, privacy policy, learning notes
 ```
 
 ## ⚙️ Getting Started
 
+### Requirements
+
+- A recent **Android Studio** that supports Android Gradle Plugin 9.2 (Gradle 9.4 is downloaded
+  automatically by the wrapper)
+- **JDK 21**: Android Studio's bundled JDK works; Gradle provisions it automatically if missing
+- **Android SDK 35** and a device or emulator running **Android 8.0 (API 26)** or newer
+- A free [Supabase](https://supabase.com/) project (see below)
+
+### Run it locally
+
 1. **Clone**
    ```bash
    git clone https://github.com/redrighthand2007/SWYCH.git
+   cd SWYCH
    ```
-2. **Configure Supabase** — add your project's URL and publishable key to `local.properties`
-   in the project root (this file is git-ignored):
+2. **Set up the backend** — follow [Supabase setup](#-supabase-setup) below (about 5 minutes).
+3. **Add your Supabase keys** to `local.properties` in the project root. Android Studio creates
+   this file on first sync; it is git-ignored, so keys never end up in the repository.
    ```properties
-   supabase.url=https://<your-project>.supabase.co
+   supabase.url=https://<your-project-ref>.supabase.co
    supabase.key=<your publishable key>
    ```
-   See [Using your own Supabase project](#-using-your-own-supabase-project) to set up the database.
-3. **Open** the folder in Android Studio and let Gradle sync.
-4. **Run** on an emulator or device with Android 8.0 (API 26) or newer.
+4. **Open** the folder in Android Studio, let Gradle sync, and press **Run ▶**.
 
-Sign-up only accepts `@vitstudent.ac.in` email addresses.
+Sign-up only accepts `@vitstudent.ac.in` email addresses (see
+[Adapting it to another college](#-adapting-it-to-another-college)).
 
-## 🔧 Using your own Supabase project
+## 🔧 Supabase setup
 
-1. Create a [Supabase](https://supabase.com/) project with the `users`, `items` and `deals` tables
-   and a public storage bucket named `items`.
-2. Apply the SQL files in [`supabase/migrations/`](supabase/migrations) in order. They add the deal
-   functions, constraints, sign-up trigger, access rules and the hourly expiry job.
-3. Put your project URL and publishable key in `local.properties` (see Getting Started). The
-   publishable key is meant to ship inside the app; the database is protected by Row Level
-   Security, not by keeping the key secret. Never put the `service_role` key in the app.
-4. In Supabase → Authentication → Settings, turn on **Leaked password protection**.
+1. **Create a project** at [supabase.com](https://supabase.com/) (the free tier is enough).
+2. **Run the migrations** in [`supabase/migrations/`](supabase/migrations), oldest first. Either
+   paste each file into **SQL Editor → New query → Run**, or use the
+   [Supabase CLI](https://supabase.com/docs/guides/cli):
+   ```bash
+   supabase init        # only if supabase/config.toml doesn't exist yet
+   supabase link --project-ref <your-project-ref>
+   supabase db push
+   ```
+   | File | What it creates |
+   |---|---|
+   | `20261001000000_initial_schema.sql` | `users`, `items`, `deals` tables, the `items` photo bucket, RLS switched on |
+   | `20261021000000_deal_workflow.sql` | Deal statuses and constraints, deal functions, sign-up trigger, access rules |
+   | `20261025000000_launch_readiness.sql` | Hourly expiry job (`pg_cron`), photo upload rules, account deletion |
+3. **Copy your keys** from **Project Settings → API Keys**: the project URL and the
+   **publishable** key go into `local.properties`. The publishable key is meant to ship inside the
+   app; the data is protected by Row Level Security, not by keeping that key secret.
+   **Never** put the `secret` / `service_role` key in the app.
+4. **Auth settings** (Authentication → Sign In / Providers → Email):
+   - Email provider: **enabled**
+   - *Confirm email*: optional. When on, new users must click the link before logging in, which
+     stops sign-ups with someone else's college address.
+   - *Leaked password protection*: recommended **on**.
+
+### Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| App closes at launch with *"Supabase is not configured"* | `supabase.url` / `supabase.key` missing from `local.properties`; add them and rebuild |
+| *"This item is no longer available"* on every action | Migrations not applied, or applied out of order |
+| Sign-up fails with *"already registered"* | That phone number or email is already used by another account |
+| Photos don't upload | The `items` bucket is missing; re-run the first migration |
+
+## 🎓 Adapting it to another college
+
+- **Email domain**: change `@vitstudent.ac.in` in
+  [`SignUpScreen.kt`](app/src/main/java/com/kush/swych/ui/auth/SignUpScreen.kt).
+- **Hostel blocks**: edit `HOSTEL_BLOCKS` in
+  [`Constants.kt`](app/src/main/java/com/kush/swych/core/util/Constants.kt).
+- **Categories**: add or remove entries in
+  [`Category.kt`](app/src/main/java/com/kush/swych/core/model/Category.kt) (name, Home section
+  and icon); Home, Browse and Post update automatically.
 
 ## 📦 Release build
 
@@ -193,7 +238,9 @@ the Play Console listing.
 ## 🧪 Tests
 
 ```bash
-./gradlew testDebugUnitTest lintDebug
+./gradlew testDebugUnitTest   # unit tests: deal states, categories, error messages
+./gradlew lintDebug           # Android lint
+./gradlew assembleRelease     # shrunk release build (catches R8 issues the debug build hides)
 ```
 
 ## 🗺️ Roadmap

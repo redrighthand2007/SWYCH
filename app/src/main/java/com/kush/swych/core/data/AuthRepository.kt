@@ -5,13 +5,13 @@ import androidx.core.content.edit
 import com.kush.swych.core.model.User
 import com.kush.swych.core.network.SupabaseManager
 import com.kush.swych.core.notifications.DealNotifier
+import com.kush.swych.core.util.decodeNullableString
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.rpc
 import kotlinx.serialization.json.buildJsonObject
-import com.kush.swych.core.util.decodeNullableString
 import kotlinx.serialization.json.put
 
 class AuthRepository(private val context: Context) {

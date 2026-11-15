@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,17 +27,17 @@ fun DealButton(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val hapticManager = androidx.compose.runtime.remember { com.kush.swych.core.util.HapticManager(context) }
-    
+
     val alpha by animateFloatAsState(
         targetValue = if (enabled && !isLoading) 1f else 0.6f,
         label = "button_alpha"
     )
 
     Button(
-        onClick = { 
+        onClick = {
             if (!isLoading) {
                 hapticManager.triggerFeedback()
-                onClick() 
+                onClick()
             }
         },
         modifier = modifier
