@@ -51,7 +51,7 @@ fun AuthScreen(navController: NavController) {
         // Stylized slogan at ~25% from top
         AnimatedVisibility(
             visible = isVisible,
-            enter = fadeIn(animationSpec = tween(durationMillis = 800))
+            enter = fadeIn(animationSpec = tween(durationMillis = 350))
         ) {
             Text(
                 text = "Swych",
@@ -68,7 +68,7 @@ fun AuthScreen(navController: NavController) {
         // Options at ~25% from bottom
         AnimatedVisibility(
             visible = isVisible,
-            enter = fadeIn(animationSpec = tween(durationMillis = 800, delayMillis = 200))
+            enter = fadeIn(animationSpec = tween(durationMillis = 350, delayMillis = 100))
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
