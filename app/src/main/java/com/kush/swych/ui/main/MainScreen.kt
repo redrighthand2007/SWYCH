@@ -38,7 +38,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
-import com.kush.swych.core.util.HapticManager
+import com.kush.swych.core.designsystem.theme.screenCrossfade
 import com.kush.swych.ui.browse.BrowseContent
 import com.kush.swych.ui.browse.BrowseViewModel
 import com.kush.swych.ui.deals.DealsScreen
@@ -107,21 +106,11 @@ fun MainScreen(
         viewModel.selectTab(MainViewModel.TAB_HOME)
     }
 
-    val hapticManager = remember { HapticManager(context) }
-
     // Bottom bar floats over the tabs; each tab adds its own bottom padding for it
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedContent(
             targetState = selectedTabIndex,
-            transitionSpec = {
-                (slideInHorizontally(
-                    animationSpec = tween(300),
-                    initialOffsetX = { fullWidth -> if (targetState > initialState) fullWidth else -fullWidth }
-                ) + fadeIn(animationSpec = tween(300))) togetherWith (slideOutHorizontally(
-                    animationSpec = tween(300),
-                    targetOffsetX = { fullWidth -> if (targetState > initialState) -fullWidth else fullWidth }
-                ) + fadeOut(animationSpec = tween(300)))
-            },
+            transitionSpec = { screenCrossfade() },
             label = "tab_transition",
             modifier = Modifier.fillMaxSize()
         ) { targetIndex ->
@@ -148,7 +137,6 @@ fun MainScreen(
                 hasPendingDeals = viewModel.hasPendingOffers,
                 onTabSelected = { index ->
                     if (selectedTabIndex != index) {
-                        hapticManager.triggerFeedback()
                         // Opening Browse from the tab bar shows everything, not the last category
                         if (index == MainViewModel.TAB_BROWSE) browseViewModel.selectCategory("")
                         viewModel.selectTab(index)

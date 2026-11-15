@@ -32,6 +32,7 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.kush.swych.core.designsystem.component.ItemCard
+import com.kush.swych.core.designsystem.theme.screenCrossfade
 import com.kush.swych.core.model.Deal
 import com.kush.swych.core.model.DealStatus
 import com.kush.swych.core.model.Item
@@ -112,15 +113,7 @@ fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltVi
                     } else {
                         AnimatedContent(
                             targetState = selectedTab,
-                            transitionSpec = {
-                                if (targetState > initialState) {
-                                    (slideInHorizontally(animationSpec = tween(300)) { width -> width } + fadeIn(animationSpec = tween(300))) togetherWith
-                                    (slideOutHorizontally(animationSpec = tween(300)) { width -> -width } + fadeOut(animationSpec = tween(300)))
-                                } else {
-                                    (slideInHorizontally(animationSpec = tween(300)) { width -> -width } + fadeIn(animationSpec = tween(300))) togetherWith
-                                    (slideOutHorizontally(animationSpec = tween(300)) { width -> width } + fadeOut(animationSpec = tween(300)))
-                                }
-                            },
+                            transitionSpec = { screenCrossfade() },
                             label = "deals_animation",
                             modifier = Modifier.fillMaxSize()
                         ) { tab ->

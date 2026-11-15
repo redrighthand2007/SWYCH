@@ -18,6 +18,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kush.swych.core.data.AuthRepository
 import com.kush.swych.core.data.SessionState
+import com.kush.swych.core.designsystem.theme.screenFadeIn
+import com.kush.swych.core.designsystem.theme.screenFadeOut
 import com.kush.swych.ui.auth.AuthScreen
 import com.kush.swych.ui.auth.LoginScreen
 import com.kush.swych.ui.auth.SignUpScreen
@@ -63,7 +65,11 @@ fun AppNavHost(sessionViewModel: SessionViewModel = hiltViewModel()) {
 
     NavHost(
         navController = navController,
-        startDestination = startDest
+        startDestination = startDest,
+        enterTransition = { screenFadeIn },
+        exitTransition = { screenFadeOut },
+        popEnterTransition = { screenFadeIn },
+        popExitTransition = { screenFadeOut }
     ) {
         composable<AuthRoute> {
             AuthScreen(navController = navController)
