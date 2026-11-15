@@ -241,7 +241,7 @@ fun ProfileScreen(
                             "Q: What happens when my offer is accepted?\n" +
                             "A: The item is reserved for you and a Call button appears. Meet up, exchange the item, then both of you tap Done.\n\n" +
                             "Q: What if we can't meet?\n" +
-                            "A: Either side can Cancel the deal and the item goes back on sale. Cancelling adds a red dot to your profile. Deals nobody confirms expire after 3 days.\n\n" +
+                            "A: Either side can Cancel the deal and the item goes back on sale. Cancelling adds a red dot to your profile. Deals nobody confirms expire after 3 hours.\n\n" +
                             "Q: What do the dots mean?\n" +
                             "A: Green = completed deals, red = deals you cancelled.",
                         style = MaterialTheme.typography.bodyMedium

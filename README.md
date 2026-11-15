@@ -44,7 +44,8 @@ From picking a category to closing a deal, in light and dark mode:
 - **List in seconds**: take a photo (or pick one from the gallery), set a price, done. Photos are resized before upload.
 - **Offers, not DMs**: offer the listed price with one tap, or make your own offer from the item page.
 - **Safe hand-overs**: an accepted deal reserves the item; both sides confirm with **Done** after meeting up.
-- **Phone numbers stay private**: the other person's number is only revealed once a deal is accepted.
+- **Phone numbers stay private**: the other person's number is only shared while a deal is accepted, and hidden again once it's done.
+- **Buy and Sell in one place**: your offers and your listings, sortable by latest or by product.
 - **Golden V badge**: sign up with any email; VIT students verify their `@vitstudent.ac.in` address from Profile (one email link) and get a gold **V** next to their name on listings and deals.
 - **Reputation**: green dots for completed deals, red dots for deals you cancelled.
 - **Notifications**: new offers, accepted/rejected offers and deal updates, also when the app is closed (checked about every 15 minutes).
@@ -57,7 +58,7 @@ From picking a category to closing a deal, in light and dark mode:
 Buyer offers ──► PENDING ──► seller Accepts ──► ACCEPTED ──► both tap Done ──► COMPLETED
                     │                              │   (item reserved)          (item sold)
                     ├─ seller Rejects ─► REJECTED  ├─ either side Cancels ─► CANCELLED (item back on sale)
-                    └─ buyer Withdraws (removed)   └─ nobody confirms in 3 days ─► EXPIRED (item back on sale)
+                    └─ buyer Withdraws (removed)   └─ nobody confirms in 3 hours ─► EXPIRED (item back on sale)
 ```
 
 - Accepting one offer automatically rejects the other offers on that item.
@@ -153,14 +154,14 @@ SWYCH/
 │       ├── browse/            # Marketplace feed
 │       ├── itemdetail/        # Item page, offers, edit/remove own listing
 │       ├── postitem/          # New listing
-│       ├── deals/             # Offers and My Products
+│       ├── deals/             # Buy and Sell: offers, deals and listings
 │       ├── profile/           # Profile, settings, logout, delete account
 │       ├── main/              # Tabs and bottom bar
 │       └── navigation/        # Routes and session-based navigation
 ├── app/src/test/              # Unit tests (ViewModels with fake repositories)
 ├── baselineprofile/           # Records the startup Baseline Profile and measures cold start
 ├── supabase/migrations/       # Database schema, functions and access rules
-├── supabase/functions/        # Edge Functions for the VIT badge email
+├── supabase/functions/        # Edge Functions: phone login and the VIT badge email
 └── docs/                      # Logo, screenshots, privacy policy
 ```
 
@@ -213,6 +214,8 @@ address get the verified **V** badge (see
    | `20261115000000_college_email_only.sql` | Old college-only email rule (removed again by the next file) |
    | `20261116000000_any_email_vit_badge.sql` | Any email can sign up; `vit_verified` badge and pending VIT verifications |
    | `20261117000000_cleanup_deleted_users.sql` | Deleting a user in the dashboard also removes their profile, listings and deals |
+   | `20261118000000_three_hour_deals.sql` | Accepted deals expire after 3 hours (checked every 10 min); numbers shared only while a deal is accepted |
+   | `20261119000000_phone_login_and_speed.sql` | Phone login moves to an Edge Function; indexes and faster access rules |
 3. **Copy your keys** from **Project Settings → API Keys**: the project URL and the
    **publishable** key go into `local.properties`. The publishable key is meant to ship inside the
    app; the data is protected by Row Level Security, not by keeping that key secret.
@@ -227,6 +230,7 @@ address get the verified **V** badge (see
    ```bash
    supabase functions deploy request-vit-verification
    supabase functions deploy confirm-vit-email --no-verify-jwt
+   supabase functions deploy phone-login --no-verify-jwt
    supabase secrets set SMTP_USER=<gmail address> SMTP_PASS=<gmail app password>
    ```
    Without the secrets everything else works; Profile just says verification isn't available yet.

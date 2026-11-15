@@ -59,7 +59,7 @@ class SupabaseDealRepository @Inject constructor(
 
     // Row level security limits the result to the signed-in user's deals
     override suspend fun getMyDeals(expireStale: Boolean): Result<List<Deal>> = runCatching {
-        // Closes accepted deals older than 3 days; failing here must not block the list
+        // Closes accepted deals older than 3 hours; failing here must not block the list
         if (expireStale) runCatching { db.rpc("expire_stale_deals") }
         db["deals"].select {
             order("timestamp", Order.DESCENDING)

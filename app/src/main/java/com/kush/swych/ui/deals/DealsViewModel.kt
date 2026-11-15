@@ -37,8 +37,11 @@ class DealsViewModel @Inject constructor(
     var isRefreshing by mutableStateOf(false)
         private set
 
-    /** 0 = my offers, 1 = my products. */
+    /** 0 = Buy (my offers), 1 = Sell (my listings and the offers on them). */
     var selectedTab by mutableIntStateOf(0)
+
+    /** How both tabs are ordered. */
+    var sortMode by mutableStateOf(DealSort.LATEST)
 
     /** Deals with a request in flight; their buttons are disabled so nothing is sent twice. */
     var busyIds by mutableStateOf<Set<String>>(emptySet())
@@ -95,4 +98,11 @@ class DealsViewModel @Inject constructor(
             load()
         }
     }
+}
+
+enum class DealSort(val label: String) {
+    /** Newest offer or listing first. */
+    LATEST("Latest"),
+    /** Grouped by product name, A to Z; newest first within a product. */
+    PRODUCT("Product")
 }

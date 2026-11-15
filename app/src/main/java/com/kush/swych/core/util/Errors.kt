@@ -4,6 +4,8 @@ import android.util.Log
 import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.exceptions.HttpRequestException
 import io.github.jan.supabase.exceptions.RestException
+import java.io.IOException
+import java.nio.channels.UnresolvedAddressException
 
 private const val TAG = "Swych"
 private const val GENERIC = "Something went wrong on our side. Please try again in a minute."
@@ -21,7 +23,9 @@ private val TECHNICAL_MARKERS = listOf(
  * details are only logged.
  */
 fun Throwable.userMessage(): String {
-    if (this is HttpRequestException) return "No internet connection. Check your Wi-Fi or mobile data and try again."
+    if (this is HttpRequestException || this is IOException || this is UnresolvedAddressException) {
+        return "No internet connection. Check your Wi-Fi or mobile data and try again."
+    }
     if (this is AuthRestException) authMessage(errorCode?.value)?.let { return it }
     if (this is RestException && statusCode == 429) return "Too many attempts. Please wait a few minutes and try again."
     val raw = if (this is RestException) "$error ${description.orEmpty()}" else message.orEmpty()

@@ -40,6 +40,7 @@ import com.kush.swych.core.model.ItemStatus
 import com.kush.swych.core.model.User
 import com.kush.swych.core.util.HapticManager
 import com.kush.swych.ui.navigation.ItemDetailRoute
+import java.time.OffsetDateTime
 
 private val SuccessGreen = Color(0xFF4CAF50)
 
@@ -96,6 +97,7 @@ fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltVi
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()
         ) {
             SegmentedControl(selectedTabIndex = selectedTab, onTabSelected = { selectedTab = it })
+            SortRow(selected = viewModel.sortMode, onSelect = { viewModel.sortMode = it })
 
             Box(modifier = Modifier.fillMaxSize().weight(1f).padding(top = 8.dp)) {
                 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,15 +119,16 @@ fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltVi
                             label = "deals_animation",
                             modifier = Modifier.fillMaxSize()
                         ) { tab ->
-                            val displayList: List<Any> = if (tab == 0) {
-                                loadedDeals.filter { it.buyerId == currentUid }.sortedBy { statusOrder(it.status) }
+                            val entries: List<Any> = if (tab == 0) {
+                                loadedDeals.filter { it.buyerId == currentUid }
                             } else {
                                 val sellerDeals = loadedDeals.filter { it.sellerId == currentUid }
                                 // Open listings with no live offer get their own card so they can be managed
                                 val itemsWithLiveDeals = sellerDeals.filter { it.isLive }.map { it.itemId }.toSet()
                                 val idleListings = myItems.filter { it.status == ItemStatus.OPEN && it.id !in itemsWithLiveDeals }
-                                sellerDeals.sortedBy { statusOrder(it.status) } + idleListings
+                                sellerDeals + idleListings
                             }
+                            val displayList = sortEntries(entries, viewModel.sortMode)
 
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(1),
@@ -244,12 +247,48 @@ fun DealsScreen(navController: NavController, viewModel: DealsViewModel = hiltVi
     }
 }
 
-/** Things needing action first, finished deals last. */
-private fun statusOrder(status: String): Int = when (status) {
-    DealStatus.ACCEPTED -> 0
-    DealStatus.PENDING -> 1
-    DealStatus.COMPLETED -> 2
-    else -> 3
+/** Deals carry a creation time in milliseconds; listings an ISO timestamp. */
+private fun createdMillis(entry: Any): Long = when (entry) {
+    is Deal -> entry.timestamp
+    is Item -> entry.createdAt?.let { runCatching { OffsetDateTime.parse(it).toInstant().toEpochMilli() }.getOrNull() } ?: 0L
+    else -> 0L
+}
+
+private fun productName(entry: Any): String = when (entry) {
+    is Deal -> entry.itemTitle
+    is Item -> entry.title
+    else -> ""
+}.trim().lowercase()
+
+private fun sortEntries(entries: List<Any>, sort: DealSort): List<Any> = when (sort) {
+    DealSort.LATEST -> entries.sortedByDescending { createdMillis(it) }
+    DealSort.PRODUCT -> entries.sortedWith(
+        compareBy<Any> { productName(it) }.thenByDescending { createdMillis(it) }
+    )
+}
+
+/** "Sort by" chips under the Buy / Sell switch. */
+@Composable
+private fun SortRow(selected: DealSort, onSelect: (DealSort) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            "Sort by",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        DealSort.entries.forEach { option ->
+            FilterChip(
+                selected = selected == option,
+                onClick = { onSelect(option) },
+                label = { Text(option.label) },
+                shape = RoundedCornerShape(50)
+            )
+        }
+    }
 }
 
 @Composable
@@ -307,10 +346,8 @@ private fun DealCard(
                     }
                     ActionPill("Cancel", MaterialTheme.colorScheme.error, enabled = enabled, onClick = onCancelDeal)
                 }
-                DealStatus.COMPLETED -> {
-                    ActionPill("Completed", SuccessGreen, enabled = false) {}
-                    ActionPill("Call", MaterialTheme.colorScheme.primary, icon = Icons.Default.Call, onClick = onCall)
-                }
+                // Numbers are only shared while the hand-over is being arranged
+                DealStatus.COMPLETED -> ActionPill("Completed", SuccessGreen, enabled = false) {}
                 else -> {
                     val label = when (deal.status) {
                         DealStatus.REJECTED -> "Rejected"
@@ -327,7 +364,7 @@ private fun DealCard(
                 val hint = when {
                     iConfirmed -> "Waiting for the ${if (isBuyer) "seller" else "buyer"} to confirm the hand-over."
                     theyConfirmed -> "The ${if (isBuyer) "seller" else "buyer"} marked this done. Tap Done once you've exchanged the item."
-                    else -> "Meet up, then both tap Done. Unconfirmed deals expire after 3 days."
+                    else -> "Meet up, then both tap Done. Unconfirmed deals expire after 3 hours."
                 }
                 Text(
                     text = hint,
@@ -376,7 +413,7 @@ fun SegmentedControl(
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {
-    val tabs = listOf("Offers", "My Products")
+    val tabs = listOf("Buy", "Sell")
 
     BoxWithConstraints(
         modifier = Modifier

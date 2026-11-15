@@ -5,12 +5,12 @@ import androidx.core.content.edit
 import com.kush.swych.BuildConfig
 import com.kush.swych.core.model.User
 import com.kush.swych.core.notifications.DealNotifier
-import com.kush.swych.core.util.decodeNullableString
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.status.SessionStatus
+import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -35,9 +35,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
 
 @Singleton
@@ -113,16 +115,32 @@ class SupabaseAuthRepository @Inject constructor(
 
     override suspend fun loginUser(phoneOrEmail: String, password: String): Result<Unit> = runCatching {
         val input = phoneOrEmail.trim()
-        val email = if (input.contains("@")) {
-            input.lowercase()
+        if (input.contains("@")) {
+            auth.signInWith(Email) {
+                this.email = input.lowercase()
+                this.password = password
+            }
         } else {
-            val phone = input.filter { it.isDigit() }
-            db.rpc("get_login_email", buildJsonObject { put("p_phone", phone) }).decodeNullableString()
-                ?: throw Exception("No account found with this phone number.")
-        }
-        auth.signInWith(Email) {
-            this.email = email
-            this.password = password
+            // Done on the server, so the email linked to a phone number never reaches the app
+            val tokens = callFunction(
+                "phone-login",
+                buildJsonObject {
+                    put("phone", input.filter { it.isDigit() })
+                    put("password", password)
+                },
+                bearer = BuildConfig.SUPABASE_KEY,
+                fallbackError = "Couldn't log in. Please try again."
+            )
+            auth.importSession(
+                UserSession(
+                    accessToken = tokens.getValue("access_token").jsonPrimitive.content,
+                    refreshToken = tokens.getValue("refresh_token").jsonPrimitive.content,
+                    expiresIn = tokens["expires_in"]?.jsonPrimitive?.long ?: 3600L,
+                    tokenType = tokens["token_type"]?.jsonPrimitive?.content ?: "bearer",
+                    user = null
+                )
+            )
+            auth.retrieveUserForCurrentSession(updateSession = true)
         }
         cachedUsers = null
     }
@@ -145,19 +163,35 @@ class SupabaseAuthRepository @Inject constructor(
 
     override suspend fun requestVitVerification(vitEmail: String): Result<Unit> = runCatching {
         val accessToken = auth.currentSessionOrNull()?.accessToken ?: throw Exception("Please log in again.")
-        val response = http.post("${BuildConfig.SUPABASE_URL}/functions/v1/request-vit-verification") {
-            header(HttpHeaders.Authorization, "Bearer $accessToken")
+        callFunction(
+            "request-vit-verification",
+            buildJsonObject { put("email", vitEmail.trim().lowercase()) },
+            bearer = accessToken,
+            fallbackError = "Couldn't send the verification email. Please try again."
+        )
+    }
+
+    /**
+     * Calls one of our Edge Functions. They answer {"error": "<message for the user>"} on
+     * failure, which becomes the exception message.
+     */
+    private suspend fun callFunction(
+        name: String,
+        body: JsonObject,
+        bearer: String,
+        fallbackError: String
+    ): JsonObject {
+        val response = http.post("${BuildConfig.SUPABASE_URL}/functions/v1/$name") {
+            header(HttpHeaders.Authorization, "Bearer $bearer")
             header("apikey", BuildConfig.SUPABASE_KEY)
             contentType(ContentType.Application.Json)
-            setBody(buildJsonObject { put("email", vitEmail.trim().lowercase()) }.toString())
+            setBody(body.toString())
         }
+        val json = runCatching { Json.parseToJsonElement(response.bodyAsText()).jsonObject }.getOrNull()
         if (!response.status.isSuccess()) {
-            // The function returns {"error": "<message for the user>"}
-            val message = runCatching {
-                Json.parseToJsonElement(response.bodyAsText()).jsonObject["error"]?.jsonPrimitive?.content
-            }.getOrNull()
-            throw Exception(message ?: "Couldn't send the verification email. Please try again.")
+            throw Exception(json?.get("error")?.jsonPrimitive?.content ?: fallbackError)
         }
+        return json ?: JsonObject(emptyMap())
     }
 
     /** Permanently deletes the account, its listings and deals, then signs out locally. */

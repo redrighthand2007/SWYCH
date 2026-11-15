@@ -14,7 +14,9 @@ data class Item(
     val price: Double = 0.0,
     @SerialName("photo_url")
     val photoUrl: String? = null,
-    val status: String = ItemStatus.OPEN
+    val status: String = ItemStatus.OPEN,
+    @SerialName("created_at")
+    val createdAt: String? = null
 )
 
 object ItemStatus {

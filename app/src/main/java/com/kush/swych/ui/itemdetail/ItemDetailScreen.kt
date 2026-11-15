@@ -266,7 +266,7 @@ fun ItemDetailScreen(navController: NavController, viewModel: ItemDetailViewMode
                             }
                         } else if (it.sellerId == currentUid && it.status == ItemStatus.OPEN) {
                             Text(
-                                "This is your listing. Offers appear in your Deals tab.",
+                                "This is your listing. Offers appear under Sell in your Deals tab.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

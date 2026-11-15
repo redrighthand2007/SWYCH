@@ -88,7 +88,7 @@ object DealNotifier {
             deal.status == DealStatus.CANCELLED && deal.cancelledBy != myUid ->
                 "Deal cancelled" to "The deal for ${deal.itemTitle} was cancelled."
             deal.status == DealStatus.EXPIRED ->
-                "Deal expired" to "The deal for ${deal.itemTitle} expired after 3 days without confirmation."
+                "Deal expired" to "The deal for ${deal.itemTitle} expired after 3 hours without confirmation."
             else -> null
         }
     }

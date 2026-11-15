@@ -15,7 +15,7 @@ with each other. This policy explains what information the app collects and how 
 | Name and hostel block | Shown to other students on your listings and deals |
 | Email address | Account login and account emails (confirmation) |
 | VIT email address (optional) | Only if you verify it in Profile: we email it a one-time link and, once confirmed, show a verified badge next to your name. The address itself is never shown to other students. |
-| Phone number | Login by phone, and shared with the other student **only after** a deal is accepted so you can arrange the hand-over |
+| Phone number | Login by phone, and shared with the other student **only while** a deal is accepted, so you can arrange the hand-over; it is hidden again once the deal is completed |
 | Password | Stored by our authentication provider in hashed form; we never see it |
 | Item listings (title, description, price, category, photo) | Shown to other signed-in students |
 | Offers and deals (prices, status, confirmations) | Visible only to the two students in the deal |
